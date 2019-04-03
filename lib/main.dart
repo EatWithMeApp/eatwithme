@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:eatwithme/pages/home_placeholder.dart';
+import 'package:eatwithme/pages/login/login.dart';
 import 'package:eatwithme/theme/eatwithme_theme.dart';
 import 'package:eatwithme/utils/constants.dart';
 
@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return new MaterialApp(
       title: APP_TITLE,
-      home: EatWithMeHomePlaceholder(),
+      home: new LoginPage(),
       theme: themeLight(),
     );
   }
