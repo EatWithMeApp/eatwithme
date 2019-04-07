@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:eatwithme/theme/eatwithme_theme.dart';
 
 class GradientButton extends StatelessWidget {
-  //final GestureTapCallback onPressed;
+  final GestureTapCallback onPressed;
   final String text;
 
-  //GradientButton({@required this.onPressed, @required this.text});
-  GradientButton({@required this.text});
+  GradientButton({@required this.onPressed, @required this.text});
+  //GradientButton({@required this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -17,8 +17,8 @@ class GradientButton extends StatelessWidget {
       color: Colors.transparent,
       shape: const StadiumBorder(),
       child: InkWell(
-        //onTap: onPressed,
-        //splashColor: Colors.yellow,
+        onTap: onPressed,
+        splashColor: Colors.orange,
         child: Ink(
           height: 50.0,
           decoration: ShapeDecoration(
