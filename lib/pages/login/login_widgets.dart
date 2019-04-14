@@ -1,6 +1,6 @@
 //Adapted from https://github.com/iampawan/Flutter-UI-Kit/blob/master/lib/ui/page/login/login_one/login_widget.dart
 
-import 'package:eatwithme/pages/login/login_card.dart';
+/* import 'package:eatwithme/pages/login/login.dart';
 import 'package:flutter/material.dart';
 
 class LoginWidgets extends StatelessWidget {
@@ -13,7 +13,7 @@ class LoginWidgets extends StatelessWidget {
             SizedBox(
               height: 100.0,
             ),
-            LoginCard(),
+            loginCard(),
             // new Padding(
             //   padding: const EdgeInsets.only(top: 30.0),
             //   child: new Text(
@@ -26,4 +26,4 @@ class LoginWidgets extends StatelessWidget {
       ),
     );
   }
-}
+} */

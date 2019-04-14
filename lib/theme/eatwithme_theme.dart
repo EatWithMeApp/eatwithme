@@ -4,6 +4,7 @@ ThemeData themeLight() {
   return new ThemeData(
     primaryColor: Colors.orange,
     backgroundColor: Colors.white,
+    cardColor: Colors.orange.shade200,
   );
 }
 

@@ -24,6 +24,21 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
   english_words: ^3.1.0
+  
+  # To avoid upgrading to AndroidX, use only this version as a maximum
+  firebase_auth: 0.7.0
+
+  flutter_auth_buttons:
+  
+  simple_auth_flutter: 2.0.2
+
+  aad_oauth: 0.1.4
+
+  flutter_aad: 
+  http:
+
+  microsoft_graph: ^0.0.13
+  microsoft_graph_http: ^0.0.13
 
 dev_dependencies:
   flutter_test:

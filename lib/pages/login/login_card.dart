@@ -1,7 +1,8 @@
 //Adapted from https://github.com/iampawan/Flutter-UI-Kit/blob/master/lib/ui/page/login/login_one/login_card.dart
 
-import 'package:flutter/material.dart';
+/* import 'package:flutter/material.dart';
 import 'package:eatwithme/widgets/gradient_button.dart';
+import 'package:flutter_auth_buttons/flutter_auth_buttons.dart';
 
 class LoginCard extends StatefulWidget {
   @override
@@ -23,35 +24,39 @@ class _LoginCardState extends State<LoginCard>
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            new TextField(
-              //onChanged: (phone) => phoneNumber = phone,
-              //enabled: !snapshot.data,
-              style: new TextStyle(fontSize: 15.0, color: Colors.black),
-              decoration: new InputDecoration(
-                  hintText: "",
-                  labelText: "Username",
-                  labelStyle: TextStyle(fontWeight: FontWeight.w700)),
-            ),
-            new SizedBox(
-              height: 10.0,
-            ),
-            new TextField(
-              //onChanged: (myotp) => otp = myotp,
-              //keyboardType: TextInputType.number,
-              style: new TextStyle(fontSize: 15.0, color: Colors.black),
-              decoration: new InputDecoration(
-                  hintText: "",
-                  labelText: "Password",
-                  labelStyle: TextStyle(fontWeight: FontWeight.w700)),
-              obscureText: true,
-            ),
-            new SizedBox(
-              height: 30.0,
-            ),
+            // new TextField(
+            //   //onChanged: (phone) => phoneNumber = phone,
+            //   //enabled: !snapshot.data,
+            //   style: new TextStyle(fontSize: 15.0, color: Colors.black),
+            //   decoration: new InputDecoration(
+            //       hintText: "",
+            //       labelText: "Username",
+            //       labelStyle: TextStyle(fontWeight: FontWeight.w700)),
+            // ),
+            // new SizedBox(
+            //   height: 10.0,
+            // ),
+            // new TextField(
+            //   //onChanged: (myotp) => otp = myotp,
+            //   //keyboardType: TextInputType.number,
+            //   style: new TextStyle(fontSize: 15.0, color: Colors.black),
+            //   decoration: new InputDecoration(
+            //       hintText: "",
+            //       labelText: "Password",
+            //       labelStyle: TextStyle(fontWeight: FontWeight.w700)),
+            //   obscureText: true,
+            // ),
+            // new SizedBox(
+            //   height: 30.0,
+            // ),
             Container(
-              child: new GradientButton(text: "Login"),
+              // child: new GradientButton(text: "Login with ANU Email"),
+              
+              child: MicrosoftSignInButton(
+                borderRadius: 10.0,
+                onPressed: super.validateAndSubmit(),
+              )
             ),
-            new Container()
           ],
         ),
       ),
@@ -98,4 +103,4 @@ class _LoginCardState extends State<LoginCard>
     deviceSize = MediaQuery.of(context).size;
     return loginCard();
   }
-}
+} */
