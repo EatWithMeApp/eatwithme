@@ -24,8 +24,17 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
   english_words: ^3.1.0
-  simple_auth: 
-  simple_auth_flutter:  
+
+  firebase_core: ^0.3.0
+
+  # To address AndroidX issues, go no higher than specifed https://goo.gl/CP92wY
+  firebase_auth: 0.8.4+1
+  
+  flutter_redux: ^0.5.3
+  redux: ^3.0.0
+  google_sign_in: 3.2.4
+
+  fluttertoast: ^3.0.3
 
 dev_dependencies:
   flutter_test:

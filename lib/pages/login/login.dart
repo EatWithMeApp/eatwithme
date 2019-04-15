@@ -12,16 +12,7 @@ class LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-        // appBar: new AppBar(
-        //   centerTitle: true,
-        //   textTheme: TextTheme(
-        //     title: TextStyle(
-        //       fontSize: 30.0,
-        //     )
-        //   ),
-        //   title: Text('EatWithMe'),
-        // ),
-        backgroundColor: Color(0xffeeeeee),
+        backgroundColor: themeLight().backgroundColor,
         body: Stack(
           fit: StackFit.expand,
           children: <Widget>[LoginBackground(), LoginWidgets()],

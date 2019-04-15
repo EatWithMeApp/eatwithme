@@ -14,13 +14,6 @@ class LoginWidgets extends StatelessWidget {
               height: 100.0,
             ),
             LoginCard(),
-            // new Padding(
-            //   padding: const EdgeInsets.only(top: 30.0),
-            //   child: new Text(
-            //     ISRData.forgot_password,
-            //     style: new TextStyle(fontWeight: FontWeight.normal),
-            //   ),
-            // )
           ],
         ),
       ),

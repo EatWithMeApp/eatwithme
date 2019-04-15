@@ -6,13 +6,15 @@ import 'package:eatwithme/theme/eatwithme_theme.dart';
 class GradientButton extends StatelessWidget {
   final GestureTapCallback onPressed;
   final String text;
+  final Key key;
 
-  GradientButton({@required this.onPressed, @required this.text});
+  GradientButton({@required this.onPressed, @required this.text, this.key});
   //GradientButton({@required this.text});
 
   @override
   Widget build(BuildContext context) {
     return Material(
+      key: key,
       elevation: 10.0,
       color: Colors.transparent,
       shape: const StadiumBorder(),
