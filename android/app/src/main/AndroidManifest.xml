@@ -29,5 +29,17 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <!--https://pub.dartlang.org/packages/simple_auth_flutter#-readme-tab- -->
+        <activity android:name="clancey.simpleauth.simpleauthflutter.SimpleAuthCallbackActivity" >
+            <intent-filter android:label="simple_auth">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- <data android:scheme="com.myapp.foo" /> -->
+                <data android:scheme="msale3a62f96-d33f-4964-8fe7-e925129aa3ad" android:host="auth" />
+            </intent-filter>
+        </activity>
+
     </application>
 </manifest>
