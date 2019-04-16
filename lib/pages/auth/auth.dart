@@ -1,13 +1,17 @@
 //Adapted from https://github.com/tattwei46/flutter_login_demo/blob/master/lib/services/authentication.dart
+//Adapted from https://www.youtube.com/watch?v=cHFV6JPp-6A
 
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:rxdart/rxdart.dart';
 
 abstract class BaseAuth {
   Stream<String> get onAuthStateChanged;
-  Future<String> login(String email, String password);
-  Future<String> signUp(String email, String password);
-  Future<FirebaseUser> getCurrentUser();
+  Future<FirebaseUser> login(String email, String password);
+  Future<FirebaseUser> signUp(String email, String password);
+  Observable<FirebaseUser> getCurrentUser();
+  Observable<Map<String, dynamic>> getCurrentUserProfile();
   Future<void> sendEmailVerification();
   Future<void> logout();
   Future<bool> isEmailVerified();
@@ -16,35 +20,71 @@ abstract class BaseAuth {
 
 class Auth implements BaseAuth {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final Firestore _firestore = Firestore.instance;
+
+  Observable<FirebaseUser> _user;
+  Observable<Map<String, dynamic>> _userProfile;
+  PublishSubject loading = PublishSubject();
+
+  Auth() {
+    _user = Observable(_firebaseAuth.onAuthStateChanged);
+
+    //Pull user profile from FireStore
+    _userProfile = _user.switchMap((FirebaseUser u) {
+      if (u != null) {
+        return _firestore
+            .collection('Users')
+            .document(u.uid)
+            .snapshots()
+            .map((snap) => snap.data);
+      } else {
+        return Observable.just({});
+      }
+    });
+  }
 
   @override
   Stream<String> get onAuthStateChanged {
     return _firebaseAuth.onAuthStateChanged.map((user) => user?.uid);
   }
 
-  Future<String> login(String email, String password) async {
+  Future<FirebaseUser> login(String email, String password) async {
     try {
+      loading.add(true);
       FirebaseUser user = await _firebaseAuth.signInWithEmailAndPassword(
-        email: email, password: password);
-      return user.uid;
+          email: email, password: password);
+
+      updateUserProfile(user);
+      print('Signed in ' + user.email);
+
+      loading.add(false);
+      return user;
     } catch (e) {
       throw e;
     }
   }
 
-  Future<String> signUp(String email, String password) async {
+  Future<FirebaseUser> signUp(String email, String password) async {
     try {
       FirebaseUser user = await _firebaseAuth.createUserWithEmailAndPassword(
-        email: email, password: password);
-      return user.uid;
+          email: email, password: password);
+
+      updateUserProfile(user);
+      print('Registered user ' + user.email);
+
+      return user;
     } catch (e) {
       throw e;
     }
   }
 
-  Future<FirebaseUser> getCurrentUser() async {
-    FirebaseUser user = await _firebaseAuth.currentUser();
-    return user;
+  Observable<FirebaseUser> getCurrentUser() { //async {
+    //FirebaseUser user = await _firebaseAuth.currentUser();
+    return _user;
+  }
+
+  Observable<Map<String, dynamic>> getCurrentUserProfile() {
+    return _userProfile;
   }
 
   Future<void> logout() async {
@@ -63,5 +103,18 @@ class Auth implements BaseAuth {
 
   Future<void> sendPasswordResetEmail(String userEmail) async {
     return _firebaseAuth.sendPasswordResetEmail(email: userEmail);
+  }
+
+  void updateUserProfile(FirebaseUser user) async {
+    DocumentReference ref = _firestore.collection('Users').document(user.uid);
+
+    return ref.setData({
+      'uid': user.uid,
+      'email': user.email,
+      'photoURL': user.photoUrl,
+      'displayName': user.displayName,
+      'lastSeen': DateTime.now(),
+      'interests': ['Making this work', 'Eating'],
+    }, merge: true);
   }
 }
