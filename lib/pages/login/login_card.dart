@@ -3,6 +3,7 @@
 
 import 'package:eatwithme/pages/auth/auth.dart';
 import 'package:eatwithme/pages/auth/auth_provider.dart';
+import 'package:eatwithme/utils/confirmation_toast.dart';
 import 'package:eatwithme/utils/error_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:eatwithme/widgets/gradient_button.dart';
@@ -14,16 +15,20 @@ class EmailFieldValidator {
       new RegExp(r'^u\d{7}\@anu\.edu\.au$');
   static final RegExp _emailNamedRegex =
       new RegExp(r'^\w+\.\w+\@anu\.edu\.au$');
+  
+  //This one allows for testing with dummy users - remove once released
+  static final RegExp _emailTestUserRegex =
+      new RegExp(r'^u\w+\@anu\.edu\.au$');    
 
   static String validate(String value) {
-    String _email = value.trim();
-
-    if (_email.isEmpty) {
+    if (value == null) {
       return 'Email can\'t be empty';
     }
 
+    String _email = value.trim();
     if (!_emailNamedRegex.hasMatch(_email) &&
-        !_emailStudentRegex.hasMatch(_email)) {
+        !_emailStudentRegex.hasMatch(_email) &&
+        !_emailTestUserRegex.hasMatch(_email)) {
       return 'Enter a valid ANU email';
     }
 
@@ -57,6 +62,7 @@ class _LoginCardState extends State<LoginCard>
 
   String _email;
   String _password;
+  final emailController = TextEditingController();
   FormType _formType = FormType.login;
 
   bool validateAndSave() {
@@ -139,6 +145,25 @@ class _LoginCardState extends State<LoginCard>
     });
   }
 
+  void resetPassword() {
+    try {
+      final BaseAuth auth = AuthProvider.of(context).auth;
+      String userEmail = emailController.text.trim();
+      
+      var validate = EmailFieldValidator.validate(userEmail);
+      
+      validate != null ? throw 'Email is invalid' : auth.sendPasswordResetEmail(userEmail);
+      
+      ConfirmationToast.show('Reset password email sent - please check your inbox');
+    } on PlatformException catch (e) {
+      if ((e.code == 'ERROR_INVALID_EMAIL') || (e.code == 'ERROR_USER_NOT_FOUND')) {
+        ErrorToast.show('The email was incorrect');
+      }
+    } catch (e) {
+      ErrorToast.show(e.toString());
+    }
+  }
+
   List<Widget> buildSubmitButtons() {
     if (_formType == FormType.login) {
       return <Widget>[
@@ -185,6 +210,7 @@ class _LoginCardState extends State<LoginCard>
             children: <Widget>[
               TextFormField(
                 key: Key('email'),
+                controller: emailController,
                 onSaved: (String value) => _email = value.trim(),
                 validator: EmailFieldValidator.validate,
                 style: TextStyle(fontSize: 15.0, color: Colors.black),
@@ -214,6 +240,14 @@ class _LoginCardState extends State<LoginCard>
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: buildSubmitButtons(),
               ),
+              SizedBox(
+                height: 0.0,
+              ),
+              FlatButton(
+                child: Text('Reset My Password',
+                    style: TextStyle(fontSize: 15.0)),
+                onPressed: resetPassword,
+              )
             ],
           ),
         ),
@@ -223,10 +257,10 @@ class _LoginCardState extends State<LoginCard>
 
   Widget loginCard() {
     return Opacity(
-      //opacity: animation.value,
-      opacity: 1.0,
+      opacity: animation.value,
+      //opacity: 1.0,
       child: SizedBox(
-        height: deviceSize.height / 2 - 20,
+        height: deviceSize.height / 2 - 12,
         width: deviceSize.width * 0.85,
         child: Card(color: Colors.white, elevation: 2.0, child: loginBuilder()),
       ),
