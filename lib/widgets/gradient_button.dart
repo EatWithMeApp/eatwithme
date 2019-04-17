@@ -15,7 +15,7 @@ class GradientButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       key: key,
-      elevation: 10.0,
+      elevation: 0.0,
       color: Colors.transparent,
       shape: const StadiumBorder(),
       child: InkWell(
@@ -35,7 +35,8 @@ class GradientButton extends StatelessWidget {
               style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.normal,
-                  fontSize: 20.0),
+                  fontSize: 20.0,
+                  letterSpacing: 1.0),
             ),
           ),
         ),

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 ThemeData themeLight() {
-  return new ThemeData(
+  return ThemeData(
     primaryColor: Colors.orange,
     backgroundColor: Colors.white,
+    fontFamily: 'Roboto',
   );
 }
 
