@@ -78,7 +78,8 @@ class Auth implements BaseAuth {
     }
   }
 
-  Observable<FirebaseUser> getCurrentUser() { //async {
+  Observable<FirebaseUser> getCurrentUser() {
+    //async {
     //FirebaseUser user = await _firebaseAuth.currentUser();
     return _user;
   }
@@ -114,7 +115,6 @@ class Auth implements BaseAuth {
       'photoURL': user.photoUrl,
       'displayName': user.displayName,
       'lastSeen': DateTime.now(),
-      'interests': ['Making this work', 'Eating'],
     }, merge: true);
   }
 }
