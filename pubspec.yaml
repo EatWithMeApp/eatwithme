@@ -26,12 +26,16 @@ dependencies:
   english_words: ^3.1.0
 
   firebase_core: ^0.3.0
+  cloud_firestore: ^0.9.13+1
 
   # To address AndroidX issues, go no higher than specifed https://goo.gl/CP92wY
   firebase_auth: 0.8.4+1
   
   flutter_redux: ^0.5.3
   redux: ^3.0.0
+
+  rxdart: ^0.21.0
+
   google_sign_in: 3.2.4
 
   fluttertoast: ^3.0.3
@@ -59,6 +63,12 @@ flutter:
 
   assets:
     - images/
+    - fonts/
+
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: fonts/Roboto-Regular.ttf
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.io/assets-and-images/#resolution-aware.

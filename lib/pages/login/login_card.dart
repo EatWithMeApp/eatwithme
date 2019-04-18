@@ -15,10 +15,9 @@ class EmailFieldValidator {
       new RegExp(r'^u\d{7}\@anu\.edu\.au$');
   static final RegExp _emailNamedRegex =
       new RegExp(r'^\w+\.\w+\@anu\.edu\.au$');
-  
+
   //This one allows for testing with dummy users - remove once released
-  static final RegExp _emailTestUserRegex =
-      new RegExp(r'^u\w+\@anu\.edu\.au$');    
+  static final RegExp _emailTestUserRegex = new RegExp(r'^u\w+\@anu\.edu\.au$');
 
   static String validate(String value) {
     if (value == null) {
@@ -79,42 +78,20 @@ class _LoginCardState extends State<LoginCard>
     if (validateAndSave()) {
       try {
         final BaseAuth auth = AuthProvider.of(context).auth;
-        if (_formType == FormType.login) {
-          final String userId = await auth.login(_email, _password);
-          print('Signed in: $userId');
+
+        (_formType == FormType.login)
+            ? await auth.login(_email, _password)
+            : await auth.signUp(_email, _password);
+
+        /* if (_formType == FormType.login) {
+          await auth.login(_email, _password);
         } else {
-          final String userId = await auth.signUp(_email, _password);
-          print('Registered user: $userId');
-        }
+          await auth.signUp(_email, _password);
+        } */
       } on PlatformException catch (e) {
         //Handle errors from login (based from signInWithEmailAndPassword)
         if (e.code == 'ERROR_USER_NOT_FOUND') {
           ErrorToast.show('The email or password was incorrect');
-
-          //The below would be nice, but it's probably a security issue for phising
-          /* showDialog(
-              context: context,
-              builder: (context) {
-                return AlertDialog(
-                  title: Text('Create new account?'),
-                  content: Text(
-                      'We couldn\'t find an account with email, would you like to create one?'),
-                  actions: <Widget>[
-                    FlatButton(
-                        child: Text('No'),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        }),
-                    FlatButton(
-                        child: Text('Create User'),
-                        onPressed: () {
-                          _formType = FormType.register;
-                          Navigator.of(context).pop();
-                          validateAndSubmit();
-                        }),
-                  ],
-                );
-              }); */
         } else if (e.code == 'ERROR_WRONG_PASSWORD' ||
             e.code == 'ERROR_INVALID_EMAIL') {
           ErrorToast.show('The email or password was incorrect');
@@ -149,14 +126,18 @@ class _LoginCardState extends State<LoginCard>
     try {
       final BaseAuth auth = AuthProvider.of(context).auth;
       String userEmail = emailController.text.trim();
-      
+
       var validate = EmailFieldValidator.validate(userEmail);
-      
-      validate != null ? throw 'Email is invalid' : auth.sendPasswordResetEmail(userEmail);
-      
-      ConfirmationToast.show('Reset password email sent - please check your inbox');
+
+      validate != null
+          ? throw 'Email is invalid'
+          : auth.sendPasswordResetEmail(userEmail);
+
+      ConfirmationToast.show(
+          'Reset password email sent - please check your inbox');
     } on PlatformException catch (e) {
-      if ((e.code == 'ERROR_INVALID_EMAIL') || (e.code == 'ERROR_USER_NOT_FOUND')) {
+      if ((e.code == 'ERROR_INVALID_EMAIL') ||
+          (e.code == 'ERROR_USER_NOT_FOUND')) {
         ErrorToast.show('The email was incorrect');
       }
     } catch (e) {
@@ -244,8 +225,8 @@ class _LoginCardState extends State<LoginCard>
                 height: 0.0,
               ),
               FlatButton(
-                child: Text('Reset My Password',
-                    style: TextStyle(fontSize: 15.0)),
+                child:
+                    Text('Reset My Password', style: TextStyle(fontSize: 15.0)),
                 onPressed: resetPassword,
               )
             ],
