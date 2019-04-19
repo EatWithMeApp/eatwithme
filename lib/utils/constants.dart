@@ -2,8 +2,7 @@ import 'package:flutter/painting.dart';
 
 //Strings
 const String APP_TITLE = "EatWithMe";
-const String enter_valid_number = "Enter 10 digit phone number";
-const String enter_valid_otp = "Enter 4 digit otp";
+const String PROFILE_PHOTO_PLACEHOLDER_PATH = "images/profile_placeholder.png";
 
 //Margins
 /* 

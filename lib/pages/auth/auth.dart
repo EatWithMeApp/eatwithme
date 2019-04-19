@@ -16,21 +16,22 @@ abstract class BaseAuth {
   Future<void> logout();
   Future<bool> isEmailVerified();
   Future<void> sendPasswordResetEmail(String userEmail);
+  // String getCurrentUserUid();
 }
 
 class Auth implements BaseAuth {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final Firestore _firestore = Firestore.instance;
 
-  Observable<FirebaseUser> _user;
-  Observable<Map<String, dynamic>> _userProfile;
+  Observable<FirebaseUser> user;
+  Observable<Map<String, dynamic>> userProfile;
   PublishSubject loading = PublishSubject();
 
   Auth() {
-    _user = Observable(_firebaseAuth.onAuthStateChanged);
+    user = Observable(_firebaseAuth.onAuthStateChanged);
 
     //Pull user profile from FireStore
-    _userProfile = _user.switchMap((FirebaseUser u) {
+    userProfile = user.switchMap((FirebaseUser u) {
       if (u != null) {
         return _firestore
             .collection('Users')
@@ -81,12 +82,25 @@ class Auth implements BaseAuth {
   Observable<FirebaseUser> getCurrentUser() {
     //async {
     //FirebaseUser user = await _firebaseAuth.currentUser();
-    return _user;
+    return user;
   }
 
   Observable<Map<String, dynamic>> getCurrentUserProfile() {
-    return _userProfile;
+    return userProfile;
   }
+
+  // String getCurrentUserUid() {    
+    
+  //   Stream<Map<String,dynamic>> stream = _userProfile;
+  //   String uid;
+
+  //   var wtf = _userProfile.first.asStream().listen((o) => uid = o['uid']);
+
+  //   print("CurrentUserUid: " + uid.toString());
+  //   return uid;
+
+  //   //return _userProfile.map((json) => json['uid']);
+  // }
 
   Future<void> logout() async {
     return _firebaseAuth.signOut();
@@ -118,3 +132,5 @@ class Auth implements BaseAuth {
     }, merge: true);
   }
 }
+
+final Auth authService = Auth();
