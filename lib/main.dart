@@ -1,7 +1,5 @@
 //Adapted from https://github.com/bizz84/coding-with-flutter-login-demo/blob/master/lib/main.dart
 
-import 'package:eatwithme/pages/auth/auth.dart';
-import 'package:eatwithme/pages/auth/auth_provider.dart';
 import 'package:eatwithme/pages/root.dart';
 import 'package:flutter/material.dart';
 import 'package:eatwithme/theme/eatwithme_theme.dart';

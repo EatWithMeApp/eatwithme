@@ -29,22 +29,6 @@ class _FriendState extends State<Friend> {
   Widget showProfilePhoto(String profileURL) {
     //If there is a photo, we have to pull and cache it, otherwise use the asset template
     if (profileURL != null) {
-      // return CachedNetworkImage(
-      //   placeholder: (context, url) => Container(
-      //         child: CircularProgressIndicator(
-      //             strokeWidth: 1.0,
-      //             valueColor:
-      //                 null //AlwaysStoppedAnimation<Color>(themeLight().primaryColor),
-      //             ),
-      //         width: _photoWidth,
-      //         height: _photoHeight,
-      //         padding: EdgeInsets.all(15.0),
-      //       ),
-      //   imageUrl: profileURL,
-      //   width: _photoWidth,
-      //   height: _photoHeight,
-      //   fit: BoxFit.fitHeight,
-      // );
       //TODO: Implement Firestore image pull
       return FadeInImage.assetNetwork(
         placeholder: PROFILE_PHOTO_PLACEHOLDER_PATH,
@@ -66,15 +50,12 @@ class _FriendState extends State<Friend> {
 
   @override
   void initState() {
-    print('${widget.uid}');
-
-    //TODO: Use authService instead
+    super.initState();
     _friendController.addStream(_firestore
         .collection('Users')
         .document(widget.uid)
         .snapshots()
         .map((snap) => snap.data));
-    super.initState();
   }
 
   @override
@@ -85,7 +66,6 @@ class _FriendState extends State<Friend> {
 
   @override
   Widget build(BuildContext context) {
-    //widget.uid
     return StreamBuilder(
       stream: _friendController.stream,
       builder: (context, snapshot) {

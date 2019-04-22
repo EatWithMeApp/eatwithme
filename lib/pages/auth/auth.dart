@@ -7,7 +7,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:rxdart/rxdart.dart';
 
 abstract class BaseAuth {
-  Stream<String> get onAuthStateChanged;
   Future<FirebaseUser> login(String email, String password);
   Future<FirebaseUser> signUp(String email, String password);
   Future<void> sendEmailVerification();
@@ -42,11 +41,6 @@ class Auth implements BaseAuth {
         return Observable.just({ });
       }
     });
-  }
-
-  @override
-  Stream<String> get onAuthStateChanged {
-    return _firebaseAuth.onAuthStateChanged.map((user) => user?.uid);
   }
 
   Future<FirebaseUser> login(String email, String password) async {
@@ -116,12 +110,12 @@ class Auth implements BaseAuth {
     
     DocumentReference ref = _firestore.collection('Users').document(user.uid);
 
-    //TODO: Fix rewrite/lack of saving of fields
+    //TODO: Fix rewrite/lack of saving of fields (needs a profile edit page)
     return ref.setData({
-      'uid': user.uid,
-      'email': user.email,
-      'photoURL': user.photoUrl,
-      'displayName': user.displayName,
+      //'uid': user.uid,
+      //'email': user.email,
+      //'photoURL': user.photoUrl,
+      //'displayName': user.displayName,
       'lastSeen': DateTime.now(),
     }, merge: true);
   }

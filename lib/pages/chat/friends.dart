@@ -30,8 +30,8 @@ class _FriendsPageState extends State<FriendsPage> {
 
   @override
   void dispose() async {
-    super.dispose();
     _controllerChat.close();
+    super.dispose();
   }
 
   @override
