@@ -1,22 +1,46 @@
 //Adapted from https://github.com/bizz84/coding-with-flutter-login-demo/blob/master/lib/home_page.dart
 
+import 'dart:async';
+
 import 'package:eatwithme/pages/chat/friends.dart';
 import 'package:flutter/material.dart';
 import 'package:eatwithme/pages/auth/auth.dart';
-import 'package:eatwithme/pages/auth/auth_provider.dart';
+import 'package:rxdart/rxdart.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final PublishSubject _subjectUser = PublishSubject<Map<String, dynamic>>();
+
+  @override
+  void initState() {
+    super.initState();
+    _subjectUser.addStream(authService.userProfile);
+    print('Home initState done ${authService.userProfile.toList().toString()}');
+  }
+
   Future<void> _signOut(BuildContext context) async {
     try {
-      final BaseAuth auth = AuthProvider.of(context).auth;
-      await auth.logout();
+      dispose();
+      await authService.logout();
     } catch (e) {
       print(e);
     }
   }
 
   @override
+  void dispose() async {
+    super.dispose();
+    await _subjectUser.drain();
+    _subjectUser.close();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    String currentUid;
     return Scaffold(
       appBar: AppBar(
         title: Text('EatWithMe Main'),
@@ -40,30 +64,54 @@ class HomePage extends StatelessWidget {
           ),
           Container(
               child: StreamBuilder(
-            stream: AuthProvider.of(context).auth.getCurrentUserProfile(),
+            stream:
+                _subjectUser, //_streamController.stream,//authService.userProfile,
             builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return Column(
-                  children: <Widget>[
-                    Text(
-                      snapshot.data.toString(),
-                      softWrap: true,
-                    ),
-                  ],
-                );
-              } else {
-                return Container(
-                  child: Text("Didn't load user"),
-                );
+              switch (snapshot.connectionState) {
+                case ConnectionState.none:
+                  return Text("WTF none");
+                  break;
+                case ConnectionState.done:
+                  return Text("All done bish");
+                case ConnectionState.waiting:
+                  return Text("Hang on");
+                  break;
+                case ConnectionState.active:
+                  if (snapshot.hasData) {
+                    currentUid = snapshot.data['uid'];
+                    return Column(
+                      children: <Widget>[
+                        Text(
+                          snapshot.data.toString(),
+                          softWrap: true,
+                        ),
+                      ],
+                    );
+                  } else {
+                    return Container(
+                      child: Text("Didn't load user"),
+                    );
+                  }
+                  break;
               }
             },
           )),
-          FlatButton(
-              child: Text('FriendsPage'),
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => FriendsPage()));
-              })
+          SizedBox(
+            height: 20.0,
+          ),
+          Hero(
+              tag: 'FriendPage',
+              child: Material(
+                  child: IconButton(
+                      icon: Icon(Icons.chat),
+                      iconSize: 60.0,
+                      onPressed: () {
+                        var route = MaterialPageRoute(
+                          builder: (context) => FriendsPage(currentUid: currentUid,)
+                        );
+                        Navigator.of(context).push(route);
+                        //Navigator.pushNamed(context, '/FriendsPage');
+                      })))
         ],
       )),
     );

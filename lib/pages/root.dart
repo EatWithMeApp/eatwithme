@@ -4,14 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:eatwithme/pages/auth/auth.dart';
 import 'package:eatwithme/pages/home.dart';
 import 'package:eatwithme/pages/login/login.dart';
-import 'package:eatwithme/pages/auth/auth_provider.dart';
 
 class RootPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final BaseAuth auth = AuthProvider.of(context).auth;
     return StreamBuilder<String>(
-        stream: auth.onAuthStateChanged,
+        stream: authService.onAuthStateChanged,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.active) {
             final bool isLoggedIn = snapshot.hasData;
