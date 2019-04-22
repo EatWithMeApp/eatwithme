@@ -128,7 +128,7 @@ class _FriendState extends State<Friend> {
                     //               peerAvatar: userProfile['photoUrl'],
                     //             )));
                   },
-                  color: Colors.grey,
+                  color: Colors.white,
                   padding: EdgeInsets.fromLTRB(10.0, 6.0, 0.0, 6.0),
                 ),
                 margin: EdgeInsets.only(bottom: 0.0, left: 0.0, right: 0.0),

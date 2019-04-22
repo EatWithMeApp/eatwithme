@@ -87,12 +87,16 @@ class _FriendsPageState extends State<FriendsPage> {
       return noActiveChats();
     }
 
-    return ListView.builder(
+    return ListView.separated(
+      separatorBuilder: (context, index) => Divider(
+        color: Colors.black,
+      ),
       padding: EdgeInsets.all(0.0),
       itemBuilder: (context, index) => Friend(
           uid: getUidFromChatSnapshot(
               chatSnapshot.data.documents[index], currentUid)),
       itemCount: chatSnapshot.data.documents.length,
+
     );
   }
 
