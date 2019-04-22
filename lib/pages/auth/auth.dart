@@ -64,7 +64,7 @@ class Auth implements BaseAuth {
       FirebaseUser user = await _firebaseAuth.createUserWithEmailAndPassword(
           email: email, password: password);
 
-      updateUserProfile(user);
+      makeUserProfile(user);
       print('Registered user ' + user.email);
 
       return user;
@@ -111,11 +111,28 @@ class Auth implements BaseAuth {
     DocumentReference ref = _firestore.collection('Users').document(user.uid);
 
     //TODO: Fix rewrite/lack of saving of fields (needs a profile edit page)
+    //Will probably need to read in a Map<String,dynamic> and use those values
     return ref.setData({
       //'uid': user.uid,
       //'email': user.email,
       //'photoURL': user.photoUrl,
       //'displayName': user.displayName,
+      'lastSeen': DateTime.now(),
+    }, merge: true);
+  }
+
+  void makeUserProfile(FirebaseUser user) async {
+    currentUid = user.uid;
+    
+    DocumentReference ref = _firestore.collection('Users').document(user.uid);
+
+    //TODO: Fix rewrite/lack of saving of fields (needs a profile edit page)
+    //Will probably need to read in a Map<String,dynamic> and use those values
+    return ref.setData({
+      'uid': user.uid,
+      'email': user.email,
+      'photoURL': user.photoUrl,
+      'displayName': user.displayName,
       'lastSeen': DateTime.now(),
     }, merge: true);
   }

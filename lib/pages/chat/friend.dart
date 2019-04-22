@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eatwithme/utils/constants.dart';
+import 'package:eatwithme/widgets/loadingCircle.dart';
 import 'package:flutter/material.dart';
 
 class Friend extends StatefulWidget {
@@ -21,7 +22,7 @@ class _FriendState extends State<Friend> {
   final double _photoHeight = 80.0;
 
   Widget buildInterests(List<dynamic> interests) {
-    //TODO: add formatting to interests 
+    //TODO: add formatting to interests (colours, dynamic list on items etc.)
     return Text('${interests != null ? interests.toString() : 'No interests listed'}',
         style: TextStyle(color: Colors.black, fontSize: 18.0));
   }
@@ -71,12 +72,12 @@ class _FriendState extends State<Friend> {
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.none:
-            return Text("WTF none");
+            return Text("Error loading chat");
             break;
           case ConnectionState.done:
-            return Text("All done bish");
+            return Container();
           case ConnectionState.waiting:
-            return Text("Hang on");
+            return LoadingCircle();
             break;
           case ConnectionState.active:
             if (snapshot.hasData) {
@@ -118,6 +119,7 @@ class _FriendState extends State<Friend> {
                     ],
                   ),
                   onPressed: () {
+                    //TODO: link friends to go to chat
                     // Navigator.push(
                     //     context,
                     //     MaterialPageRoute(
@@ -131,7 +133,9 @@ class _FriendState extends State<Friend> {
                 ),
                 margin: EdgeInsets.only(bottom: 0.0, left: 0.0, right: 0.0),
               );
-            } else {}
+            } else {
+              return Container();
+            }
             break;
         }
       },

@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eatwithme/pages/chat/friends.dart';
+import 'package:eatwithme/widgets/loadingCircle.dart';
 import 'package:flutter/material.dart';
 import 'package:eatwithme/pages/auth/auth.dart';
 
@@ -70,12 +71,12 @@ class _HomePageState extends State<HomePage> {
             builder: (context, snapshot) {
               switch (snapshot.connectionState) {
                 case ConnectionState.none:
-                  return Text("WTF none");
+                  return Text("Error reading profile");
                   break;
                 case ConnectionState.done:
-                  return Text("All done bish");
+                  return Text("Error reading profile");
                 case ConnectionState.waiting:
-                  return Text("Hang on");
+                  return LoadingCircle();
                   break;
                 case ConnectionState.active:
                   if (snapshot.hasData) {

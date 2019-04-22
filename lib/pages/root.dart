@@ -1,5 +1,6 @@
 //Adapted from https://github.com/bizz84/coding-with-flutter-login-demo/blob/master/lib/root_page.dart
 
+import 'package:eatwithme/widgets/loadingCircle.dart';
 import 'package:flutter/material.dart';
 import 'package:eatwithme/pages/auth/auth.dart';
 import 'package:eatwithme/pages/home.dart';
@@ -21,11 +22,9 @@ class RootPage extends StatelessWidget {
 
   //TODO: replace with EatWithMe animated face
   Widget _buildWaitingScreen() {
-    return Scaffold(
-      body: Container(
-        alignment: Alignment.center,
-        child: CircularProgressIndicator(),
-      ),
+    var scaffold = Scaffold(
+      body: LoadingCircle(),
     );
+    return scaffold;
   }
 }
