@@ -1,14 +1,11 @@
 //Adapted from https://github.com/duytq94/flutter-chat-demo/blob/master/lib/main.dart
 
-import 'package:async/async.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eatwithme/pages/auth/auth.dart';
-import 'package:eatwithme/pages/auth/auth_provider.dart';
 import 'package:eatwithme/theme/eatwithme_theme.dart';
 import 'package:eatwithme/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:rxdart/rxdart.dart';
 
 class OldFriendsPage extends StatefulWidget {
   @override

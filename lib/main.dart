@@ -2,7 +2,6 @@
 
 import 'package:eatwithme/pages/auth/auth.dart';
 import 'package:eatwithme/pages/auth/auth_provider.dart';
-import 'package:eatwithme/pages/chat/friends.dart';
 import 'package:eatwithme/pages/root.dart';
 import 'package:flutter/material.dart';
 import 'package:eatwithme/theme/eatwithme_theme.dart';
@@ -13,16 +12,10 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return AuthProvider(
-      auth: Auth(),
-      child: MaterialApp(
+    return MaterialApp(
         title: APP_TITLE,
         theme: themeLight(),
         home: RootPage(),
-        routes: <String, WidgetBuilder> {
-          '/FriendsPage': (context) => FriendsPage(),
-        },
-      ),
-    );
+      );
   }
 }

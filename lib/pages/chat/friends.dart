@@ -1,11 +1,8 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:eatwithme/pages/auth/auth.dart';
 import 'package:eatwithme/pages/chat/friend.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:rxdart/rxdart.dart';
 
 class FriendsPage extends StatefulWidget {
   final String currentUid;

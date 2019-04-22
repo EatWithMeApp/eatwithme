@@ -8,8 +8,8 @@ import 'package:eatwithme/pages/login/login.dart';
 class RootPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<String>(
-        stream: authService.onAuthStateChanged,
+    return StreamBuilder(
+        stream: authService.user,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.active) {
             final bool isLoggedIn = snapshot.hasData;

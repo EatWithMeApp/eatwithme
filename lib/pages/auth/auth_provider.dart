@@ -10,7 +10,7 @@ class AuthProvider extends InheritedWidget {
   @override
   bool updateShouldNotify(InheritedWidget oldWidget) => true;
 
-  static AuthProvider of(BuildContext context) {
-    return context.inheritFromWidgetOfExactType(AuthProvider);
-  }
+  // static AuthProvider of(BuildContext context) {
+  //   return context.inheritFromWidgetOfExactType(AuthProvider);
+  // }
 }

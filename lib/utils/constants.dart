@@ -1,4 +1,3 @@
-import 'package:flutter/painting.dart';
 
 //Strings
 const String APP_TITLE = "EatWithMe";

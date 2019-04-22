@@ -77,11 +77,11 @@ class _LoginCardState extends State<LoginCard>
   Future<void> validateAndSubmit() async {
     if (validateAndSave()) {
       try {
-        final BaseAuth auth = AuthProvider.of(context).auth;
+        //final BaseAuth auth = AuthProvider.of(context).auth;
 
         (_formType == FormType.login)
-            ? await auth.login(_email, _password)
-            : await auth.signUp(_email, _password);
+            ? await authService.login(_email, _password)
+            : await authService.signUp(_email, _password);
 
         /* if (_formType == FormType.login) {
           await auth.login(_email, _password);
@@ -124,14 +124,14 @@ class _LoginCardState extends State<LoginCard>
 
   void resetPassword() {
     try {
-      final BaseAuth auth = AuthProvider.of(context).auth;
+      //final BaseAuth auth = AuthProvider.of(context).auth;
       String userEmail = emailController.text.trim();
 
       var validate = EmailFieldValidator.validate(userEmail);
 
       validate != null
           ? throw 'Email is invalid'
-          : auth.sendPasswordResetEmail(userEmail);
+          : authService.sendPasswordResetEmail(userEmail);
 
       ConfirmationToast.show(
           'Reset password email sent - please check your inbox');

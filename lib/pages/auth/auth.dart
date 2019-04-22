@@ -11,14 +11,14 @@ abstract class BaseAuth {
   Future<FirebaseUser> login(String email, String password);
   Future<FirebaseUser> signUp(String email, String password);
   Future<void> sendEmailVerification();
-  Future<void> logout();
+  Future<String> signOut();
   Future<bool> isEmailVerified();
   Future<void> sendPasswordResetEmail(String userEmail);
   Observable<Map<String, dynamic>> getUserProfile(String uid);
 }
 
 class Auth implements BaseAuth {
-  final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final Firestore _firestore = Firestore.instance;
 
   Observable<FirebaseUser> user;
@@ -28,7 +28,7 @@ class Auth implements BaseAuth {
   String currentUid;
 
   Auth() {
-    user = Observable(firebaseAuth.onAuthStateChanged);
+    user = Observable(_firebaseAuth.onAuthStateChanged);
 
     //Pull user profile from FireStore
     userProfile = user.switchMap((FirebaseUser u) {
@@ -39,20 +39,20 @@ class Auth implements BaseAuth {
             .snapshots()
             .map((snap) => snap.data);
       } else {
-        return Observable.just({});
+        return Observable.just({ });
       }
     });
   }
 
   @override
   Stream<String> get onAuthStateChanged {
-    return firebaseAuth.onAuthStateChanged.map((user) => user?.uid);
+    return _firebaseAuth.onAuthStateChanged.map((user) => user?.uid);
   }
 
   Future<FirebaseUser> login(String email, String password) async {
     try {
       loading.add(true);
-      FirebaseUser user = await firebaseAuth.signInWithEmailAndPassword(
+      FirebaseUser user = await _firebaseAuth.signInWithEmailAndPassword(
           email: email, password: password);
 
       updateUserProfile(user);
@@ -67,7 +67,7 @@ class Auth implements BaseAuth {
 
   Future<FirebaseUser> signUp(String email, String password) async {
     try {
-      FirebaseUser user = await firebaseAuth.createUserWithEmailAndPassword(
+      FirebaseUser user = await _firebaseAuth.createUserWithEmailAndPassword(
           email: email, password: password);
 
       updateUserProfile(user);
@@ -87,22 +87,28 @@ class Auth implements BaseAuth {
             .map((snap) => snap.data);
   }
 
-  Future<void> logout() async {
-    return firebaseAuth.signOut();
+  Future<String> signOut() async {
+    try {
+      currentUid = null;
+      await _firebaseAuth.signOut();
+      return 'SignOut';
+    } catch (e) {
+      return e.toString();
+    }
   }
 
   Future<void> sendEmailVerification() async {
-    FirebaseUser user = await firebaseAuth.currentUser();
+    FirebaseUser user = await _firebaseAuth.currentUser();
     user.sendEmailVerification();
   }
 
   Future<bool> isEmailVerified() async {
-    FirebaseUser user = await firebaseAuth.currentUser();
+    FirebaseUser user = await _firebaseAuth.currentUser();
     return user.isEmailVerified;
   }
 
   Future<void> sendPasswordResetEmail(String userEmail) async {
-    return firebaseAuth.sendPasswordResetEmail(email: userEmail);
+    return _firebaseAuth.sendPasswordResetEmail(email: userEmail);
   }
 
   void updateUserProfile(FirebaseUser user) async {
@@ -110,6 +116,7 @@ class Auth implements BaseAuth {
     
     DocumentReference ref = _firestore.collection('Users').document(user.uid);
 
+    //TODO: Fix rewrite/lack of saving of fields
     return ref.setData({
       'uid': user.uid,
       'email': user.email,
