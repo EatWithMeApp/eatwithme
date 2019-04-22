@@ -7,30 +7,30 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:rxdart/rxdart.dart';
 
 abstract class BaseAuth {
-  Stream<String> get onAuthStateChanged;
   Future<FirebaseUser> login(String email, String password);
   Future<FirebaseUser> signUp(String email, String password);
-  Observable<FirebaseUser> getCurrentUser();
-  Observable<Map<String, dynamic>> getCurrentUserProfile();
   Future<void> sendEmailVerification();
-  Future<void> logout();
+  Future<String> signOut();
   Future<bool> isEmailVerified();
   Future<void> sendPasswordResetEmail(String userEmail);
+  Observable<Map<String, dynamic>> getUserProfile(String uid);
 }
 
 class Auth implements BaseAuth {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final Firestore _firestore = Firestore.instance;
 
-  Observable<FirebaseUser> _user;
-  Observable<Map<String, dynamic>> _userProfile;
+  Observable<FirebaseUser> user;
+  Observable<Map<String, dynamic>> userProfile;
   PublishSubject loading = PublishSubject();
 
+  String currentUid;
+
   Auth() {
-    _user = Observable(_firebaseAuth.onAuthStateChanged);
+    user = Observable(_firebaseAuth.onAuthStateChanged);
 
     //Pull user profile from FireStore
-    _userProfile = _user.switchMap((FirebaseUser u) {
+    userProfile = user.switchMap((FirebaseUser u) {
       if (u != null) {
         return _firestore
             .collection('Users')
@@ -38,14 +38,9 @@ class Auth implements BaseAuth {
             .snapshots()
             .map((snap) => snap.data);
       } else {
-        return Observable.just({});
+        return Observable.just({ });
       }
     });
-  }
-
-  @override
-  Stream<String> get onAuthStateChanged {
-    return _firebaseAuth.onAuthStateChanged.map((user) => user?.uid);
   }
 
   Future<FirebaseUser> login(String email, String password) async {
@@ -69,7 +64,7 @@ class Auth implements BaseAuth {
       FirebaseUser user = await _firebaseAuth.createUserWithEmailAndPassword(
           email: email, password: password);
 
-      updateUserProfile(user);
+      makeUserProfile(user);
       print('Registered user ' + user.email);
 
       return user;
@@ -78,18 +73,22 @@ class Auth implements BaseAuth {
     }
   }
 
-  Observable<FirebaseUser> getCurrentUser() {
-    //async {
-    //FirebaseUser user = await _firebaseAuth.currentUser();
-    return _user;
+  Observable<Map<String, dynamic>> getUserProfile(String uid) {
+    return _firestore
+            .collection('Users')
+            .document(uid)
+            .snapshots()
+            .map((snap) => snap.data);
   }
 
-  Observable<Map<String, dynamic>> getCurrentUserProfile() {
-    return _userProfile;
-  }
-
-  Future<void> logout() async {
-    return _firebaseAuth.signOut();
+  Future<String> signOut() async {
+    try {
+      currentUid = null;
+      await _firebaseAuth.signOut();
+      return 'SignOut';
+    } catch (e) {
+      return e.toString();
+    }
   }
 
   Future<void> sendEmailVerification() async {
@@ -107,8 +106,28 @@ class Auth implements BaseAuth {
   }
 
   void updateUserProfile(FirebaseUser user) async {
+    currentUid = user.uid;
+    
     DocumentReference ref = _firestore.collection('Users').document(user.uid);
 
+    //TODO: Fix rewrite/lack of saving of fields (needs a profile edit page)
+    //Will probably need to read in a Map<String,dynamic> and use those values
+    return ref.setData({
+      //'uid': user.uid,
+      //'email': user.email,
+      //'photoURL': user.photoUrl,
+      //'displayName': user.displayName,
+      'lastSeen': DateTime.now(),
+    }, merge: true);
+  }
+
+  void makeUserProfile(FirebaseUser user) async {
+    currentUid = user.uid;
+    
+    DocumentReference ref = _firestore.collection('Users').document(user.uid);
+
+    //TODO: Fix rewrite/lack of saving of fields (needs a profile edit page)
+    //Will probably need to read in a Map<String,dynamic> and use those values
     return ref.setData({
       'uid': user.uid,
       'email': user.email,
@@ -118,3 +137,5 @@ class Auth implements BaseAuth {
     }, merge: true);
   }
 }
+
+final Auth authService = Auth();

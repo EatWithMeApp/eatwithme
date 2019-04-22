@@ -2,7 +2,6 @@
 //Adapted from https://github.com/tattwei46/flutter_login_demo/blob/master/lib/pages/login_signup_page.dart
 
 import 'package:eatwithme/pages/auth/auth.dart';
-import 'package:eatwithme/pages/auth/auth_provider.dart';
 import 'package:eatwithme/utils/confirmation_toast.dart';
 import 'package:eatwithme/utils/error_toast.dart';
 import 'package:flutter/material.dart';
@@ -77,17 +76,9 @@ class _LoginCardState extends State<LoginCard>
   Future<void> validateAndSubmit() async {
     if (validateAndSave()) {
       try {
-        final BaseAuth auth = AuthProvider.of(context).auth;
-
         (_formType == FormType.login)
-            ? await auth.login(_email, _password)
-            : await auth.signUp(_email, _password);
-
-        /* if (_formType == FormType.login) {
-          await auth.login(_email, _password);
-        } else {
-          await auth.signUp(_email, _password);
-        } */
+            ? await authService.login(_email, _password)
+            : await authService.signUp(_email, _password);
       } on PlatformException catch (e) {
         //Handle errors from login (based from signInWithEmailAndPassword)
         if (e.code == 'ERROR_USER_NOT_FOUND') {
@@ -124,14 +115,13 @@ class _LoginCardState extends State<LoginCard>
 
   void resetPassword() {
     try {
-      final BaseAuth auth = AuthProvider.of(context).auth;
       String userEmail = emailController.text.trim();
 
       var validate = EmailFieldValidator.validate(userEmail);
 
       validate != null
           ? throw 'Email is invalid'
-          : auth.sendPasswordResetEmail(userEmail);
+          : authService.sendPasswordResetEmail(userEmail);
 
       ConfirmationToast.show(
           'Reset password email sent - please check your inbox');
@@ -250,10 +240,7 @@ class _LoginCardState extends State<LoginCard>
 
   @override
   initState() {
-    // TODO: implement initState
     super.initState();
-    //loginBloc =  LoginBloc();
-    //apiStreamSubscription = apiSubscription(loginBloc.apiResult, context);
     controller = AnimationController(
         vsync: this, duration: Duration(milliseconds: 1500));
     animation = Tween(begin: 0.0, end: 1.0).animate(
@@ -265,8 +252,6 @@ class _LoginCardState extends State<LoginCard>
   @override
   void dispose() {
     controller?.dispose();
-    //loginBloc?.dispose();
-    //apiStreamSubscription?.cancel();
     super.dispose();
   }
 
