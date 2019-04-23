@@ -3,6 +3,23 @@
 const String APP_TITLE = "EatWithMe";
 const String PROFILE_PHOTO_PLACEHOLDER_PATH = "images/profile_placeholder.png";
 const String NO_ACTIVE_CHATS = 'You have no active chats right now - go make some connections on the map!';
+const String name = "EanWithMe";
+const String store = "Online chat\n For Everyone";
+const String wt1 = "WELCOME";
+const String wc1 =
+    "EanWithMe is Premium Sociaty\n Platform for Everyone";
+const String wt2 = "FIND FRIENDS";
+const String wc2 =
+    "Find Friends Near You On Campus\n With Common Interests and Hobbies";
+const String wt3 = "DISCOVER Restaurant";
+const String wc3 =
+    "Search Latest and Featured Restaurant\n With Best Price And Discount";
+const String wt4 = "CHAT ONLINE";
+const String wc4 =
+    "Chat With Friends In Spare Time\n Keep In Touch With Friends That You Like";
+const String skip = "SKIP";
+const String next = "NEXT";
+const String gotIt = "GOT IT";
 //Margins
 /* 
 Examples from https://www.driftycode.com/flutter-global-constants-for-the-complete-project/

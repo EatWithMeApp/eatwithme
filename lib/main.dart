@@ -4,8 +4,20 @@ import 'package:eatwithme/pages/root.dart';
 import 'package:flutter/material.dart';
 import 'package:eatwithme/theme/eatwithme_theme.dart';
 import 'package:eatwithme/utils/constants.dart';
+import 'package:eatwithme/pages/intro/splash_screen.dart';
+import 'package:eatwithme/pages/intro/intro_screen.dart';
+import 'package:eatwithme/utils/matchFriends.dart';
 
-void main() => runApp(MyApp());
+var routes = <String, WidgetBuilder>{
+  "/intro": (BuildContext context) => IntroScreen(),
+  "/root" : (BuildContext context) => RootPage(),
+};
+
+void main() => runApp(new MaterialApp(
+    title: APP_TITLE,
+    theme: themeLight(),
+    home: SplashScreen(),
+    routes: routes));
 
 class MyApp extends StatelessWidget {
   @override
