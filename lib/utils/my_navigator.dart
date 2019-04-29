@@ -1,3 +1,4 @@
+import 'package:eatwithme/pages/root.dart';
 import 'package:flutter/material.dart';
 
 class MyNavigator {
@@ -7,6 +8,9 @@ class MyNavigator {
   }
 
   static void goToRoot(BuildContext context) {
-    Navigator.pushNamed(context, "/root");
+    // Navigator.pushReplacementNamed(context, "/root");
+    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
+      builder: (context) => RootPage()
+    ), (_) => false);
   }
 }

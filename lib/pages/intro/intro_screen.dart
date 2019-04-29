@@ -27,6 +27,12 @@ class IntroScreenState extends State<IntroScreen> {
   }
 
   @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       color: Color(0xFFEEEEEE),

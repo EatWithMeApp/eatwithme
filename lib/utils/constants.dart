@@ -3,14 +3,14 @@
 const String APP_TITLE = "EatWithMe";
 const String PROFILE_PHOTO_PLACEHOLDER_PATH = "images/profile_placeholder.png";
 const String NO_ACTIVE_CHATS = 'You have no active chats right now - go make some connections on the map!';
-const String name = "EanWithMe";
+const String name = "EatWithMe";
 const String store = "Online chat\n For Everyone";
 const String wt1 = "WELCOME";
 const String wc1 =
-    "EanWithMe is Premium Sociaty\n Platform for Everyone";
+    "EatWithMe is the premium social\n platform for everyone!";
 const String wt2 = "FIND FRIENDS";
 const String wc2 =
-    "Find Friends Near You On Campus\n With Common Interests and Hobbies";
+    "Find friends near you on campus\n with common interests and hobbies";
 const String wt3 = "DISCOVER Restaurant";
 const String wc3 =
     "Search Latest and Featured Restaurant\n With Best Price And Discount";
