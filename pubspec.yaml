@@ -40,6 +40,10 @@ dependencies:
 
   fluttertoast: ^3.0.3
 
+  cached_network_image: ^0.7.0
+
+  shared_preferences: ^0.5.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
