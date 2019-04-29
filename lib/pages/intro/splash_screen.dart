@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'package:eatwithme/pages/intro/intro_screen.dart';
+import 'package:eatwithme/pages/root.dart';
 import 'package:flutter/material.dart';
 import 'package:eatwithme/utils/constants.dart';
 import 'package:eatwithme/utils/my_navigator.dart';
 import 'package:eatwithme/theme/eatwithme_theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -10,11 +13,28 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  Future checkFirstSeen() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool _seen = (prefs.getBool('seen') ?? false);
+
+    if (_seen) {
+      Navigator.of(context).pushReplacement(
+          new MaterialPageRoute(builder: (context) => new RootPage()));
+    } else {
+      prefs.setBool('seen', true);
+      Navigator.of(context).pushReplacement(
+          new MaterialPageRoute(builder: (context) => new IntroScreen()));
+    }
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     Timer(Duration(seconds: 5), () => MyNavigator.goToIntro(context));
+    
+    //TODO: Uncomment this line to only allow intro on first load
+    //checkFirstSeen();
   }
 
   @override
@@ -26,9 +46,8 @@ class _SplashScreenState extends State<SplashScreen> {
           Container(
             decoration: new BoxDecoration(
                 gradient: new LinearGradient(
-                  colors: ThemeColours.kitGradients,
-                )
-            ),
+              colors: ThemeColours.kitGradients,
+            )),
           ),
           Column(
             mainAxisAlignment: MainAxisAlignment.start,
