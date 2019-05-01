@@ -2,6 +2,7 @@
 //Adapted from https://www.youtube.com/watch?v=cHFV6JPp-6A
 
 import 'dart:async';
+import 'package:eatwithme/utils/verification_exception.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:rxdart/rxdart.dart';
@@ -49,6 +50,11 @@ class Auth implements BaseAuth {
       FirebaseUser user = await _firebaseAuth.signInWithEmailAndPassword(
           email: email, password: password);
 
+      // if (!user.isEmailVerified) {
+      //   loading.add(false);
+      //   throw VerificationException;
+      // }
+
       updateUserProfile(user);
       print('Signed in ' + user.email);
 
@@ -64,8 +70,14 @@ class Auth implements BaseAuth {
       FirebaseUser user = await _firebaseAuth.createUserWithEmailAndPassword(
           email: email, password: password);
 
+      currentUid = user.uid;
+
+      await user.sendEmailVerification();
+      
       makeUserProfile(user);
-      print('Registered user ' + user.email);
+      print('Signing up user ' + user.email);
+
+      //_firebaseAuth.onAuthStateChanged;
 
       return user;
     } catch (e) {
@@ -122,7 +134,7 @@ class Auth implements BaseAuth {
   }
 
   void makeUserProfile(FirebaseUser user) async {
-    currentUid = user.uid;
+    //currentUid = user.uid;
     
     DocumentReference ref = _firestore.collection('Users').document(user.uid);
 

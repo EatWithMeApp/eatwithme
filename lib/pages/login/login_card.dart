@@ -7,6 +7,7 @@ import 'package:eatwithme/utils/error_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:eatwithme/widgets/gradient_button.dart';
 import 'package:flutter/services.dart';
+import 'package:eatwithme/utils/verification_exception.dart';
 
 class EmailFieldValidator {
   //https://services.anu.edu.au/information-technology/email/email-addresses-lists
@@ -75,10 +76,12 @@ class _LoginCardState extends State<LoginCard>
 
   Future<void> validateAndSubmit() async {
     if (validateAndSave()) {
-      try {
+      try {       
         (_formType == FormType.login)
             ? await authService.login(_email, _password)
             : await authService.signUp(_email, _password);
+      } on VerificationException catch (e) {
+        ErrorToast.show('Please verify this email address');
       } on PlatformException catch (e) {
         //Handle errors from login (based from signInWithEmailAndPassword)
         if (e.code == 'ERROR_USER_NOT_FOUND') {
@@ -206,6 +209,12 @@ class _LoginCardState extends State<LoginCard>
               ),
               SizedBox(
                 height: 30.0,
+              ),
+              Column(
+                // children: buildTermsandConds(),
+              ),
+              SizedBox(
+                height: 2.0,
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
