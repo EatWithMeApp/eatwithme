@@ -13,60 +13,48 @@ class _FriendsState extends State<Friends> {
     QuerySnapshot qn = await firestore.collection("Users").getDocuments();
     return qn.documents;
   }
-  List a;
-
-  navigateToDetail(DocumentSnapshot user){
-    Navigator.push(context, MaterialPageRoute(builder: (context)=> DetailPage(user: user,)));
-  }
-
+  List a ;
+  List myInt = ["Eating","drinking"];
+  List uers = [];
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: FutureBuilder(
-          future: getUsers(),
-          builder: (_, snapshot){
+    return Scaffold(
+        body: Container(
+          child: FutureBuilder(
+              future: getUsers(),
+              builder: (_, snapshot){
+                if (snapshot.connectionState == ConnectionState.waiting){
+                  return Center(
+                    child: Text ("Loading..."),
+                  );
+                }else{
+                  return ListView.builder(
+                      itemCount: snapshot.data.length,
+                      itemBuilder: (_, index){
+                        if (index == 0){
+                          a = [];
+                        }
+                        a = snapshot.data[index].data["interests"];
+                        for (String interest in myInt){
+                          if (a.contains(interest)){
+                            uers.add(snapshot.data[index].data);
+                          }
+                        }
 
-            if (snapshot.connectionState == ConnectionState.waiting){
-              return Center(
-                child: Text ("Loading..."),
-              );
-            }else{
-              return ListView.builder(
-                  itemCount: snapshot.data.length,
-                  itemBuilder: (_, index){
-                    if (snapshot.data[index].data["interests"].contains("eating")){
-                      return ListTile(
-                        title: Text(snapshot.data[index].data["interests"].toString()),
-                        onTap: () => navigateToDetail(snapshot.data[index]),
+
+                        if (index == snapshot.data.length-1){
+                          return Text(uers.toString());
+
+                        }else{
+                          return Text(" ");
+                        }
+
+                      }
 
                       );
-                    }
-                  });
-            }
-          }),
-    );
-  }
-}
-
-class DetailPage extends StatefulWidget {
-
-  final DocumentSnapshot user;
-
-  DetailPage({this.user});
-
-  @override
-  _DetailPageState createState() => _DetailPageState();
-}
-
-class _DetailPageState extends State<DetailPage> {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        child:Card(
-          child: ListTile(
-            title: Text(widget.user.data.toString()),
-
-          ),
+                  }
+              }
+              ),
         )
     );
   }
