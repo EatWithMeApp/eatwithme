@@ -2,6 +2,7 @@
 
 import 'dart:async';
 
+import 'package:eatwithme/pages/login/verify.dart';
 import 'package:eatwithme/widgets/loadingCircle.dart';
 import 'package:flutter/material.dart';
 import 'package:eatwithme/pages/auth/auth.dart';
@@ -13,14 +14,23 @@ class RootPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return StreamBuilder(
         stream: authService.user,
-        builder: (context, snapshot) {
+        builder: (context, snapshot) {         
           final bool uidLoaded = authService.currentUid != null;
-          if (snapshot.connectionState == ConnectionState.active) {
+          if (snapshot.connectionState == ConnectionState.active) {           
             final bool isLoggedIn = snapshot.hasData;
             if (isLoggedIn) {
               // Wait for user to be made/logged in, then show home
               if (uidLoaded) {
-                return HomePage();
+                //If verified, go home otherwise make sure they verify
+                Widget screen = VerifyPage();
+                // authService.isEmailVerified().then((verified) => {
+                //   screen = (verified) ? HomePage() : VerifyPage()
+                // });
+                
+                screen = (snapshot.data.isEmailVerified) ? HomePage() : VerifyPage();
+
+                return screen;
+                //return HomePage();
               }
             } else {
               return LoginPage();

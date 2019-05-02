@@ -50,11 +50,6 @@ class Auth implements BaseAuth {
       FirebaseUser user = await _firebaseAuth.signInWithEmailAndPassword(
           email: email, password: password);
 
-      // if (!user.isEmailVerified) {
-      //   loading.add(false);
-      //   throw VerificationException;
-      // }
-
       updateUserProfile(user);
       print('Signed in ' + user.email);
 
