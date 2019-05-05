@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:eatwithme/pages/auth/auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:vector_math/vector_math.dart' show radians;
 import 'package:location/location.dart';
+
 
 Future<void> main() async {
   final FirebaseApp app = await FirebaseApp.configure(
@@ -137,6 +139,14 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
           )
       );
     }
+
+    Future<void> _signOut(BuildContext context) async {
+    try {
+      await authService.signOut();
+    } catch (e) {
+      print(e);
+    }
+  }
   
   // load data from Firebase
   Future<void> loadData() async{
@@ -260,6 +270,13 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
           preferredSize: Size.fromHeight(20),
           child: AppBar(
           backgroundColor: Colors.orange[700],
+          actions: <Widget>[
+          FlatButton(
+            child: Text('Logout',
+                style: TextStyle(fontSize: 17.0, color: Colors.white)),
+            onPressed: () => _signOut(context),
+          )
+        ],
           ),
         ),
         body: Stack(
