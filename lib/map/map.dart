@@ -227,7 +227,8 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
           title: name,
           snippet: "interests: " + interest.toString()
         ),
-        icon: BitmapDescriptor.fromAsset("assets/orange.png")
+        // icon: BitmapDescriptor.fromAsset("assets/orange.png")
+        icon: BitmapDescriptor.defaultMarker
       ));
     });
     }
