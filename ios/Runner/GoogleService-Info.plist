@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>1050553742489-fhuhf70b1hk2i1e71nuitonpcaih9i5q.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.1050553742489-fhuhf70b1hk2i1e71nuitonpcaih9i5q</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>1050553742489-h2qqr87q5sorgh2rq052oatphgcbm3n2.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyB1dv4AdtCdmPraFPWowHmSXL9933Re1DI</string>
+	<key>GCM_SENDER_ID</key>
+	<string>1050553742489</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.eatWithMe</string>
+	<key>PROJECT_ID</key>
+	<string>eatwithme-c103e</string>
+	<key>STORAGE_BUCKET</key>
+	<string>eatwithme-c103e.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:1050553742489:ios:b7aaeb772a3ecf08</string>
+	<key>DATABASE_URL</key>
+	<string>https://eatwithme-c103e.firebaseio.com</string>
+</dict>
+</plist>
