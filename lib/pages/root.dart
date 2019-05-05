@@ -4,6 +4,7 @@ import 'package:eatwithme/widgets/loadingCircle.dart';
 import 'package:flutter/material.dart';
 import 'package:eatwithme/pages/auth/auth.dart';
 import 'package:eatwithme/pages/home.dart';
+import 'package:eatwithme/map/map.dart';
 import 'package:eatwithme/pages/login/login.dart';
 
 class RootPage extends StatelessWidget {
@@ -14,7 +15,7 @@ class RootPage extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.active) {
             final bool isLoggedIn = snapshot.hasData;
-            return isLoggedIn ? HomePage() : LoginPage();
+            return isLoggedIn ? MyMap() : LoginPage();
           }
           return _buildWaitingScreen();
         });

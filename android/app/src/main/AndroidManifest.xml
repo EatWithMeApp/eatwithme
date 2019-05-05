@@ -10,6 +10,9 @@
         android:name="io.flutter.app.FlutterApplication"
         android:label="eatwithme"
         android:icon="@mipmap/ic_launcher">
+        <meta-data 
+                android:name="com.google.android.geo.API_KEY"
+                android:value="AIzaSyAuWeXQUKQmK_3vrJwj4TPS6Wea0ANMu_Y"/>
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
@@ -24,8 +27,6 @@
             <meta-data
                 android:name="io.flutter.app.android.SplashScreenUntilFirstFrame"
                 android:value="true" />
-            <meta-data android:name="com.google.android.geo.API_KEY"
-               android:value="YAIzaSyAuWeXQUKQmK_3vrJwj4TPS6Wea0ANMu_Y"/>
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

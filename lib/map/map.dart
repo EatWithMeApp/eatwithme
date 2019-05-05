@@ -11,23 +11,23 @@ Future<void> main() async {
   final FirebaseApp app = await FirebaseApp.configure(
     name: 'vscodefirebase',
     options: const FirebaseOptions(
-      googleAppID: "1:1050553742489:ios:b7aaeb772a3ecf08",
-      bundleID: "com.example.eatWithMe",
+      googleAppID: "1:1050553742489:ios:d582d6d5c13ccf2c",
+      bundleID: "com.eatwithme.eatwithme",
       projectID: 'eatwithme-c103e',
     ),
   );
   final Firestore firestore = Firestore(app: app);
   await firestore.settings(timestampsInSnapshotsEnabled: true);
 
-  runApp(MyApp());
+  runApp(MyMap());
 }
 
-class MyApp extends StatefulWidget {
+class MyMap extends StatefulWidget {
   @override
   _MyAppState createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> with TickerProviderStateMixin{
+class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
   Completer<GoogleMapController> _controller = Completer();
   bool isOpened = false;
   double _fabHeight = 56.0;
