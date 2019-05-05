@@ -25,11 +25,13 @@ dependencies:
   cupertino_icons: ^0.1.2
   english_words: ^3.1.0
 
-  firebase_core: ^0.3.0
-  cloud_firestore: ^0.9.13+1
+  firebase_core: ^0.2.3
+  # cloud_firestore: ^0.9.13+1
+  cloud_firestore: 0.8.2+3
 
   # To address AndroidX issues, go no higher than specifed https://goo.gl/CP92wY
-  firebase_auth: 0.8.4+1
+  # firebase_auth: 0.8.4+1
+  firebase_auth: 0.7.0
   
   flutter_redux: ^0.5.3
   redux: ^3.0.0
@@ -43,6 +45,13 @@ dependencies:
   cached_network_image: ^0.7.0
 
   shared_preferences: ^0.5.2
+
+  firebase_storage: 1.0.4
+
+
+  intl: ^0.15.7
+
+  image_picker: 0.4.12+1
 
 dev_dependencies:
   flutter_test:
@@ -65,9 +74,20 @@ flutter:
   #  - images/a_dot_burr.jpeg
   #  - images/a_dot_ham.jpeg
 
+
   assets:
-    - images/
-    - fonts/
+     - images/img_not_available.jpeg
+     - images/mimi1.gif
+     - images/mimi2.gif
+     - images/mimi3.gif
+     - images/mimi4.gif
+     - images/mimi5.gif
+     - images/mimi6.gif
+     - images/mimi7.gif
+     - images/mimi8.gif
+     - images/mimi9.gif
+     - fonts/
+
 
   fonts:
     - family: Roboto
