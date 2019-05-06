@@ -182,10 +182,10 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
 
 
   int count = 0;
-  Future<void> pushLocation(double latitude, double longitude) async{
+  void pushLocation(double latitude, double longitude){
     if (count == 0){
       var db = Firestore.instance;
-      await db.collection('User_Location').add({
+      db.collection('User_Location').add({
         'name': currentUserName,
         'location': GeoPoint(latitude, longitude),
         'interest': ['Hi', 'gogo'],
@@ -199,12 +199,12 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
     }
     }
 
-  Future<void> updateCurrentLocation(String name, String id) async{
+  void updateCurrentLocation(String name, String id){
     if ((currentUserName == name) & (id != null)){
       var db = Firestore.instance;
       if ((latitude != null) & (longitude != null)) {
-        await db.collection("User_Location").document(id).updateData({
-          'location': GeoPoint(latitude, longitude)
+        db.collection("User_Location").document(id).updateData({
+          'location': new GeoPoint(latitude, longitude)
         });
         print("updateSuccesss");
       }
@@ -227,7 +227,7 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
           title: name,
           snippet: "interests: " + interest.toString()
         ),
-        // icon: BitmapDescriptor.fromAsset("assets/orange.png")
+        // icon: BitmapDescriptor.fromAssetImage("assets/orange.png")
         icon: BitmapDescriptor.defaultMarker
       ));
     });
