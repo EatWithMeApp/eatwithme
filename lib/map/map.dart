@@ -1,29 +1,11 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:eatwithme/pages/auth/auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:vector_math/vector_math.dart' show radians;
 import 'package:location/location.dart';
 import 'package:eatwithme/map/animationButton.dart';
-
-
-Future<void> main() async {
-  final FirebaseApp app = await FirebaseApp.configure(
-    name: 'vscodefirebase',
-    options: const FirebaseOptions(
-      googleAppID: "1:1050553742489:ios:d582d6d5c13ccf2c",
-      bundleID: "com.eatwithme.eatwithme",
-      projectID: 'eatwithme-c103e',
-    ),
-  );
-  final Firestore firestore = Firestore(app: app);
-  await firestore.settings(timestampsInSnapshotsEnabled: true);
-
-  runApp(MyMap());
-}
 
 class MyMap extends StatefulWidget {
   @override
@@ -32,13 +14,6 @@ class MyMap extends StatefulWidget {
 
 class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
   Completer<GoogleMapController> _controller = Completer();
-  bool isOpened = false;
-  double _fabHeight = 56.0;
-  Animation<double> _translateButton;
-  AnimationController _animationController;
-  Animation<Color> _buttonColor;
-  Animation<double> _animateIcon;
-  Curve _curve = Curves.easeOut;
 
   static const LatLng _center = const LatLng(45.521563, -122.677433);
   static const LatLng ANU = const LatLng(-35.2777, 149.1185);
@@ -47,7 +22,8 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
   final Set<Marker> _markers = {};
   LatLng _lastMapPosition = _center;
   final List<userPosition> userPositions = [];
-  String currentUserName = "Brian";
+  String currentUserName = "Ben";
+  Firestore firestore;
  
   void _onMapCreated(GoogleMapController controller) {
     _controller.complete(controller);
@@ -62,91 +38,26 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
       userPositions.add(user);
   }
 
-  @override
-  initState() {
-    _animationController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 500))
-          ..addListener(() {
-            setState(() {});
-          });
-    _animateIcon =
-        Tween<double>(begin: 0.0, end: 1.0).animate(_animationController);
-    _buttonColor = ColorTween(
-      begin: Colors.blue,
-      end: Colors.red,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Interval(
-        0.00,
-        1.00,
-        curve: Curves.linear,
-      ),
-    ));
-    _translateButton = Tween<double>(
-      begin: 80,
-      end: 0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Interval(
-        0.5,
-        0.75,
-        curve: _curve,
-      ),
-    ));
-    super.initState();
-  }
-
-  @override
-  dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  animate() {
-    if (!isOpened) {
-      _animationController.forward();
-    } else {
-      _animationController.reverse();
-    }
-    isOpened = !isOpened;
-  }
-
-  Widget toggle() {
-    return Container(
-      child: FloatingActionButton(
-        backgroundColor: Colors.orange,
-        onPressed: animate,
-        tooltip: 'Toggle',
-        child: AnimatedIcon(
-          icon: AnimatedIcons.home_menu,
-          progress: _animateIcon,
-        ),
-      ),
-    );
-  }
-
-  _buildButton(double angle, {Color color, IconData icon}) {
-      final double rad = radians(angle);
-      return Transform(
-        transform: Matrix4.identity()..translate(
-          (_translateButton.value) * cos(rad), 
-          (_translateButton.value) * sin(rad)
-        ),
-        child: FloatingActionButton(
-          child: Icon(icon), 
-          backgroundColor: color, 
-          onPressed: (){}, 
-          elevation: 0
-          )
-      );
-    }
-
-    Future<void> _signOut(BuildContext context) async {
+  Future<void> _signOut(BuildContext context) async {
     try {
       await authService.signOut();
     } catch (e) {
       print(e);
     }
+  }
+
+  Future<void> set_state() async{
+    final FirebaseApp app = await FirebaseApp.configure(
+      name: 'EatWithMeIOS',
+      options: const FirebaseOptions(
+        googleAppID: '1:1050553742489:ios:d582d6d5c13ccf2c',
+        bundleID: 'com.eatwithme.eatwithme',
+        projectID: 'eatwithme-c103e',
+        apiKey: 'AIzaSyB1dv4AdtCdmPraFPWowHmSXL9933Re1DI',
+      ),
+    );
+    final firestore = Firestore(app: app);
+    await firestore.settings(timestampsInSnapshotsEnabled: true);
   }
   
   // load data from Firebase
@@ -167,10 +78,12 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
     getNewPosition(lat, lng),
     up = new userPosition(_lastMapPosition, name, interest),
     addUsers(up),
+    print(name),
     updateCurrentLocation(name, ds.documentID),
     addMarker(name, _lastMapPosition, interest)
     }
     );
+    sn = null;
   }
 
   Future<void> get_location() async{
@@ -187,7 +100,7 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
   Future<void> pushLocation(double latitude, double longitude) async{
     if (!alreadyPushed){
       var db = Firestore.instance;
-      db.collection('User_Location').add({
+      await db.collection('User_Location').add({
         'name': currentUserName,
         'location': GeoPoint(latitude, longitude),
         'interest': ['Hi', 'gogo'],
@@ -200,7 +113,7 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
     }
     }
 
-  void updateCurrentLocation(String name, String id){
+  Future<void> updateCurrentLocation(String name, String id) async{
     if ((currentUserName == name) & (id != null) & (alreadyPushed = true)){
       var db = Firestore.instance;
       if ((latitude != null) & (longitude != null)) {
