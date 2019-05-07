@@ -3,14 +3,13 @@ import 'package:flutter/material.dart';
 class Walkthrough extends StatefulWidget {
   final title;
   final content;
-  final imageIcon;
-  final imagecolor;
+  final introimage ;
 
   Walkthrough(
       {this.title,
       this.content,
-      this.imageIcon,
-      this.imagecolor = Colors.redAccent});
+      this.introimage
+  });
 
   @override
   WalkthroughState createState() {
@@ -23,20 +22,29 @@ class WalkthroughState extends State<Walkthrough>
   Animation animation;
   AnimationController animationController;
 
+  String SelectPIc (int n){
+    if (widget.introimage == 1){
+      return 'images/intro1.png';
+    }
+    if (widget.introimage == 2){
+      return 'images/intro2.png';
+    }
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+
     animationController =
         AnimationController(vsync: this, duration: Duration(milliseconds: 500));
     animation = Tween(begin: -250.0, end: 0.0).animate(
-        CurvedAnimation(parent: animationController, curve: Curves.easeInOut));
+        CurvedAnimation(parent: animationController, curve: Curves.easeInOut),);
 
     animation.addListener(() => setState(() {}));
 
     animationController.forward();
   }
-
   @override
   void dispose() {
     // TODO: implement dispose
@@ -47,11 +55,12 @@ class WalkthroughState extends State<Walkthrough>
   @override
   Widget build(BuildContext context) {
     return new Container(
-      padding: EdgeInsets.all(20.0),
+      padding: EdgeInsets.fromLTRB(30.0,0.0,30.0,0.0),
       child: Material(
+        color: const Color(0xFFFFFFFF),
         animationDuration: Duration(milliseconds: 500),
         elevation: 2.0,
-        borderRadius: BorderRadius.all(Radius.circular(5.0)),
+        borderRadius: BorderRadius.all(Radius.circular(30.0)),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -62,9 +71,9 @@ class WalkthroughState extends State<Walkthrough>
               child: new Text(
                 widget.title,
                 style: TextStyle(
-                    fontSize: 20.0,
+                    fontSize: 24.0,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black),
+                    color:const Color(0xFF4F4F4F)),
               ),
             ),
             new Transform(
@@ -75,13 +84,12 @@ class WalkthroughState extends State<Walkthrough>
                   textAlign: TextAlign.center,
                   style: TextStyle(
                       fontWeight: FontWeight.normal,
-                      fontSize: 15.0,
-                      color: Colors.black)),
+                      fontSize: 20.0,
+                      color: const Color(0xFF828282))),
             ),
-            new Icon(
-              widget.imageIcon,
-              size: 100.0,
-              color: widget.imagecolor,
+            new Center (
+                child: Image.asset(SelectPIc(widget.introimage))
+
             )
           ],
         ),

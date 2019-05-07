@@ -18,7 +18,7 @@ class IntroScreenState extends State<IntroScreen> {
   void _onPageChanged(int page) {
     setState(() {
       currentPage = page;
-      if (currentPage == 3) {
+      if (currentPage == 2) {
         lastPage = true;
       } else {
         lastPage = false;
@@ -31,13 +31,13 @@ class IntroScreenState extends State<IntroScreen> {
     controller.dispose();
     super.dispose();
   }
-
+  Color c = const Color(0xFFFF7F26);
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Color(0xFFEEEEEE),
-      padding: EdgeInsets.all(10.0),
+      color: c,
       child: Column(
+
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
           Expanded(
@@ -51,22 +51,17 @@ class IntroScreenState extends State<IntroScreen> {
                 Walkthrough(
                   title: wt1,
                   content: wc1,
-                  imageIcon: Icons.mobile_screen_share,
+                  introimage:1,
                 ),
                 Walkthrough(
                   title: wt2,
                   content: wc2,
-                  imageIcon: Icons.search,
+                  introimage:2,
                 ),
                 Walkthrough(
                   title: wt3,
                   content: wc3,
-                  imageIcon: Icons.map,
-                ),
-                Walkthrough(
-                  title: wt4,
-                  content: wc4,
-                  imageIcon: Icons.phone_in_talk,
+                  introimage: 1,
                 ),
               ],
               controller: controller,

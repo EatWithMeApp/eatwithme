@@ -8,16 +8,13 @@ const String name = "EatWithMe";
 const String store = "Online chat\n For Everyone";
 const String wt1 = "WELCOME";
 const String wc1 =
-    "EatWithMe is the premium social\n platform for everyone!";
-const String wt2 = "FIND FRIENDS";
+    "We believe that \n meaningful and deep \n social interactions \n create energy.!";
+const String wt2 = "";
 const String wc2 =
-    "Find friends near you on campus\n with common interests and hobbies";
-const String wt3 = "DISCOVER Restaurant";
+    "That energy allows \n us to spread love, \nto give fire to debates,\nto harness innovation,\nand even fight\nmental illness.";
+const String wt3 = "";
 const String wc3 =
-    "Search Latest and Featured Restaurant\n With Best Price And Discount";
-const String wt4 = "CHAT ONLINE";
-const String wc4 =
-    "Chat With Friends In Spare Time\n Keep In Touch With Friends That You Like";
+    "So today, why not\ninvite someone to lunch?\n\nYou could end up\nmeeting a partner in\nlove, in crime or\nresearch.";
 const String skip = "SKIP";
 const String next = "NEXT";
 const String gotIt = "GOT IT";

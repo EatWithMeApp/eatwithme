@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
       title: APP_TITLE,
       theme: themeLight(),
       routes: routes,
-      home: SplashScreen(),
+      home: IntroScreen(),
     );
   }
 }
