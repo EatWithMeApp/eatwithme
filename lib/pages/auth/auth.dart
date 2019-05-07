@@ -2,6 +2,7 @@
 //Adapted from https://www.youtube.com/watch?v=cHFV6JPp-6A
 
 import 'dart:async';
+import 'package:eatwithme/utils/verification_exception.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:rxdart/rxdart.dart';
@@ -11,7 +12,7 @@ abstract class BaseAuth {
   Future<FirebaseUser> signUp(String email, String password);
   Future<void> sendEmailVerification();
   Future<String> signOut();
-  Future<bool> isEmailVerified();
+  bool isEmailVerified();
   Future<void> sendPasswordResetEmail(String userEmail);
   Observable<Map<String, dynamic>> getUserProfile(String uid);
 }
@@ -64,8 +65,14 @@ class Auth implements BaseAuth {
       FirebaseUser user = await _firebaseAuth.createUserWithEmailAndPassword(
           email: email, password: password);
 
+      currentUid = user.uid;
+
+      await user.sendEmailVerification();
+      
       makeUserProfile(user);
-      print('Registered user ' + user.email);
+      print('Signing up user ' + user.email);
+
+      //_firebaseAuth.onAuthStateChanged;
 
       return user;
     } catch (e) {
@@ -96,9 +103,15 @@ class Auth implements BaseAuth {
     user.sendEmailVerification();
   }
 
-  Future<bool> isEmailVerified() async {
-    FirebaseUser user = await _firebaseAuth.currentUser();
-    return user.isEmailVerified;
+  bool isEmailVerified() {
+    // FirebaseUser user = await _firebaseAuth.currentUser();
+    // return user.isEmailVerified;
+    bool verified = false;
+    _firebaseAuth.currentUser().then((user) => {
+      print(user.isEmailVerified),
+      verified = user.isEmailVerified
+      });
+    return verified;
   }
 
   Future<void> sendPasswordResetEmail(String userEmail) async {
@@ -122,7 +135,7 @@ class Auth implements BaseAuth {
   }
 
   void makeUserProfile(FirebaseUser user) async {
-    currentUid = user.uid;
+    //currentUid = user.uid;
     
     DocumentReference ref = _firestore.collection('Users').document(user.uid);
 
@@ -135,6 +148,11 @@ class Auth implements BaseAuth {
       'displayName': user.displayName,
       'lastSeen': DateTime.now(),
     }, merge: true);
+  }
+
+  void refreshUser() {
+    _firebaseAuth.currentUser().then((user) => {user.reload()});
+    print("Refresh");
   }
 }
 

@@ -19,12 +19,14 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    super.initState();
+    
     _controllerUserProfile.addStream(_firestore
         .collection('Users')
         .document(authService.currentUid)
         .snapshots()
         .map((snap) => snap.data));
+        super.initState();
+        print("initstate");
   }
 
   Future<void> _signOut(BuildContext context) async {

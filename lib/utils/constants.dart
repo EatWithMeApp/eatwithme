@@ -3,6 +3,7 @@
 const String APP_TITLE = "EatWithMe";
 const String PROFILE_PHOTO_PLACEHOLDER_PATH = "images/profile_placeholder.png";
 const String NO_ACTIVE_CHATS = 'You have no active chats right now - go make some connections on the map!';
+const String VERIFY_ACCOUNT = 'Thank you for signing up! Please visit your email inbox and use the verification email to get started making new friends!';
 const String name = "EatWithMe";
 const String store = "Online chat\n For Everyone";
 const String wt1 = "WELCOME";
