@@ -7,6 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:vector_math/vector_math.dart' show radians;
 import 'package:location/location.dart';
+import 'package:eatwithme/map/animationButton.dart';
 
 
 Future<void> main() async {
@@ -46,7 +47,7 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
   final Set<Marker> _markers = {};
   LatLng _lastMapPosition = _center;
   final List<userPosition> userPositions = [];
-  String currentUserName = "Uwe";
+  String currentUserName = "Brian";
  
   void _onMapCreated(GoogleMapController controller) {
     _controller.complete(controller);
@@ -157,18 +158,19 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
     userPosition up;
     QuerySnapshot sn = await Firestore.instance.collection('User_Location').getDocuments();
     var list = sn.documents;
-    list.forEach((DocumentSnapshot ds) => {
-      name = ds.data['name'],
-      lat = ds.data['location'].latitude,
-      lng = ds.data['location'].longitude,
-      interest = ds.data['interest'],
-      getNewPosition(lat, lng),
-      up = new userPosition(_lastMapPosition, name, interest),
-      addUsers(up),
-      updateCurrentLocation(name, ds.documentID),
-      addMarker(name, _lastMapPosition, interest)
-      }
-      );
+    Future.delayed(const Duration(milliseconds: 500));
+    await list.forEach((DocumentSnapshot ds) => {
+    name = ds.data['name'],
+    lat = ds.data['location'].latitude,
+    lng = ds.data['location'].longitude,
+    interest = ds.data['interest'],
+    getNewPosition(lat, lng),
+    up = new userPosition(_lastMapPosition, name, interest),
+    addUsers(up),
+    updateCurrentLocation(name, ds.documentID),
+    addMarker(name, _lastMapPosition, interest)
+    }
+    );
   }
 
   Future<void> get_location() async{
@@ -181,33 +183,32 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
   }
 
 
-  int count = 0;
-  void pushLocation(double latitude, double longitude){
-    if (count == 0){
+  bool alreadyPushed = false;
+  Future<void> pushLocation(double latitude, double longitude) async{
+    if (!alreadyPushed){
       var db = Firestore.instance;
       db.collection('User_Location').add({
         'name': currentUserName,
         'location': GeoPoint(latitude, longitude),
         'interest': ['Hi', 'gogo'],
       }).then((val){
-        print("success");
+        print("Pushed success");
       }).catchError((err) {
         print(err);
       });
-      count++;
-      print(count);
+      alreadyPushed = true;
     }
     }
 
   void updateCurrentLocation(String name, String id){
-    if ((currentUserName == name) & (id != null)){
+    if ((currentUserName == name) & (id != null) & (alreadyPushed = true)){
       var db = Firestore.instance;
       if ((latitude != null) & (longitude != null)) {
         db.collection("User_Location").document(id).updateData({
           'location': new GeoPoint(latitude, longitude)
         });
         print("updateSuccesss");
-      }
+        }
     }
   }
 
@@ -225,10 +226,8 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
         position: pos,
         infoWindow: InfoWindow(
           title: name,
-          snippet: "interests: " + interest.toString()
         ),
-        // icon: BitmapDescriptor.fromAssetImage("assets/orange.png")
-        icon: BitmapDescriptor.defaultMarker
+        icon: BitmapDescriptor.fromAsset("assets/orange.png")
       ));
     });
     }
@@ -281,13 +280,12 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
           ),
         ),
         body: Stack(
-          alignment: Alignment.bottomRight,
+          alignment: AlignmentDirectional.bottomEnd,
           children: <Widget>[
             GoogleMap(
               onMapCreated: _onMapCreated,
               rotateGesturesEnabled: true,
               compassEnabled: true,
-              scrollGesturesEnabled: true,
               myLocationEnabled: true,
               initialCameraPosition: CameraPosition(
                 target: ANU,
@@ -297,10 +295,9 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
               markers: _markers,
               onCameraMove: _onCameraMove,
             ),
-            _buildButton(180, color: Colors.red),
-            _buildButton(225, color: Colors.orange),
-            _buildButton(-90, color: Colors.black),
-            toggle(),
+            SafeArea(
+              child: AnimationButton(),
+            ),
           ],
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
