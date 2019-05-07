@@ -6,22 +6,22 @@ class VerifyPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => {authService.signOut()},
+        appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () => {authService.signOut()},
+          ),
         ),
-      ),
         body: Container(
-      alignment: Alignment.center,
-      child: Text(
-        VERIFY_ACCOUNT,
-        softWrap: true,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: 25.0,
-        ),
-      ),
-    ));
+          alignment: Alignment.center,
+          child: Text(
+            VERIFY_ACCOUNT,
+            softWrap: true,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 25.0,
+            ),
+          ),
+        ));
   }
 }

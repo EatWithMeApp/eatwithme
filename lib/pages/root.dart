@@ -11,7 +11,7 @@ import 'package:eatwithme/pages/login/login.dart';
 
 class RootPage extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) {   
     return StreamBuilder(
         stream: authService.user,
         builder: (context, snapshot) {         
@@ -23,14 +23,10 @@ class RootPage extends StatelessWidget {
               if (uidLoaded) {
                 //If verified, go home otherwise make sure they verify
                 Widget screen = VerifyPage();
-                // authService.isEmailVerified().then((verified) => {
-                //   screen = (verified) ? HomePage() : VerifyPage()
-                // });
-                
+
                 screen = (snapshot.data.isEmailVerified) ? HomePage() : VerifyPage();
 
                 return screen;
-                //return HomePage();
               }
             } else {
               return LoginPage();
