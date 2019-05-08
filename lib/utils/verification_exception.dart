@@ -1,0 +1,3 @@
+class VerificationException implements Exception {
+  
+}
