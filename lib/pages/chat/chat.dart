@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eatwithme/utils/constants.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:eatwithme/pages/chat/constant.dart';
@@ -12,22 +13,25 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Chat extends StatelessWidget {
+  final String userId;
   final String peerId;
   final String peerAvatar;
+  final String peerName;
 
-  Chat({Key key, @required this.peerId, @required this.peerAvatar}) : super(key: key);
+  Chat({Key key, @required this.userId, @required this.peerId, @required this.peerAvatar, @required this.peerName}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
         title: new Text(
-          'CHAT',
+          peerName,
           style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
       body: new ChatScreen(
+        userId: userId,
         peerId: peerId,
         peerAvatar: peerAvatar,
       ),
@@ -36,21 +40,22 @@ class Chat extends StatelessWidget {
 }
 
 class ChatScreen extends StatefulWidget {
+  final String userId;
   final String peerId;
   final String peerAvatar;
 
-  ChatScreen({Key key, @required this.peerId, @required this.peerAvatar}) : super(key: key);
+  ChatScreen({Key key, @required this.userId, @required this.peerId, @required this.peerAvatar}) : super(key: key);
 
   @override
-  State createState() => new ChatScreenState(peerId: peerId, peerAvatar: peerAvatar);
+  State createState() => new ChatScreenState(userId: userId, peerId: peerId, peerAvatar: peerAvatar);
 }
 
 class ChatScreenState extends State<ChatScreen> {
-  ChatScreenState({Key key, @required this.peerId, @required this.peerAvatar});
+  ChatScreenState({Key key, @required this.userId, @required this.peerId, @required this.peerAvatar});
 
   String peerId;
   String peerAvatar;
-  String id;
+  String userId;
 
   var listMessage;
   String groupChatId;
@@ -76,7 +81,8 @@ class ChatScreenState extends State<ChatScreen> {
     isShowSticker = false;
     imageUrl = '';
 
-    readLocal();
+    //Make group ID from userID and peerID
+    makeGroupId();
   }
 
   void onFocusChange() {
@@ -88,13 +94,11 @@ class ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  readLocal() async {
-    prefs = await SharedPreferences.getInstance();
-    id = prefs.getString('id') ?? '';
-    if (id.hashCode <= peerId.hashCode) {
-      groupChatId = '$id-$peerId';
+  makeGroupId() async {
+    if (userId.hashCode <= peerId.hashCode) {
+      groupChatId = '$userId-$peerId';
     } else {
-      groupChatId = '$peerId-$id';
+      groupChatId = '$peerId-$userId';
     }
 
     setState(() {});
@@ -144,16 +148,15 @@ class ChatScreenState extends State<ChatScreen> {
       textEditingController.clear();
 
       var documentReference = Firestore.instance
-          .collection('messages')
-          .document(groupChatId)
-          .collection(groupChatId)
-          .document(DateTime.now().millisecondsSinceEpoch.toString());
+          .collection('Messages')
+          .document();
 
       Firestore.instance.runTransaction((transaction) async {
         await transaction.set(
           documentReference,
           {
-            'idFrom': id,
+            'chatId': groupChatId,
+            'idFrom': userId,
             'idTo': peerId,
             'timestamp': DateTime.now().millisecondsSinceEpoch.toString(),
             'content': content,
@@ -167,8 +170,9 @@ class ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  //TODO: Clean widget tree so it's not so long and has less nesting
   Widget buildItem(int index, DocumentSnapshot document) {
-    if (document['idFrom'] == id) {
+    if (document['idFrom'] == userId) {
       // Right (my message)
       return Row(
         children: <Widget>[
@@ -247,17 +251,9 @@ class ChatScreenState extends State<ChatScreen> {
               children: <Widget>[
                 isLastMessageLeft(index)
                     ? Material(
-                        child: CachedNetworkImage(
-                          placeholder: (context, url) => Container(
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 1.0,
-                                  valueColor: AlwaysStoppedAnimation<Color>(themeColor),
-                                ),
-                                width: 35.0,
-                                height: 35.0,
-                                padding: EdgeInsets.all(10.0),
-                              ),
-                          imageUrl: peerAvatar,
+                        child: FadeInImage.assetNetwork(
+                          placeholder: PROFILE_PHOTO_PLACEHOLDER_PATH,
+                          image: buildPeerAvatar(),
                           width: 35.0,
                           height: 35.0,
                           fit: BoxFit.cover,
@@ -350,8 +346,18 @@ class ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  String buildPeerAvatar() {
+    String avatarURL = peerAvatar;
+
+    if (avatarURL == null) {
+      avatarURL = PROFILE_PHOTO_PLACEHOLDER_PATH;
+    }
+    
+    return avatarURL;
+  }
+
   bool isLastMessageLeft(int index) {
-    if ((index > 0 && listMessage != null && listMessage[index - 1]['idFrom'] == id) || index == 0) {
+    if ((index > 0 && listMessage != null && listMessage[index - 1]['idFrom'] == userId) || index == 0) {
       return true;
     } else {
       return false;
@@ -359,7 +365,7 @@ class ChatScreenState extends State<ChatScreen> {
   }
 
   bool isLastMessageRight(int index) {
-    if ((index > 0 && listMessage != null && listMessage[index - 1]['idFrom'] != id) || index == 0) {
+    if ((index > 0 && listMessage != null && listMessage[index - 1]['idFrom'] != userId) || index == 0) {
       return true;
     } else {
       return false;
@@ -592,14 +598,14 @@ class ChatScreenState extends State<ChatScreen> {
   }
 
   Widget buildListMessage() {
+    print(groupChatId);
     return Flexible(
       child: groupChatId == ''
           ? Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(themeColor)))
           : StreamBuilder(
               stream: Firestore.instance
-                  .collection('messages')
-                  .document(groupChatId)
-                  .collection(groupChatId)
+                  .collection('Messages')
+                  .where('chatId', isEqualTo: groupChatId)
                   .orderBy('timestamp', descending: true)
                   .limit(20)
                   .snapshots(),
@@ -611,7 +617,7 @@ class ChatScreenState extends State<ChatScreen> {
                   listMessage = snapshot.data.documents;
                   return ListView.builder(
                     padding: EdgeInsets.all(10.0),
-                    itemBuilder: (context, index) => buildItem(index, snapshot.data.documents[index]),
+                    itemBuilder: (context, index) => buildItem(index, listMessage[index]),
                     itemCount: snapshot.data.documents.length,
                     reverse: true,
                     controller: listScrollController,
