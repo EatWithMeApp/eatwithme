@@ -93,7 +93,8 @@ class _FriendsPageState extends State<FriendsPage> {
       ),
       padding: EdgeInsets.all(0.0),
       itemBuilder: (context, index) => Friend(
-          uid: getUidFromChatSnapshot(
+          userUid: currentUid,
+          friendUid: getUidFromChatSnapshot(
               chatSnapshot.data.documents[index], currentUid)),
       itemCount: chatSnapshot.data.documents.length,
 

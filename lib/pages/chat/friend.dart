@@ -1,14 +1,16 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eatwithme/pages/chat/chat.dart';
 import 'package:eatwithme/utils/constants.dart';
 import 'package:eatwithme/widgets/loadingCircle.dart';
 import 'package:flutter/material.dart';
 
 class Friend extends StatefulWidget {
-  final String uid;
+  final String userUid;
+  final String friendUid;
 
-  const Friend({Key key, @required this.uid}) : super(key: key);
+  const Friend({Key key, @required this.userUid, @required this.friendUid}) : super(key: key);
 
   @override
   _FriendState createState() => _FriendState();
@@ -54,7 +56,7 @@ class _FriendState extends State<Friend> {
     super.initState();
     _friendController.addStream(_firestore
         .collection('Users')
-        .document(widget.uid)
+        .document(widget.friendUid)
         .snapshots()
         .map((snap) => snap.data));
   }
@@ -119,14 +121,15 @@ class _FriendState extends State<Friend> {
                     ],
                   ),
                   onPressed: () {
-                    //TODO: link friends to go to chat
-                    // Navigator.push(
-                    //     context,
-                    //     MaterialPageRoute(
-                    //         builder: (context) => Chat(
-                    //               peerId: userProfile.documentID,
-                    //               peerAvatar: userProfile['photoUrl'],
-                    //             )));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => Chat(
+                                  userId: widget.userUid,
+                                  peerId: widget.friendUid,
+                                  peerAvatar: snapshot.data['photoURL'],
+                                  peerName: (snapshot.data['displayName'] != null) ? snapshot.data['displayName'] : snapshot.data['email'],
+                                )));
                   },
                   color: Colors.white,
                   padding: EdgeInsets.fromLTRB(10.0, 6.0, 0.0, 6.0),
