@@ -25,8 +25,10 @@ dependencies:
   cupertino_icons: ^0.1.2
   english_words: ^3.1.0
 
-  firebase_core: ^0.3.0
-  cloud_firestore: ^0.9.13+1
+  # firebase_core: ^0.3.0
+  # cloud_firestore: ^0.9.13+1
+  firebase_core: 
+  cloud_firestore:
 
   # To address AndroidX issues, go no higher than specifed https://goo.gl/CP92wY
   firebase_auth: 0.8.4+1

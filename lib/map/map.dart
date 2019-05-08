@@ -15,15 +15,17 @@ class MyMap extends StatefulWidget {
 class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
   Completer<GoogleMapController> _controller = Completer();
 
+  bool alreadyPushed = false;
   static const LatLng _center = const LatLng(45.521563, -122.677433);
   static const LatLng ANU = const LatLng(-35.2777, 149.1185);
+  // store the current location of the user
   double latitude;
   double longitude;
+  // store markers (pins)
   final Set<Marker> _markers = {};
   LatLng _lastMapPosition = _center;
   final List<userPosition> userPositions = [];
-  String currentUserName = "Ben";
-  Firestore firestore;
+  String currentUserName = "u6225609@anu.edu.au";
  
   void _onMapCreated(GoogleMapController controller) {
     _controller.complete(controller);
@@ -38,6 +40,7 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
       userPositions.add(user);
   }
 
+  // Log out button
   Future<void> _signOut(BuildContext context) async {
     try {
       await authService.signOut();
@@ -46,14 +49,15 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
     }
   }
 
+  // Initiate the state of Firebase
+  // Doesn't know whether it work
   Future<void> set_state() async{
     final FirebaseApp app = await FirebaseApp.configure(
-      name: 'EatWithMeIOS',
+      name: 'eatwithme',
       options: const FirebaseOptions(
         googleAppID: '1:1050553742489:ios:d582d6d5c13ccf2c',
         bundleID: 'com.eatwithme.eatwithme',
         projectID: 'eatwithme-c103e',
-        apiKey: 'AIzaSyB1dv4AdtCdmPraFPWowHmSXL9933Re1DI',
       ),
     );
     final firestore = Firestore(app: app);
@@ -62,19 +66,20 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
   
   // load data from Firebase
   Future<void> loadData() async{
+    pushLocation(latitude, longitude);
     double lat;
     double lng;
     String name;
     List interest;
     userPosition up;
-    QuerySnapshot sn = await Firestore.instance.collection('User_Location').getDocuments();
+    QuerySnapshot sn = await Firestore.instance.collection('Users').where("location", isEqualTo: GeoPoint(-35.2777, 149.118)).getDocuments();
     var list = sn.documents;
     Future.delayed(const Duration(milliseconds: 500));
-    await list.forEach((DocumentSnapshot ds) => {
-    name = ds.data['name'],
+    list.forEach((DocumentSnapshot ds) => {
+    name = ds.data['displayName'],
     lat = ds.data['location'].latitude,
     lng = ds.data['location'].longitude,
-    interest = ds.data['interest'],
+    interest = ds.data['interests'],
     getNewPosition(lat, lng),
     up = new userPosition(_lastMapPosition, name, interest),
     addUsers(up),
@@ -83,27 +88,29 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
     addMarker(name, _lastMapPosition, interest)
     }
     );
-    sn = null;
   }
 
+  // Use location package to get the location of the user
   Future<void> get_location() async{
+    do {
     var location = new Location();
     LocationData ld = await location.getLocation();
     location.onLocationChanged().listen((LocationData currentLocation) {
       latitude = currentLocation.latitude;
       longitude = currentLocation.longitude;
     });
+    } while ((latitude == null) || (longitude != null));
   }
 
-
-  bool alreadyPushed = false;
+  // Create a document to put user's name, user's interests
+  // and user's location in 
   Future<void> pushLocation(double latitude, double longitude) async{
     if (!alreadyPushed){
       var db = Firestore.instance;
       await db.collection('Users').add({
-        'name': currentUserName,
+        'displayName': currentUserName,
         'location': GeoPoint(latitude, longitude),
-        'interest': ['Hi', 'gogo'],
+        'interests': ['Hi', 'gogo'],
       }).then((val){
         print("Pushed success");
       }).catchError((err) {
@@ -113,11 +120,12 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
     }
     }
 
+  // update user's location in the firebase when the user moves
   Future<void> updateCurrentLocation(String name, String id) async{
     if ((currentUserName == name) & (id != null) & (alreadyPushed = true)){
       var db = Firestore.instance;
       if ((latitude != null) & (longitude != null)) {
-        db.collection("User_Location").document(id).updateData({
+        db.collection("Users").document(id).updateData({
           'location': new GeoPoint(latitude, longitude)
         });
         print("updateSuccesss");
@@ -125,6 +133,7 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
     }
   }
 
+  // add and update markers(pins), when name, interest, and location change
   void addMarker(String name, LatLng pos, List interest){
     if (name != currentUserName){
     setState(() {
@@ -140,12 +149,15 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
         infoWindow: InfoWindow(
           title: name,
         ),
-        icon: BitmapDescriptor.fromAsset("assets/orange.png")
+        icon: BitmapDescriptor.fromAsset("images/orange.png")
+        // icon: BitmapDescriptor.defaultMarker
       ));
     });
     }
   }
 
+  // These three functions are used to get a specific marker by a position
+  // name, or interest respectively
   Marker getMarkerByPos(LatLng pos){
     for (Marker m in _markers) {
       if (m.position == pos)
@@ -175,8 +187,7 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
   Widget build(BuildContext context) {
     set_state();
     get_location();
-    if ((longitude != null) & (latitude != null))
-      pushLocation(latitude, longitude);
+    pushLocation(latitude, longitude);
     loadData();
     return MaterialApp(
       home: Scaffold(

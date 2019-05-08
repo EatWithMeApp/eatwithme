@@ -12,22 +12,7 @@ import 'package:eatwithme/utils/matchFriends.dart';
 import 'package:eatwithme/map/map.dart';
 
 
-// void main() => runApp(new MyApp());
-
-Future<void> main() async{
-  final FirebaseApp app = await FirebaseApp.configure(
-    name: 'EatWithMeIOS',
-    options: const FirebaseOptions(
-      googleAppID: '1:1050553742489:ios:d582d6d5c13ccf2c',
-      bundleID: 'com.eatwithme.eatwithme',
-      projectID: 'eatwithme-c103e',
-    ),
-  );
-  final Firestore firestore = Firestore(app: app);
-  await firestore.settings(timestampsInSnapshotsEnabled: true);
-
-  runApp(MyApp());
-}
+void main() => runApp(new MyApp());
 
 class MyApp extends StatelessWidget {
   var routes = <String, WidgetBuilder>{
