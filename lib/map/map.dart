@@ -100,7 +100,7 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
   Future<void> pushLocation(double latitude, double longitude) async{
     if (!alreadyPushed){
       var db = Firestore.instance;
-      await db.collection('User_Location').add({
+      await db.collection('Users').add({
         'name': currentUserName,
         'location': GeoPoint(latitude, longitude),
         'interest': ['Hi', 'gogo'],
@@ -173,6 +173,7 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
 
   @override
   Widget build(BuildContext context) {
+    set_state();
     get_location();
     if ((longitude != null) & (latitude != null))
       pushLocation(latitude, longitude);
