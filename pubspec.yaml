@@ -52,6 +52,9 @@ dependencies:
   intl: ^0.15.7
 
   image_picker: 0.5.4
+  location: ^2.3.5
+
+  google_maps_flutter: ^0.5.12
 
 dev_dependencies:
   flutter_test:
