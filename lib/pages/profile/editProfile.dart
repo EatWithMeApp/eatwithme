@@ -9,12 +9,12 @@ import 'package:eatwithme/main.dart';
 import 'package:eatwithme/widgets/loadingCircle.dart';
 import 'package:eatwithme/pages/auth/auth.dart';
 
-class ProfilePage extends StatefulWidget {
+class EditProfilePage extends StatefulWidget {
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends State<EditProfilePage> {
   String uID = 'XAozq9M5DqTgs7TVL1G3JI4Rbns2';
   final Firestore _firestore = Firestore.instance;
   final StreamController _profileController = StreamController();
@@ -95,8 +95,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                 alignment: Alignment(-1.0, 0.0),
                               ),
                               Container(
-                                child: Text(
-                                  usersSnapshot.data['aboutMe'],
+                                child: TextField(
+                                  maxLength: 250,
+                                  maxLengthEnforced: true,
                                 ),
                               ),
                               Container(
@@ -134,17 +135,16 @@ class _ProfilePageState extends State<ProfilePage> {
                                       })),
                               Container(
                                 padding: EdgeInsets.only(top: 25.0),
-                                child: TextField(
-                                  maxLength: 150,
-                                  maxLengthEnforced: true,
-                                  controller: _chatController,
-                                  onSubmitted:
-                                      SendChat(uID, _chatController.text),
-                                  decoration: InputDecoration(
-                                      labelText: 'Say Hi!',
-                                      border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(25.0))),
+                                width: 200.0,
+                                child: RaisedButton
+                                (
+                                  elevation: 5.0,
+                                  color: Colors.grey,
+                                  child: Text('Sign Out'),
+                                  onPressed: ()
+                                  {
+                                    submitProfileChanges();
+                                  },
                                 ),
                               )
                             ],
@@ -156,11 +156,6 @@ class _ProfilePageState extends State<ProfilePage> {
                         left: imgXPos,
                         height: imgHeight,
                         width: imgWidth,
-                        child: GestureDetector(
-                          onTap: ()
-                          {
-                            enlargeImage();
-                          },
                           child: Material(
                             child: showProfilePhoto(
                                 usersSnapshot.data['photoURL']),
@@ -168,6 +163,21 @@ class _ProfilePageState extends State<ProfilePage> {
                                 BorderRadius.all(Radius.circular(100.0)),
                             clipBehavior: Clip.hardEdge,
                           ),
+                      ),
+                      Positioned
+                      (
+                        top: imgYPos + 150.0,
+                        left: imgXPos + 150.0,
+                        child: RaisedButton
+                        (
+                          elevation: 5.0,
+                          color: Colors.orange,
+                          child: Text('Edit Picture'),
+                          onPressed: ()
+                          {
+                            //TODO: Get an image picker and upload to firebase
+                            changeProfilePicture();
+                          },
                         ),
                       ),
                     ],
@@ -183,9 +193,14 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 }
 
-enlargeImage()
+submitProfileChanges()
 {
   //TODO find out a way to blow up image size
+}
+
+changeProfilePicture()
+{
+
 }
 
 SendChat(String recipientUID, String message) {
