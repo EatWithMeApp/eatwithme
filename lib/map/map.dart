@@ -6,6 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:location/location.dart';
 import 'package:eatwithme/map/animationButton.dart';
+import 'package:eatwithme/map/visitingCard.dart';
 
 class MyMap extends StatefulWidget {
   @override
@@ -83,7 +84,6 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
     getNewPosition(lat, lng),
     up = new userPosition(_lastMapPosition, name, interest),
     addUsers(up),
-    print(name),
     updateCurrentLocation(name, ds.documentID),
     addMarker(name, _lastMapPosition, interest)
     }
@@ -133,6 +133,7 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
     }
   }
 
+  bool tapped = false;
   // add and update markers(pins), when name, interest, and location change
   void addMarker(String name, LatLng pos, List interest){
     if (name != currentUserName){
@@ -146,9 +147,7 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
       _markers.add(Marker(
         markerId: MarkerId(name),
         position: pos,
-        infoWindow: InfoWindow(
-          title: name,
-        ),
+        onTap: () => changeTapped(),
         icon: BitmapDescriptor.fromAsset("images/orange.png")
         // icon: BitmapDescriptor.defaultMarker
       ));
@@ -183,6 +182,34 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
     _lastMapPosition = new LatLng(lat, lng);
   }
 
+  Widget showVisitingCard() {
+    if (tapped) {
+      return Align(
+              alignment: Alignment(0, -0.28),
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: visitingCard(),
+              ),
+            );
+    }
+    else {
+      return Align(
+              alignment: Alignment(100, 100),
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: visitingCard(),
+              ),
+            );
+    }
+  }
+
+  void changeTapped(){
+    if (tapped)
+      tapped = false;
+    else
+      tapped = true;
+  }
+
   @override
   Widget build(BuildContext context) {
     set_state();
@@ -205,7 +232,7 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
           ),
         ),
         body: Stack(
-          alignment: AlignmentDirectional.bottomEnd,
+          alignment: Alignment.bottomLeft,
           children: <Widget>[
             GoogleMap(
               onMapCreated: _onMapCreated,
@@ -220,12 +247,10 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
               markers: _markers,
               onCameraMove: _onCameraMove,
             ),
-            SafeArea(
-              child: AnimationButton(),
-            ),
+            AnimationButton(),
+            showVisitingCard()
           ],
         ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       ),
     );
   }

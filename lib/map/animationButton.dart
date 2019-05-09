@@ -102,8 +102,8 @@ class ButtonState extends State<AnimationButton> with TickerProviderStateMixin{
       alignment: AlignmentDirectional.bottomEnd,
       children: <Widget>[
         _buildButton(-90, color: Colors.black),
-        _buildButton(180, color: Colors.red),
-        _buildButton(225, color: Colors.orange),
+        _buildButton(0, color: Colors.red),
+        _buildButton(-45, color: Colors.orange),
         toggle(),
       ],
     );
