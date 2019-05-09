@@ -10,6 +10,7 @@ import 'package:eatwithme/pages/intro/splash_screen.dart';
 import 'package:eatwithme/pages/intro/intro_screen.dart';
 import 'package:eatwithme/utils/matchFriends.dart';
 import 'package:eatwithme/map/map.dart';
+import 'package:eatwithme/map/visitingCard.dart';
 
 
 void main() => runApp(new MyApp());
@@ -26,7 +27,7 @@ class MyApp extends StatelessWidget {
       title: APP_TITLE,
       theme: themeLight(),
       routes: routes,
-      home: SplashScreen(),
+      home: visitingCard(),
     );
   }
 }
