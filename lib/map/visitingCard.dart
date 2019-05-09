@@ -4,52 +4,59 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class visitingCard extends StatefulWidget{
   @override
   _animationCard createState() => _animationCard();
-
 }
 
 class _animationCard extends State<visitingCard> with TickerProviderStateMixin{
-
   String displayName = "";
   List<dynamic> interestss;
   List<dynamic> interests = [];
+  bool pressed = false;
+  double _height = 60.0;
+  double _width = 350.0;
   var photoUrl;
-  AnimationController _animationController;
+  AnimationController controller;
+  Animation<double> animation;
 
-  @override
-  initState() {
-    super.initState();
-    _animationController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 500))
-          ..addListener(() {
-            setState(() {});
-          });
-  }
-
-Widget buildCard(displayName, interests){
-  Widget card = new Container(
-    color: Colors.white,
-    child: new ListTile(
-            onTap: () => print('hi'),
+Widget buildcard(displayName, interests){
+  String showName = displayName;
+  var showInterest = interests;
+  Widget card = new AnimatedSize(
+    curve: Curves.fastOutSlowIn,
+    duration: const Duration(seconds: 1),
+    vsync: this,      
+      child: new Container(
+        color: Colors.white,
+        width: _width,
+        height: _height,
+        child: new ListTile(
+            onTap: () => {
+              setState(() {          
+                if (pressed){
+                  pressed = false;
+                  _height = 10;
+                  _width = 10;
+                  showName = "";
+                  showInterest = [];
+                } else {
+                  pressed = true;
+                  _height = 60.0;
+                  _width = 350.0;
+                  showName = displayName;
+                  showInterest = interests;
+                }
+                })
+            },
             onLongPress: () => {},
             leading: CircleAvatar(
               backgroundImage: NetworkImage('https://i.stack.imgur.com/Dw6f7.png'),
             ),
-            title: Text(displayName),
-            subtitle: Text(interests.toString()),
+            title: Text(showName),
+            subtitle: Text(showInterest.toString()),
           ),
-  );
+      ),
+    );
   return card;
 }
-
-// new ListTile(
-//             onTap: () => {},
-//             onLongPress: () => {},
-//             leading: CircleAvatar(
-//               backgroundImage: NetworkImage('https://i.stack.imgur.com/Dw6f7.png'),
-//             ),
-//             title: Text(displayName),
-//             subtitle: Text(interests.toString()),
-//           );
 
 Widget _buildBody(BuildContext context, String name) {
  return StreamBuilder<QuerySnapshot>(
@@ -62,13 +69,14 @@ Widget _buildBody(BuildContext context, String name) {
        interestss = ds.data['interests'],
       //  photoUrl = ds.data['photoUrl']
      });
-     return buildCard(displayName, interestss);
+     return buildcard(displayName, interestss);
    },
  );
 }
 
   @override
   Widget build(BuildContext context) {
+    // return _buildBody(context, 'u6225609');
     return _buildBody(context, 'u6225609');
   }
 }
