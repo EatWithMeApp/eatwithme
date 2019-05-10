@@ -134,6 +134,7 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
   }
 
   bool tapped = false;
+  bool pressed = false;
   // add and update markers(pins), when name, interest, and location change
   void addMarker(String name, LatLng pos, List interest){
     if (name != currentUserName){
@@ -147,8 +148,20 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
       _markers.add(Marker(
         markerId: MarkerId(name),
         position: pos,
-        onTap: () => changeTapped(),
-        icon: BitmapDescriptor.fromAsset("images/orange.png")
+        onTap: () => {
+          setState(() {          
+                if (pressed){
+                  pressed = false;
+                  _height = 60;
+                  _width = 0;
+                } else {
+                  pressed = true;
+                  _height = 60.0;
+                  _width = 350.0;
+                }
+                })
+        },
+        icon: BitmapDescriptor.fromAsset("images/head_picture_u6225609.png")
         // icon: BitmapDescriptor.defaultMarker
       ));
     });
@@ -182,32 +195,41 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
     _lastMapPosition = new LatLng(lat, lng);
   }
 
+  // Below is animation part
   Widget showVisitingCard() {
-    if (tapped) {
+    if (pressed){
       return Align(
-              alignment: Alignment(0, -0.28),
-              child: Padding(
-                padding: EdgeInsets.all(20),
-                child: visitingCard(),
-              ),
-            );
-    }
-    else {
+        alignment: Alignment(0,-0.25),
+        child: Padding(
+          padding: EdgeInsets.all(20),
+          child: showCard(),
+        ),
+      );
+    } else {
       return Align(
-              alignment: Alignment(100, 100),
-              child: Padding(
-                padding: EdgeInsets.all(20),
-                child: visitingCard(),
-              ),
-            );
+        alignment: Alignment(0,100),
+        child: Padding(
+          padding: EdgeInsets.all(20),
+          child: showCard(),
+        ),
+      );
     }
   }
-
-  void changeTapped(){
-    if (tapped)
-      tapped = false;
-    else
-      tapped = true;
+  
+  double _height = 60.0;
+  double _width = 0;
+  Widget showCard() {
+    return new AnimatedSize(
+      curve: Curves.linear,
+      duration: const Duration(seconds: 1),
+      vsync: this,      
+      child: new Container(
+        color: Colors.white,
+        width: _width,
+        height: _height,
+        child: visitingCard(),
+      ),
+    );
   }
 
   @override
@@ -248,7 +270,7 @@ class _MyAppState extends State<MyMap> with TickerProviderStateMixin{
               onCameraMove: _onCameraMove,
             ),
             AnimationButton(),
-            showVisitingCard()
+            SafeArea(child: showVisitingCard(),)
           ],
         ),
       ),

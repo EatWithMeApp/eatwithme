@@ -8,53 +8,27 @@ class visitingCard extends StatefulWidget{
 
 class _animationCard extends State<visitingCard> with TickerProviderStateMixin{
   String displayName = "";
-  List<dynamic> interestss;
-  List<dynamic> interests = [];
-  bool pressed = false;
-  double _height = 60.0;
-  double _width = 350.0;
+  List<dynamic> interests = [];  
   var photoUrl;
-  AnimationController controller;
-  Animation<double> animation;
 
-Widget buildcard(displayName, interests){
-  String showName = displayName;
-  var showInterest = interests;
-  Widget card = new AnimatedSize(
-    curve: Curves.fastOutSlowIn,
-    duration: const Duration(seconds: 1),
-    vsync: this,      
-      child: new Container(
-        color: Colors.white,
-        width: _width,
-        height: _height,
-        child: new ListTile(
-            onTap: () => {
-              setState(() {          
-                if (pressed){
-                  pressed = false;
-                  _height = 10;
-                  _width = 10;
-                  showName = "";
-                  showInterest = [];
-                } else {
-                  pressed = true;
-                  _height = 60.0;
-                  _width = 350.0;
-                  showName = displayName;
-                  showInterest = interests;
-                }
-                })
-            },
-            onLongPress: () => {},
-            leading: CircleAvatar(
-              backgroundImage: NetworkImage('https://i.stack.imgur.com/Dw6f7.png'),
-            ),
-            title: Text(showName),
-            subtitle: Text(showInterest.toString()),
-          ),
-      ),
-    );
+String showInterest(){
+  String s = "";
+  for (String i in interests){
+    s += i + ", ";
+  }
+  return s;
+}
+
+Widget buildCard(displayName, interests) {
+  Widget card = new ListTile(
+    onTap: () => {},
+    onLongPress: () => {},
+    leading: CircleAvatar(
+      backgroundImage: new AssetImage("images/head_picture_u6225609.png"),
+    ),
+    title: Text(displayName),
+    subtitle: Text(showInterest()),
+  );
   return card;
 }
 
@@ -66,17 +40,16 @@ Widget _buildBody(BuildContext context, String name) {
      var name = snapshot.data.documents;
      name.forEach((DocumentSnapshot ds) => {
        displayName = ds.data['displayName'],
-       interestss = ds.data['interests'],
+       interests = ds.data['interests'],
       //  photoUrl = ds.data['photoUrl']
      });
-     return buildcard(displayName, interestss);
+     return buildCard(displayName, interests);
    },
  );
 }
 
   @override
   Widget build(BuildContext context) {
-    // return _buildBody(context, 'u6225609');
     return _buildBody(context, 'u6225609');
   }
 }
