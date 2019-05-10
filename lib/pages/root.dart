@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:eatwithme/pages/login/verify.dart';
+import 'package:eatwithme/pages/map/map2.dart';
 import 'package:eatwithme/widgets/loadingCircle.dart';
 import 'package:flutter/material.dart';
 import 'package:eatwithme/pages/auth/auth.dart';
@@ -27,7 +28,9 @@ class RootPage extends StatelessWidget {
                 Widget screen = VerifyPage();
 
                 // screen = (snapshot.data.isEmailVerified) ? HomePage() : VerifyPage();
-                screen = (snapshot.data.isEmailVerified) ? MyMap() : VerifyPage();
+                // screen = (snapshot.data.isEmailVerified) ? MyMap() : VerifyPage();
+                screen = (snapshot.data.isEmailVerified) ? Map2() : VerifyPage();
+
 
                 return screen;
               }
