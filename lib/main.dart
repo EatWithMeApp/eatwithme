@@ -9,6 +9,7 @@ import 'package:eatwithme/pages/intro/splash_screen.dart';
 import 'package:eatwithme/pages/intro/intro_screen.dart';
 import 'package:eatwithme/utils/matchFriends.dart';
 import 'package:eatwithme/pages/profile/editProfile.dart';
+import 'package:eatwithme/pages/interests/interets.dart';
 
 void main() => runApp(new MyApp());
 
@@ -24,8 +25,9 @@ class MyApp extends StatelessWidget {
       title: APP_TITLE,
       theme: themeLight(),
       routes: routes,
-      home: EditProfilePage(),
+      //home: EditProfilePage(),
       //home: ProfilePage(),
+      home: Interests(),
     );
   }
 }

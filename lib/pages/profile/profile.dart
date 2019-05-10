@@ -74,7 +74,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               Container(
                                 height: 160.0,
                                 width: 500.0,
-                                color: Colors.grey,
+                                color: Color(0xFF333333),
                                 child: Text(
                                   usersSnapshot.data['displayName'],
                                   style: TextStyle(
