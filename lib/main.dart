@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
       theme: themeLight(),
       routes: routes,
       home: EditProfilePage(),
-      //home: ProfilePage();
+      //home: ProfilePage(),
     );
   }
 }

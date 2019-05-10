@@ -57,8 +57,10 @@ class _ProfilePageState extends State<ProfilePage> {
               break;
             case ConnectionState.active:
               if (usersSnapshot.hasData) {
-                return Scaffold(
-                  body: Stack(
+                //return Scaffold(
+                return ListView(
+                  children: <Widget>[
+                  Stack(
                     children: <Widget>[
                       Column(
                         children: <Widget>[
@@ -95,6 +97,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 alignment: Alignment(-1.0, 0.0),
                               ),
                               Container(
+                                height: 110.0,
                                 child: Text(
                                   usersSnapshot.data['aboutMe'],
                                 ),
@@ -172,6 +175,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ],
                   ),
+                  ],
                 );
               } else {
                 //Shouldn't reach here, but assume no chats instead of broken
