@@ -1,5 +1,7 @@
 
 //Strings
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 const String APP_TITLE = "EatWithMe";
 const String PROFILE_PHOTO_PLACEHOLDER_PATH = "images/profile_placeholder.png";
 const String NO_ACTIVE_CHATS = 'You have no active chats right now - go make some connections on the map!';
@@ -21,6 +23,10 @@ const String wc4 =
 const String skip = "SKIP";
 const String next = "NEXT";
 const String gotIt = "GOT IT";
+
+//Geopoints
+const LatLng GeoPointANU = const LatLng(-35.2777, 149.1185);
+
 //Margins
 /* 
 Examples from https://www.driftycode.com/flutter-global-constants-for-the-complete-project/
