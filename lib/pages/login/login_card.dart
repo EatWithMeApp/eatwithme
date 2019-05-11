@@ -80,6 +80,9 @@ class _LoginCardState extends State<LoginCard>
         (_formType == FormType.login)
             ? await authService.login(_email, _password)
             : await authService.signUp(_email, _password);
+
+        // Drop focus and get rid of the keyboard
+        FocusScope.of(context).requestFocus(new FocusNode());   
       } on VerificationException catch (e) {
         ErrorToast.show('Please verify this email address');
       } on PlatformException catch (e) {

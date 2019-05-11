@@ -27,7 +27,10 @@ class LoginBackground extends StatelessWidget {
                     child: SizedBox(
                         height: deviceSize.height / 8,
                         width: deviceSize.width / 2,
-                        child: Image.asset('images/EatWithMeGuy.png')),
+                        child: Hero(
+                          tag: 'EatWithMeLogin',
+                          child: Image.asset('images/EatWithMeGuy.png'), 
+                        )),
                   )
                 : new Container(
                     width: double.infinity,
