@@ -3,12 +3,18 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math.dart' show radians;
 
-class AnimationButton extends StatefulWidget{
+class AnimationButton extends StatefulWidget {   
+  final VoidCallback button1;
+  final VoidCallback button2;
+  final VoidCallback button3;
+
+  const AnimationButton({Key key, this.button1, this.button2, this.button3}) : super(key: key);
+
   @override
   ButtonState createState() => ButtonState();
 }
 
-class ButtonState extends State<AnimationButton> with TickerProviderStateMixin{
+class ButtonState extends State<AnimationButton> with TickerProviderStateMixin {
   bool isOpened = false;
   double _fabHeight = 56.0;
   Animation<double> _translateButton;
@@ -20,7 +26,7 @@ class ButtonState extends State<AnimationButton> with TickerProviderStateMixin{
   @override
   initState() {
     _animationController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 500))
+        AnimationController(vsync: this, duration: Duration(milliseconds: 200))
           ..addListener(() {
             setState(() {});
           });
@@ -48,6 +54,11 @@ class ButtonState extends State<AnimationButton> with TickerProviderStateMixin{
         curve: _curve,
       ),
     ));
+        
+    // widget.button1 = VoidCallback(_translateButton, 225, color: Colors.orange);
+    // widget.button2 = VoidCallback(_translateButton, 180, color: Colors.red);
+    // widget.button3 = VoidCallback(_translateButton, -90, color: Colors.black);
+
     super.initState();
   }
 
@@ -72,41 +83,84 @@ class ButtonState extends State<AnimationButton> with TickerProviderStateMixin{
         backgroundColor: Colors.orange,
         onPressed: animate,
         tooltip: 'Toggle',
-        child: AnimatedIcon(
-          icon: AnimatedIcons.home_menu,
-          progress: _animateIcon,
-        ),
+        // child: AnimatedIcon(
+        //   icon: AnimatedIcons.home_menu,
+        //   progress: _animateIcon,
+        // ),
+        //TODO: Animate EatWithMeGuy when clicked
+        child: Hero(
+            tag: 'EatWithMeLogin',
+            child: Image.asset(
+              'images/EatWithMeGuy.png',
+              width: 45.0,
+            )),
       ),
     );
   }
 
-  _buildButton(double angle, {Color color, IconData icon}) {
-      final double rad = radians(angle);
-      return Transform(
-        transform: Matrix4.identity()..translate(
-          (_translateButton.value) * cos(rad), 
-          (_translateButton.value) * sin(rad)
-        ),
-        child: FloatingActionButton(
-          child: Icon(icon), 
-          backgroundColor: color, 
-          onPressed: (){}, 
-          elevation: 0
-          )
-      );
-    }
+  // _buildButton(double angle, {Color color, IconData icon}) {
+  //   final double rad = radians(angle);
+  //   return Transform(
+  //       transform: Matrix4.identity()
+  //         ..translate((_translateButton.value) * cos(rad),
+  //             (_translateButton.value) * sin(rad)),
+  //       child: FloatingActionButton(
+  //           child: Icon(icon),
+  //           backgroundColor: color,
+  //           onPressed: () {},
+  //           elevation: 0));
+  // }
 
   @override
   Widget build(BuildContext context) {
     return new Stack(
+      fit: StackFit.passthrough,
+      overflow: Overflow.visible,
       alignment: AlignmentDirectional.bottomEnd,
       children: <Widget>[
-        _buildButton(-90, color: Colors.black),
-        _buildButton(180, color: Colors.red),
-        _buildButton(225, color: Colors.orange),
+        FancyButton(_translateButton, -90, Colors.black, Icons.account_circle, widget.button3,),
+        //FancyButton(_translateButton, 180, color: Colors.red),
+        //FancyButton(_translateButton, 225, color: Colors.orange),
         toggle(),
       ],
     );
+  }
+}
+
+abstract class UseFunction {
+  void onClick();
+}
+
+class FancyButton extends StatelessWidget {
+  final Animation<double> translateButton;
+  final double angle;
+  final Color color;
+  final IconData icon;
+  
+  final VoidCallback onClick;
+
+  FancyButton(this.translateButton, this.angle, this.color, this.icon, this.onClick);
+  // {
+  //   this.translateButton = translateButton;
+  //   this.angle = angle;
+  //   this.color = color;
+  //   this.icon = icon;
+  //   this.onClick = onClick;
+  // }
+  
+  @override
+  Widget build(BuildContext context) {
+    final double rad = radians(angle);
+    return Transform(
+        transform: Matrix4.identity()
+          ..translate((translateButton.value) * cos(rad),
+              (translateButton.value) * sin(rad)),
+        child: FloatingActionButton(
+            child: Icon(icon),
+            backgroundColor: color,
+            // onPressed: () => onClick.onClick(),
+            onPressed: () {print('Fuck you');},
+            elevation: 0));
   }
 
 }

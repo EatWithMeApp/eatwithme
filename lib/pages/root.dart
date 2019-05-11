@@ -13,13 +13,13 @@ import 'package:eatwithme/pages/login/login.dart';
 
 class RootPage extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {   
+  Widget build(BuildContext context) {
     // authService.signOut();
     return StreamBuilder(
         stream: authService.user,
-        builder: (context, snapshot) {         
+        builder: (context, snapshot) {
           final bool uidLoaded = authService.currentUid != null;
-          if (snapshot.connectionState == ConnectionState.active) {           
+          if (snapshot.connectionState == ConnectionState.active) {
             final bool isLoggedIn = snapshot.hasData;
             if (isLoggedIn) {
               // Wait for user to be made/logged in, then show home
@@ -29,8 +29,8 @@ class RootPage extends StatelessWidget {
 
                 // screen = (snapshot.data.isEmailVerified) ? HomePage() : VerifyPage();
                 // screen = (snapshot.data.isEmailVerified) ? MyMap() : VerifyPage();
-                screen = (snapshot.data.isEmailVerified) ? Map2() : VerifyPage();
-
+                screen =
+                    (snapshot.data.isEmailVerified) ? Map2() : VerifyPage();
 
                 return screen;
               }
@@ -38,6 +38,12 @@ class RootPage extends StatelessWidget {
               return LoginPage();
             }
             // return isLoggedIn ? MyMap() : LoginPage();
+          }
+
+          if (snapshot.hasData) {
+            // To reach here, we are logged in but in some sort of stuck state
+            // so flush it out by forcing the log out
+            authService.signOut();
           }
           return _buildWaitingScreen();
         });
