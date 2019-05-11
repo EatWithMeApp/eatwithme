@@ -1,6 +1,7 @@
 // Adapted from https://github.com/fireship-io/167-flutter-geolocation-firestore/blob/master/lib/main.dart
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eatwithme/pages/auth/auth.dart';
@@ -8,6 +9,7 @@ import 'package:eatwithme/pages/map/animationButton.dart';
 import 'package:eatwithme/theme/eatwithme_theme.dart';
 import 'package:eatwithme/utils/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:rxdart/rxdart.dart';
@@ -122,7 +124,7 @@ class _Map2State extends State<Map2> {
     });
   }
 
-  _updateUserLocation(LocationData data) async {
+  void _updateUserLocation(LocationData data) async {
     // var pos = await userLocation.getLocation();
     // GeoFirePoint point =
     //     geo.point(latitude: pos.latitude, longitude: pos.longitude);
@@ -139,7 +141,9 @@ class _Map2State extends State<Map2> {
 
     print('distance: ' + distance.toString());
 
-    if (distance <= 0.0) return null;
+    // if (distance <= 0.0) return null;
+
+    if (authService.currentUid == null) return null;
 
     previousUserLocation = point;
 
@@ -194,14 +198,28 @@ class _Map2State extends State<Map2> {
       _firestore.collection('Users').document(uid).get().then((snap) {
         var userData = snap.data;
 
+        // var x = FadeInImage.assetNetwork(
+        //   image: userData['photoURL'],
+        //   placeholder: PROFILE_PHOTO_PLACEHOLDER_PATH,
+        // ).image;
+
         var marker = Marker(
             markerId: MarkerId(uid),
-            icon: BitmapDescriptor.defaultMarker,
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+                BitmapDescriptor.hueOrange),
             position: LatLng(pos.latitude, pos.longitude),
             draggable: false,
+            zIndex: 3.0,
+            infoWindow: InfoWindow(
+              title: userData['displayName'],
+            ),
             onTap: () {
-              print('Update me with widget card');
-              print(userData['displayName']);
+              // print('Update me with widget card');
+              // print(userData['displayName']);
+              showModalBottomSheet<void>(
+                  context: context, builder: (BuildContext context) {
+                    return Text("Show profile page here");
+                  });
             });
 
         _markers.add(marker);
@@ -222,7 +240,7 @@ class _Map2State extends State<Map2> {
     //SignOutFunction button3;
 
     var button3 = () {
-      print('Fuck you');
+      print('');
     };
 
     var animationButton = AnimationButton(
