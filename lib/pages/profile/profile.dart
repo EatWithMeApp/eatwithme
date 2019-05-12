@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:core';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eatwithme/theme/eatwithme_theme.dart';
 import 'package:eatwithme/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:eatwithme/pages/interests/interests.dart';
@@ -13,7 +14,7 @@ class ProfilePage extends StatefulWidget {
   final String uid;
 
   const ProfilePage({Key key, this.uid}) : super(key: key);
-  
+
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
@@ -62,125 +63,114 @@ class _ProfilePageState extends State<ProfilePage> {
               break;
             case ConnectionState.active:
               if (usersSnapshot.hasData) {
-                //return Scaffold(
-                return ListView(
+                // return Scaffold(
+                // return ListView(
+                //   children: <Widget>[
+                return Stack(
                   children: <Widget>[
-                    Stack(
+                    Column(
                       children: <Widget>[
-                        Column(
-                          children: <Widget>[
-                            Container(
-                              height: 114.0,
-                            ),
-                            Card(
+                        Container(
+                          height: 0.0,
+                        ),
+                        Container(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.max,
+                            children: <Widget>[
+                              Container(
+                                height: 100.0,
+                                width: 500.0,
+                                color: Color(0xFF333333),
+                                child: Text(
+                                  (usersSnapshot.data['displayName'] ??
+                                      usersSnapshot.data['email']
+                                          .toString()
+                                          .split('@')[0]
+                                          .trim()),
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 30.0,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                alignment: Alignment(0.0, 1.0),
+                              ),
+                              SizedBox(
+                                height: 25.0,
+                              ),
+                              Container(
+                                child: Text(
+                                  'About',
+                                  style: TextStyle(
+                                      fontSize: 20.0,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                alignment: Alignment(-1.0, 0.0),
+                              ),
+                              Container(
+                                // height: 110.0,
+                                padding: EdgeInsets.only(
+                                  top: 10.0,
+                                ),
+                                constraints: BoxConstraints(
+                                    maxHeight: 90.0,
+                                    minHeight: 40.0,
+                                    maxWidth: double.infinity,
+                                    minWidth: double.infinity),
+                                child: Text(
+                                  (usersSnapshot.data['aboutMe'] ??
+                                      '(Not provided)'),
+                                ),
+                              ),
+                              Container(
+                                alignment: Alignment(0.0, 0.7),
                                 child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                Container(
-                                  height: 160.0,
-                                  width: 500.0,
-                                  color: Color(0xFF333333),
-                                  child: Text(
-                                    (usersSnapshot.data['displayName'] ?? usersSnapshot.data['email'].toString().split('@')[0]),
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 30.0,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  alignment: Alignment(0.0, 1.0),
+                                  children: <Widget>[
+                                    Container(
+                                      padding: EdgeInsets.only(top: 10.0),
+                                      child: Text(
+                                        'Interests',
+                                        style: TextStyle(
+                                            fontSize: 20.0,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      alignment: Alignment(-1.0, 0.0),
+                                    ),
+                                    InterestsList(
+                                      interests:
+                                          List.of(usersSnapshot.data['interests']),
+                                    ),
+                                  ],
                                 ),
-                                SizedBox(
-                                  height: 25.0,
-                                ),
-                                Container(
-                                  child: Text(
-                                    'About',
-                                    style: TextStyle(
-                                        fontSize: 20.0,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  alignment: Alignment(-1.0, 0.0),
-                                ),
-                                Container(
-                                  height: 110.0,
-                                  child: Text(
-                                    (usersSnapshot.data['aboutMe'] ?? ''),
-                                  ),
-                                ),
-                                Container(
-                                  padding: EdgeInsets.only(top: 10.0),
-                                  child: Text(
-                                    'Interests',
-                                    style: TextStyle(
-                                        fontSize: 20.0,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  alignment: Alignment(-1.0, 0.0),
-                                ),
-                                Container(
-                                    height: 75.0,
-                                    child: ListView.builder(
-                                        scrollDirection: Axis.horizontal,
-                                        itemCount: List.of(
-                                                usersSnapshot.data['interests'])
-                                            .length,
-                                        itemBuilder:
-                                            (BuildContext context, int index) {
-                                          return ButtonBar(
-                                            alignment: MainAxisAlignment.start,
-                                            children: <Widget>[
-                                              RaisedButton(
-                                                onPressed: null,
-                                                elevation: 5.0,
-                                                child: Text('#' +
-                                                    List.of(usersSnapshot
-                                                            .data['interests'])
-                                                        .elementAt(index)),
-                                              ),
-                                            ],
-                                          );
-                                        })),
-                                Container(
-                                  padding: EdgeInsets.only(top: 25.0),
-                                  child: TextField(
-                                    maxLength: 150,
-                                    maxLengthEnforced: true,
-                                    controller: _chatController,
-                                    onSubmitted:
-                                        SendChat(uID, _chatController.text),
-                                    decoration: InputDecoration(
-                                        labelText: 'Say Hi!',
-                                        border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(25.0))),
-                                  ),
-                                )
-                              ],
-                            )),
-                          ],
-                        ),
-                        Positioned(
-                          top: imgYPos,
-                          left: imgXPos,
-                          height: imgHeight,
-                          width: imgWidth,
-                          child: GestureDetector(
-                            onTap: () {
-                              enlargeImage();
-                            },
-                            child: Material(
-                              child: showProfilePhoto(
-                                  usersSnapshot.data['photoURL']),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(100.0)),
-                              clipBehavior: Clip.hardEdge,
-                            ),
+                              ),
+                              SizedBox(
+                                height: 25.0,
+                              ),
+                              Container(
+                                child: ChatboxLink(uID: uID),
+                                alignment: Alignment(0.0, 1.0),
+                              )
+                            ],
                           ),
-                        ),
+                        )
+                        // Card(
+                        //   // clipBehavior: Clip.none,
+
+                        //   child:
+
+                        //   ),
                       ],
                     ),
+                    // UserImage(
+                    //   imgYPos: imgYPos,
+                    //   imgXPos: imgXPos,
+                    //   imgHeight: imgHeight,
+                    //   imgWidth: imgWidth,
+                    //   photoURL: usersSnapshot.data['photoURL'],
+                    // ),
                   ],
                 );
+                // ],
+                // );
               } else {
                 //Shouldn't reach here, but assume no chats instead of broken
                 return noActiveProfile();
@@ -188,6 +178,95 @@ class _ProfilePageState extends State<ProfilePage> {
               break;
           }
         });
+  }
+}
+
+class InterestsList extends StatelessWidget {
+  const InterestsList({
+    Key key,
+    @required this.interests,
+  }) : super(key: key);
+
+  final List<dynamic> interests;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        height: 50.0,
+        child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: interests.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Chip(
+                label: Text('#' + interests.elementAt(index).toString()),
+              );
+            }));
+  }
+}
+
+class ChatboxLink extends StatelessWidget {
+  const ChatboxLink({
+    Key key,
+    @required this.uID,
+  }) : super(key: key);
+
+  final String uID;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+        // padding: EdgeInsets.only(top: 25.0),
+        height: 40.0,
+        width: double.infinity,
+        child: RaisedButton(
+          onPressed: () {
+            //TODO: Go to chat
+          },
+          color: themeLight().primaryColor,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0)),
+          child: Text(
+            'Say hi!',
+            style: TextStyle(fontSize: 20.0),
+          ),
+        ));
+  }
+}
+
+class UserImage extends StatelessWidget {
+  const UserImage({
+    Key key,
+    @required this.photoURL,
+    @required this.imgYPos,
+    @required this.imgXPos,
+    @required this.imgHeight,
+    @required this.imgWidth,
+  }) : super(key: key);
+
+  final String photoURL;
+  final double imgYPos;
+  final double imgXPos;
+  final double imgHeight;
+  final double imgWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: imgYPos,
+      left: imgXPos,
+      height: imgHeight,
+      width: imgWidth,
+      child: GestureDetector(
+        onTap: () {
+          enlargeImage();
+        },
+        child: Material(
+          child: showProfilePhoto(photoURL),
+          borderRadius: BorderRadius.all(Radius.circular(100.0)),
+          clipBehavior: Clip.hardEdge,
+        ),
+      ),
+    );
   }
 }
 

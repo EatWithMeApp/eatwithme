@@ -85,10 +85,6 @@ class _Map2State extends State<Map2> {
     setState(() {
       _mapController.complete(controller);
     });
-
-    // setState(() {
-    //   _mapController = controller;
-    // });
   }
 
   _startQuery() async {
@@ -121,7 +117,7 @@ class _Map2State extends State<Map2> {
     subscription = radius.switchMap((rad) {
       return geo.collection(collectionRef: ref).within(
           center: center, radius: rad, field: 'position', strictMode: true);
-    // }).listen(_updateMarkers);
+      // }).listen(_updateMarkers);
     }).listen(_updateMapMarkers);
 
     print(subscription.toString());
@@ -235,11 +231,19 @@ class _Map2State extends State<Map2> {
               showModalBottomSheet<void>(
                   context: context,
                   builder: (BuildContext context) {
-                    //return Text("Show profile page here");
-                    return ProfilePage(uid: userData['uid']);
+                    return Container(
+                        height: 350.0,
+                        color: Colors.transparent,
+                        child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.only(
+                                topLeft: const Radius.circular(10.0),
+                                topRight: const Radius.circular(10.0),
+                            )),
+                            child: ProfilePage(uid: userData['uid'])));
                   });
-            }
-        );
+            });
 
         setState(() {
           _mapMarkers[markerId] = marker;
