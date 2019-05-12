@@ -7,7 +7,7 @@ import 'package:eatwithme/utils/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:eatwithme/pages/interests/interets.dart';
+import 'package:eatwithme/pages/interests/interests.dart';
 import 'package:eatwithme/main.dart';
 import 'package:eatwithme/widgets/loadingCircle.dart';
 import 'package:eatwithme/pages/auth/auth.dart';
