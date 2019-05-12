@@ -10,7 +10,7 @@ import 'package:eatwithme/pages/intro/intro_screen.dart';
 void main() => runApp(new MyApp());
 
 class MyApp extends StatelessWidget {
-  var routes = <String, WidgetBuilder>{
+  final routes = <String, WidgetBuilder>{
     "/intro": (BuildContext context) => IntroScreen(),
     "/root": (BuildContext context) => RootPage(),
   };

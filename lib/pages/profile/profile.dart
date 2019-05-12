@@ -10,6 +10,10 @@ import 'package:eatwithme/widgets/loadingCircle.dart';
 import 'package:eatwithme/pages/auth/auth.dart';
 
 class ProfilePage extends StatefulWidget {
+  final String uid;
+
+  const ProfilePage({Key key, this.uid}) : super(key: key);
+  
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
@@ -30,13 +34,14 @@ class _ProfilePageState extends State<ProfilePage> {
     super.initState();
     _profileController.addStream(_firestore
         .collection('Users')
-        .document(uID)
+        .document(widget.uid)
         .snapshots()
         .map((snap) => snap.data));
   }
 
   @override
   void dispose() {
+    print('Close profile');
     _profileController.close();
     super.dispose();
   }
@@ -60,121 +65,120 @@ class _ProfilePageState extends State<ProfilePage> {
                 //return Scaffold(
                 return ListView(
                   children: <Widget>[
-                  Stack(
-                    children: <Widget>[
-                      Column(
-                        children: <Widget>[
-                          Container(
-                            height: 114.0,
-                          ),
-                          Card(
-                              child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Container(
-                                height: 160.0,
-                                width: 500.0,
-                                color: Color(0xFF333333),
-                                child: Text(
-                                  usersSnapshot.data['displayName'],
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 30.0,
-                                      fontWeight: FontWeight.bold),
+                    Stack(
+                      children: <Widget>[
+                        Column(
+                          children: <Widget>[
+                            Container(
+                              height: 114.0,
+                            ),
+                            Card(
+                                child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                Container(
+                                  height: 160.0,
+                                  width: 500.0,
+                                  color: Color(0xFF333333),
+                                  child: Text(
+                                    (usersSnapshot.data['displayName'] ?? usersSnapshot.data['email'].toString().split('@')[0]),
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 30.0,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  alignment: Alignment(0.0, 1.0),
                                 ),
-                                alignment: Alignment(0.0, 1.0),
-                              ),
-                              SizedBox(
-                                height: 25.0,
-                              ),
-                              Container(
-                                child: Text(
-                                  'About',
-                                  style: TextStyle(
-                                      fontSize: 20.0,
-                                      fontWeight: FontWeight.bold),
+                                SizedBox(
+                                  height: 25.0,
                                 ),
-                                alignment: Alignment(-1.0, 0.0),
-                              ),
-                              Container(
-                                height: 110.0,
-                                child: Text(
-                                  usersSnapshot.data['aboutMe'],
+                                Container(
+                                  child: Text(
+                                    'About',
+                                    style: TextStyle(
+                                        fontSize: 20.0,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  alignment: Alignment(-1.0, 0.0),
                                 ),
-                              ),
-                              Container(
-                                padding: EdgeInsets.only(top: 10.0),
-                                child: Text(
-                                  'Interests',
-                                  style: TextStyle(
-                                      fontSize: 20.0,
-                                      fontWeight: FontWeight.bold),
+                                Container(
+                                  height: 110.0,
+                                  child: Text(
+                                    (usersSnapshot.data['aboutMe'] ?? ''),
+                                  ),
                                 ),
-                                alignment: Alignment(-1.0, 0.0),
-                              ),
-                              Container(
-                                  height: 75.0,
-                                  child: ListView.builder(
-                                      scrollDirection: Axis.horizontal,
-                                      itemCount: List.of(
-                                              usersSnapshot.data['interests'])
-                                          .length,
-                                      itemBuilder:
-                                          (BuildContext context, int index) {
-                                        return ButtonBar(
-                                          alignment: MainAxisAlignment.start,
-                                          children: <Widget>[
-                                            RaisedButton(
-                                              onPressed: null,
-                                              elevation: 5.0,
-                                              child: Text('#' +
-                                                  List.of(usersSnapshot
-                                                          .data['interests'])
-                                                      .elementAt(index)),
-                                            ),
-                                          ],
-                                        );
-                                      })),
-                              Container(
-                                padding: EdgeInsets.only(top: 25.0),
-                                child: TextField(
-                                  maxLength: 150,
-                                  maxLengthEnforced: true,
-                                  controller: _chatController,
-                                  onSubmitted:
-                                      SendChat(uID, _chatController.text),
-                                  decoration: InputDecoration(
-                                      labelText: 'Say Hi!',
-                                      border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(25.0))),
+                                Container(
+                                  padding: EdgeInsets.only(top: 10.0),
+                                  child: Text(
+                                    'Interests',
+                                    style: TextStyle(
+                                        fontSize: 20.0,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  alignment: Alignment(-1.0, 0.0),
                                 ),
-                              )
-                            ],
-                          )),
-                        ],
-                      ),
-                      Positioned(
-                        top: imgYPos,
-                        left: imgXPos,
-                        height: imgHeight,
-                        width: imgWidth,
-                        child: GestureDetector(
-                          onTap: ()
-                          {
-                            enlargeImage();
-                          },
-                          child: Material(
-                            child: showProfilePhoto(
-                                usersSnapshot.data['photoURL']),
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(100.0)),
-                            clipBehavior: Clip.hardEdge,
+                                Container(
+                                    height: 75.0,
+                                    child: ListView.builder(
+                                        scrollDirection: Axis.horizontal,
+                                        itemCount: List.of(
+                                                usersSnapshot.data['interests'])
+                                            .length,
+                                        itemBuilder:
+                                            (BuildContext context, int index) {
+                                          return ButtonBar(
+                                            alignment: MainAxisAlignment.start,
+                                            children: <Widget>[
+                                              RaisedButton(
+                                                onPressed: null,
+                                                elevation: 5.0,
+                                                child: Text('#' +
+                                                    List.of(usersSnapshot
+                                                            .data['interests'])
+                                                        .elementAt(index)),
+                                              ),
+                                            ],
+                                          );
+                                        })),
+                                Container(
+                                  padding: EdgeInsets.only(top: 25.0),
+                                  child: TextField(
+                                    maxLength: 150,
+                                    maxLengthEnforced: true,
+                                    controller: _chatController,
+                                    onSubmitted:
+                                        SendChat(uID, _chatController.text),
+                                    decoration: InputDecoration(
+                                        labelText: 'Say Hi!',
+                                        border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(25.0))),
+                                  ),
+                                )
+                              ],
+                            )),
+                          ],
+                        ),
+                        Positioned(
+                          top: imgYPos,
+                          left: imgXPos,
+                          height: imgHeight,
+                          width: imgWidth,
+                          child: GestureDetector(
+                            onTap: () {
+                              enlargeImage();
+                            },
+                            child: Material(
+                              child: showProfilePhoto(
+                                  usersSnapshot.data['photoURL']),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(100.0)),
+                              clipBehavior: Clip.hardEdge,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
                   ],
                 );
               } else {
@@ -187,8 +191,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 }
 
-enlargeImage()
-{
+enlargeImage() {
   //TODO find out a way to blow up image size
 }
 

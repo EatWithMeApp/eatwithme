@@ -43,6 +43,7 @@ class RootPage extends StatelessWidget {
           if (snapshot.hasData) {
             // To reach here, we are logged in but in some sort of stuck state
             // so flush it out by forcing the log out
+            print('Flush login');
             authService.signOut();
           }
           return _buildWaitingScreen();

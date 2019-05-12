@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eatwithme/pages/auth/auth.dart';
 import 'package:eatwithme/pages/map/animationButton.dart';
+import 'package:eatwithme/pages/profile/profile.dart';
 import 'package:eatwithme/theme/eatwithme_theme.dart';
 import 'package:eatwithme/utils/constants.dart';
 import 'package:flutter/material.dart';
@@ -27,14 +28,18 @@ class _Map2State extends State<Map2> {
 
   final StreamController _controllerUserLocation = StreamController();
 
-  GoogleMapController _mapController;
+  // GoogleMapController _mapController;
+  Completer<GoogleMapController> _mapController = Completer();
+
   Location userLocation = new Location();
   GeoFirePoint previousUserLocation;
 
   BehaviorSubject<double> radius = BehaviorSubject.seeded(500.0);
   Stream<dynamic> query;
 
-  final Set<Marker> _markers = {};
+  Set<Marker> _markers = {};
+
+  Map<MarkerId, Marker> _mapMarkers = <MarkerId, Marker>{};
 
   StreamSubscription subscription;
   // Stream<List<DocumentSnapshot>> subscription;
@@ -43,6 +48,7 @@ class _Map2State extends State<Map2> {
 
   @override
   void initState() {
+    print('Begin init');
     super.initState();
     _controllerUserProfile.addStream(_firestore
         .collection('Users')
@@ -50,9 +56,16 @@ class _Map2State extends State<Map2> {
         .snapshots()
         .map((snap) => snap.data));
 
-    _controllerUserLocation
-        .add(userLocation.onLocationChanged().listen(_updateUserLocation));
+    // Future.delayed(const Duration(seconds: 5), () => "5");
+
+    // startTheQuery();
+
+    print('End init');
   }
+
+  // void startTheQuery() async {
+  //   await _startQuery();
+  // }
 
   @override
   void dispose() {
@@ -64,13 +77,23 @@ class _Map2State extends State<Map2> {
   }
 
   _onMapCreated(GoogleMapController controller) {
+    _startQuery();
+
+    _controllerUserLocation
+        .add(userLocation.onLocationChanged().listen(_updateUserLocation));
+
     setState(() {
-      _mapController = controller;
-      _startQuery();
+      _mapController.complete(controller);
     });
+
+    // setState(() {
+    //   _mapController = controller;
+    // });
   }
 
   _startQuery() async {
+    print('Start Query');
+
     // Get users location
     var pos = await userLocation.getLocation();
     double lat = pos.latitude;
@@ -98,24 +121,27 @@ class _Map2State extends State<Map2> {
     subscription = radius.switchMap((rad) {
       return geo.collection(collectionRef: ref).within(
           center: center, radius: rad, field: 'position', strictMode: true);
-    }).listen(_updateMarkers);
+    // }).listen(_updateMarkers);
+    }).listen(_updateMapMarkers);
+
+    print(subscription.toString());
   }
 
-  _updateQuery(value) {
-    final zoomMap = {
-      100.0: 12.0,
-      200.0: 10.0,
-      300.0: 7.0,
-      400.0: 6.0,
-      500.0: 5.0
-    };
-    final zoom = zoomMap[value];
-    _mapController.moveCamera(CameraUpdate.zoomTo(zoom));
+  // _updateQuery(value) {
+  //   final zoomMap = {
+  //     100.0: 12.0,
+  //     200.0: 10.0,
+  //     300.0: 7.0,
+  //     400.0: 6.0,
+  //     500.0: 5.0
+  //   };
+  //   final zoom = zoomMap[value];
+  //   _mapController.moveCamera(CameraUpdate.zoomTo(zoom));
 
-    setState(() {
-      radius.add(value);
-    });
-  }
+  //   setState(() {
+  //     radius.add(value);
+  //   });
+  // }
 
   void _updateUserLocation(LocationData data) async {
     // var pos = await userLocation.getLocation();
@@ -124,6 +150,9 @@ class _Map2State extends State<Map2> {
 
     // if (data.longitude == previousUserLocation.longitude) return null;
     // if (data.latitude == previousUserLocation.latitude) return null;
+
+    if (data.latitude == null) return null;
+    if (data.longitude == null) return null;
 
     GeoFirePoint point =
         geo.point(latitude: data.latitude, longitude: data.longitude);
@@ -136,7 +165,10 @@ class _Map2State extends State<Map2> {
 
     // if (distance <= 0.0) return null;
 
-    if (authService.currentUid == null) return null;
+    if (authService.currentUid == null) {
+      print('Map currentuid no good');
+      return null;
+    }
 
     previousUserLocation = point;
 
@@ -157,16 +189,72 @@ class _Map2State extends State<Map2> {
 
   _animateToUser() async {
     LocationData pos = await userLocation.getLocation();
-    _mapController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+    final GoogleMapController controller = await _mapController.future;
+    controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+      // _mapController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
       target: LatLng(pos.latitude, pos.longitude),
       zoom: _zoomValue,
     )));
   }
 
-  _updateMarkers(List<DocumentSnapshot> documentList) async {
+  _updateMapMarkers(List<DocumentSnapshot> documents) {
+    print(documents);
+    for (DocumentSnapshot document in documents) {
+      if (document == null) continue;
+
+      // If the pin is us, skip
+      String uid = document.data['uid'];
+      if (uid == authService.currentUid) continue;
+
+      // If the person doesn't have any interests in common, skip
+      if (document.data['interests'] != null) {}
+
+      GeoPoint pos = document.data['position']['geopoint'];
+
+      var lat = pos.latitude;
+      var lng = pos.longitude;
+
+      if ((lat == null) || (lng == null)) continue;
+
+      _firestore.collection('Users').document(uid).get().then((snap) {
+        var userData = snap.data;
+
+        var markerId = MarkerId(uid);
+
+        var marker = Marker(
+            markerId: markerId,
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+                BitmapDescriptor.hueOrange),
+            // icon: BitmapDescriptor.defaultMarker;
+            position: LatLng(lat, lng),
+            draggable: false,
+            infoWindow: InfoWindow(
+              title: userData['displayName'],
+            ),
+            onTap: () {
+              showModalBottomSheet<void>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    //return Text("Show profile page here");
+                    return ProfilePage(uid: userData['uid']);
+                  });
+            }
+        );
+
+        setState(() {
+          _mapMarkers[markerId] = marker;
+        });
+
+        print('Added a marker');
+      });
+    }
+  }
+
+  _updateMarkers(List<DocumentSnapshot> documentList) {
     print(documentList);
     _markers.clear();
     for (DocumentSnapshot document in documentList) {
+      if (document == null) continue;
 
       // If the pin is us, skip
       String uid = document.data['uid'];
@@ -175,11 +263,10 @@ class _Map2State extends State<Map2> {
       print('Not us: ' + document.data['email']);
 
       // If the person doesn't have any interests in common, skip
-
-
+      if (document.data['interests'] != null) {}
 
       GeoPoint pos = document.data['position']['geopoint'];
-      
+
       var lat = pos.latitude;
       var lng = pos.longitude;
 
@@ -192,6 +279,7 @@ class _Map2State extends State<Map2> {
             markerId: MarkerId(uid),
             icon: BitmapDescriptor.defaultMarkerWithHue(
                 BitmapDescriptor.hueOrange),
+            // icon: BitmapDescriptor.defaultMarker;
             position: LatLng(lat, lng),
             draggable: false,
             infoWindow: InfoWindow(
@@ -199,14 +287,20 @@ class _Map2State extends State<Map2> {
             ),
             onTap: () {
               showModalBottomSheet<void>(
-                  context: context, builder: (BuildContext context) {
-                    return Text("Show profile page here");
+                  context: context,
+                  builder: (BuildContext context) {
+                    //return Text("Show profile page here");
+                    return ProfilePage(uid: userData['uid']);
                   });
             });
 
         _markers.add(marker);
+
+        print('Added a marker');
       });
     }
+
+    Future.delayed(const Duration(seconds: 5), () => "5");
   }
 
   Future<void> _signOut(BuildContext context) async {
@@ -242,7 +336,8 @@ class _Map2State extends State<Map2> {
             myLocationEnabled: true,
             mapType: MapType.normal,
             myLocationButtonEnabled: false,
-            markers: _markers,
+            // markers: _markers,
+            markers: Set<Marker>.of(_mapMarkers.values),
           ),
           Positioned(bottom: 5, right: 5, child: animationButton),
           // animationButton,
@@ -254,10 +349,10 @@ class _Map2State extends State<Map2> {
                   backgroundColor: themeLight().primaryColor,
                   // onPressed: () => _animateToUser()))
                   onPressed: () => _signOut(context)))
-        //           onPressed: () => {_firestore
-        // .collection('Users')
-        // .document('zrHlbJ3oy5hpRPShaFsGL3JVYYl2')
-        // .setData({'position': geo.point(latitude: -35.2777, longitude: 149.1185).data}, merge: true)})),
+          //           onPressed: () => {_firestore
+          // .collection('Users')
+          // .document('zrHlbJ3oy5hpRPShaFsGL3JVYYl2')
+          // .setData({'position': geo.point(latitude: -35.2777, longitude: 149.1185).data}, merge: true)})),
         ]),
       ),
     );
