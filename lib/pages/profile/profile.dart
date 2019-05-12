@@ -20,15 +20,11 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  String uID = 'XAozq9M5DqTgs7TVL1G3JI4Rbns2';
   final Firestore _firestore = Firestore.instance;
   final StreamController _profileController = StreamController();
-  final TextEditingController _chatController = TextEditingController();
 
-  double imgYPos = 45.0;
-  double imgWidth = 200.0;
-  double imgHeight = 200.0;
-  double imgXPos = 100.0;
+  double imgWidth = 140.0;
+  double imgHeight = 140.0;
 
   @override
   void initState() {
@@ -63,114 +59,31 @@ class _ProfilePageState extends State<ProfilePage> {
               break;
             case ConnectionState.active:
               if (usersSnapshot.hasData) {
-                // return Scaffold(
-                // return ListView(
-                //   children: <Widget>[
-                return Stack(
-                  children: <Widget>[
-                    Column(
-                      children: <Widget>[
-                        Container(
-                          height: 0.0,
-                        ),
-                        Container(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.max,
-                            children: <Widget>[
-                              Container(
-                                height: 100.0,
-                                width: 500.0,
-                                color: Color(0xFF333333),
-                                child: Text(
-                                  (usersSnapshot.data['displayName'] ??
-                                      usersSnapshot.data['email']
-                                          .toString()
-                                          .split('@')[0]
-                                          .trim()),
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 30.0,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                alignment: Alignment(0.0, 1.0),
-                              ),
-                              SizedBox(
-                                height: 25.0,
-                              ),
-                              Container(
-                                child: Text(
-                                  'About',
-                                  style: TextStyle(
-                                      fontSize: 20.0,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                alignment: Alignment(-1.0, 0.0),
-                              ),
-                              Container(
-                                // height: 110.0,
-                                padding: EdgeInsets.only(
-                                  top: 10.0,
-                                ),
-                                constraints: BoxConstraints(
-                                    maxHeight: 90.0,
-                                    minHeight: 40.0,
-                                    maxWidth: double.infinity,
-                                    minWidth: double.infinity),
-                                child: Text(
-                                  (usersSnapshot.data['aboutMe'] ??
-                                      '(Not provided)'),
-                                ),
-                              ),
-                              Container(
-                                alignment: Alignment(0.0, 0.7),
-                                child: Column(
-                                  children: <Widget>[
-                                    Container(
-                                      padding: EdgeInsets.only(top: 10.0),
-                                      child: Text(
-                                        'Interests',
-                                        style: TextStyle(
-                                            fontSize: 20.0,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      alignment: Alignment(-1.0, 0.0),
-                                    ),
-                                    InterestsList(
-                                      interests:
-                                          List.of(usersSnapshot.data['interests']),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(
-                                height: 25.0,
-                              ),
-                              Container(
-                                child: ChatboxLink(uID: uID),
-                                alignment: Alignment(0.0, 1.0),
-                              )
-                            ],
+                return Container(
+                  child: Stack(
+                    alignment: Alignment.topCenter,
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.only(top: imgWidth / 2.0),
+                        child: Container(
+                          constraints: BoxConstraints(
+                            minHeight: 306.0,
+                            maxHeight: 500.0,
+                            minWidth: double.infinity,
+                            maxWidth: double.infinity,
                           ),
-                        )
-                        // Card(
-                        //   // clipBehavior: Clip.none,
-
-                        //   child:
-
-                        //   ),
-                      ],
-                    ),
-                    // UserImage(
-                    //   imgYPos: imgYPos,
-                    //   imgXPos: imgXPos,
-                    //   imgHeight: imgHeight,
-                    //   imgWidth: imgWidth,
-                    //   photoURL: usersSnapshot.data['photoURL'],
-                    // ),
-                  ],
+                          child: ProfileCard(
+                              widget: widget, usersSnapshot: usersSnapshot),
+                        ),
+                      ),
+                      UserImage(
+                        imgHeight: imgHeight,
+                        imgWidth: imgWidth,
+                        photoURL: usersSnapshot.data['photoURL'],
+                      ),
+                    ],
+                  ),
                 );
-                // ],
-                // );
               } else {
                 //Shouldn't reach here, but assume no chats instead of broken
                 return noActiveProfile();
@@ -178,6 +91,119 @@ class _ProfilePageState extends State<ProfilePage> {
               break;
           }
         });
+  }
+}
+
+class ProfileCard extends StatelessWidget {
+  const ProfileCard(
+      {Key key, @required this.widget, @required this.usersSnapshot})
+      : super(key: key);
+
+  final ProfilePage widget;
+  final AsyncSnapshot usersSnapshot;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        Container(
+          // height: 400.0,
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            children: <Widget>[
+              Container(
+                height: 100.0,
+                decoration: BoxDecoration(
+                    color: Color(0xFF333333),
+                    borderRadius: BorderRadius.only(
+                      topLeft: const Radius.circular(10.0),
+                      topRight: const Radius.circular(10.0),
+                    )),
+                child: Text(
+                  (usersSnapshot.data['displayName'] ??
+                      usersSnapshot.data['email']
+                          .toString()
+                          .split('@')[0]
+                          .trim()),
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 30.0,
+                      fontWeight: FontWeight.bold),
+                ),
+                alignment: Alignment(0.0, 1.0),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(
+                    color: Colors.transparent,
+                    width: 0.0
+                  )
+                ),
+                child: Column(
+                  children: <Widget>[
+                    SizedBox(
+                      height: 10.0,
+                    ),
+                    Container(
+                      child: Text(
+                        'About',
+                        style: TextStyle(
+                            fontSize: 20.0, fontWeight: FontWeight.bold),
+                      ),
+                      alignment: Alignment(-1.0, 0.0),
+                    ),
+                    Container(
+                      // height: 110.0,
+                      padding: EdgeInsets.only(
+                        top: 10.0,
+                      ),
+                      constraints: BoxConstraints(
+                          maxHeight: 90.0,
+                          minHeight: 50.0,
+                          maxWidth: double.infinity,
+                          minWidth: double.infinity),
+                      child: Text(
+                        (usersSnapshot.data['aboutMe'] ?? '(Not provided)'),
+                      ),
+                    ),
+                    Container(
+                      // alignment: Alignment(0.0, 0.7),
+                      child: Column(
+                        children: <Widget>[
+                          Container(
+                            padding: EdgeInsets.only(top: 10.0),
+                            child: Text(
+                              'Interests',
+                              style: TextStyle(
+                                  fontSize: 20.0, fontWeight: FontWeight.bold),
+                            ),
+                            alignment: Alignment(-1.0, 0.0),
+                          ),
+                          InterestsList(
+                            interests: List.of(usersSnapshot.data['interests']),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(
+                    color: Colors.transparent,
+                    width: 0.0
+                  )
+                ),
+                child: ChatboxLink(uID: widget.uid),
+              )
+            ],
+          ),
+        )
+      ],
+    );
   }
 }
 
@@ -198,6 +224,7 @@ class InterestsList extends StatelessWidget {
             itemCount: interests.length,
             itemBuilder: (BuildContext context, int index) {
               return Chip(
+                backgroundColor: Colors.orangeAccent,
                 label: Text('#' + interests.elementAt(index).toString()),
               );
             }));
@@ -237,36 +264,49 @@ class UserImage extends StatelessWidget {
   const UserImage({
     Key key,
     @required this.photoURL,
-    @required this.imgYPos,
-    @required this.imgXPos,
     @required this.imgHeight,
     @required this.imgWidth,
   }) : super(key: key);
 
   final String photoURL;
-  final double imgYPos;
-  final double imgXPos;
   final double imgHeight;
   final double imgWidth;
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      top: imgYPos,
-      left: imgXPos,
-      height: imgHeight,
+    return Container(
       width: imgWidth,
-      child: GestureDetector(
-        onTap: () {
-          enlargeImage();
-        },
-        child: Material(
-          child: showProfilePhoto(photoURL),
-          borderRadius: BorderRadius.all(Radius.circular(100.0)),
-          clipBehavior: Clip.hardEdge,
+      height: imgHeight,
+      decoration:
+          ShapeDecoration(shape: CircleBorder(), color: Color(0xFF333333)),
+      child: Padding(
+        padding: EdgeInsets.all(1.1),
+        child: DecoratedBox(
+          decoration: ShapeDecoration(
+              shape: CircleBorder(),
+              image: DecorationImage(
+                  fit: BoxFit.cover,
+                  image: showProfilePhoto(photoURL, imgWidth, imgHeight))),
         ),
       ),
     );
+
+    // return Positioned(
+    //   top: imgYPos,
+    //   left: imgXPos,
+    //   // height: imgHeight,
+    //   // width: imgWidth,
+    //   child: GestureDetector(
+    //     onTap: () {
+    //       enlargeImage();
+    //     },
+    //     child: Material(
+    //       child: showProfilePhoto(photoURL, imgWidth, imgHeight),
+    //       borderRadius: BorderRadius.all(Radius.circular(100.0)),
+    //       clipBehavior: Clip.hardEdge,
+    //     ),
+    //   ),
+    // );
   }
 }
 
@@ -278,7 +318,7 @@ SendChat(String recipientUID, String message) {
   //TODO Send the chat to this user
 }
 
-Widget showProfilePhoto(String profileURL) {
+ImageProvider showProfilePhoto(String profileURL, double width, double height) {
   //If there is a photo, we have to pull and cache it, otherwise use the asset template
   if (profileURL != null) {
     //TODO: Implement Firestore image pull
@@ -286,17 +326,17 @@ Widget showProfilePhoto(String profileURL) {
       placeholder: PROFILE_PHOTO_PLACEHOLDER_PATH,
       fadeInCurve: SawTooth(1),
       image: profileURL,
-      width: 125.0,
-      height: 125.0,
+      width: width,
+      height: height,
       fit: BoxFit.fitHeight,
-    );
+    ).image;
   } else {
     return Image.asset(
       PROFILE_PHOTO_PLACEHOLDER_PATH,
-      width: 125.0,
-      height: 125.0,
+      width: width,
+      height: height,
       fit: BoxFit.scaleDown,
-    );
+    ).image;
   }
 }
 

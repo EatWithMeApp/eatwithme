@@ -231,17 +231,7 @@ class _Map2State extends State<Map2> {
               showModalBottomSheet<void>(
                   context: context,
                   builder: (BuildContext context) {
-                    return Container(
-                        height: 350.0,
-                        color: Colors.transparent,
-                        child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.only(
-                                topLeft: const Radius.circular(10.0),
-                                topRight: const Radius.circular(10.0),
-                            )),
-                            child: ProfilePage(uid: userData['uid'])));
+                    return ProfileBottomSheet(userData: userData);
                   });
             });
 
@@ -293,7 +283,6 @@ class _Map2State extends State<Map2> {
               showModalBottomSheet<void>(
                   context: context,
                   builder: (BuildContext context) {
-                    //return Text("Show profile page here");
                     return ProfilePage(uid: userData['uid']);
                   });
             });
@@ -360,6 +349,35 @@ class _Map2State extends State<Map2> {
         ]),
       ),
     );
+  }
+}
+
+class ProfileBottomSheet extends StatefulWidget {
+  const ProfileBottomSheet({
+    Key key,
+    @required this.userData,
+  }) : super(key: key);
+
+  final Map<String, dynamic> userData;
+
+  @override
+  _ProfileBottomSheetState createState() => _ProfileBottomSheetState();
+}
+
+class _ProfileBottomSheetState extends State<ProfileBottomSheet> {
+  double height = 800.0;
+  
+  @override
+  Widget build(BuildContext context) {   
+    return Container(
+        height: height,
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: Colors.transparent,
+            width: 0.0
+            ),
+        ),
+        child: ProfilePage(uid: widget.userData['uid']));
   }
 }
 
