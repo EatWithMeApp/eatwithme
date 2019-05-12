@@ -194,6 +194,24 @@ class ChatScreenState extends State<ChatScreen> {
     if (content.trim() != '') {
       textEditingController.clear();
 
+      var userUids = List<String>();
+      userUids.add(groupChatId.split('-')[0]);
+      userUids.add(groupChatId.split('-')[1]);
+
+      var rightNow = DateTime.now();
+
+      // Make Chat in Chats
+      Firestore.instance.collection('Chats')
+      .document(groupChatId)
+      .setData(
+        {
+          'userUids': userUids,
+          'lastModified': rightNow
+        },
+        merge: true
+      );
+
+      // Make Message in Messages
       var documentReference =
           Firestore.instance.collection('Messages').document();
 
@@ -204,7 +222,7 @@ class ChatScreenState extends State<ChatScreen> {
             'chatId': groupChatId,
             'idFrom': userId,
             'idTo': peerId,
-            'timestamp': DateTime.now().millisecondsSinceEpoch.toString(),
+            'timestamp': rightNow.millisecondsSinceEpoch.toString(),
             'content': content,
             'type': type
           },
