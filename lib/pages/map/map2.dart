@@ -23,7 +23,7 @@ class Map2 extends StatefulWidget {
 class _Map2State extends State<Map2> {
   final Firestore _firestore = Firestore.instance;
   final Geoflutterfire geo = Geoflutterfire();
-  // final StreamController _controllerUserProfile = StreamController();
+  final StreamController _controllerUserProfile = StreamController();
 
   final StreamController _controllerUserLocation = StreamController();
 
@@ -44,24 +44,20 @@ class _Map2State extends State<Map2> {
   @override
   void initState() {
     super.initState();
-    // _controllerUserProfile.addStream(_firestore
-    //     .collection('Users')
-    //     .document(authService.currentUid)
-    //     .snapshots()
-    //     .map((snap) => snap.data));
-    // _startQuery();
+    _controllerUserProfile.addStream(_firestore
+        .collection('Users')
+        .document(authService.currentUid)
+        .snapshots()
+        .map((snap) => snap.data));
 
     _controllerUserLocation
         .add(userLocation.onLocationChanged().listen(_updateUserLocation));
-
-    // userLocation.onLocationChanged().listen(_updateUserLocation);
   }
 
   @override
   void dispose() {
-    // _controllerUserProfile.close();
+    _controllerUserProfile.close();
     subscription.cancel();
-    // userLocation.onLocationChanged().listen(_updateUserLocation).cancel();
     _controllerUserLocation.close();
     radius.close();
     super.dispose();
@@ -71,9 +67,6 @@ class _Map2State extends State<Map2> {
     setState(() {
       _mapController = controller;
       _startQuery();
-      // subscription.listen((docList) {
-      //   _updateMarkers(docList);
-      // });
     });
   }
 
@@ -170,52 +163,41 @@ class _Map2State extends State<Map2> {
     )));
   }
 
-  void _updateMarkers(List<DocumentSnapshot> documentList) async {
+  _updateMarkers(List<DocumentSnapshot> documentList) async {
     print(documentList);
     _markers.clear();
-    documentList.forEach((DocumentSnapshot document) {
-      // GeoPoint pos = document.data['position']['geopoint'];
-      // double distance = document.data['distance'];
-      // var marker = MarkerOptions(
-      //     position: LatLng(pos.latitude, pos.longitude),
-      //     icon: BitmapDescriptor.defaultMarker,
-      //     infoWindowText: InfoWindowText(
-      //         'Magic Marker', '$distance kilometers from query center'));
+    for (DocumentSnapshot document in documentList) {
 
-      // _mapController.addMarker(marker);
+      // If the pin is us, skip
+      String uid = document.data['uid'];
+      if (uid == authService.currentUid) continue;
+
+      print('Not us: ' + document.data['email']);
+
+      // If the person doesn't have any interests in common, skip
+
+
 
       GeoPoint pos = document.data['position']['geopoint'];
-      String uid = document.data['uid'];
+      
+      var lat = pos.latitude;
+      var lng = pos.longitude;
 
-      // var userData = _firestore
-      //     .collection('Users')
-      //     .document(uid)
-      //     .get()
-      //     .then((snap) => snap.data);
-
-      // var userData;
+      if ((lat == null) || (lng == null)) continue;
 
       _firestore.collection('Users').document(uid).get().then((snap) {
         var userData = snap.data;
-
-        // var x = FadeInImage.assetNetwork(
-        //   image: userData['photoURL'],
-        //   placeholder: PROFILE_PHOTO_PLACEHOLDER_PATH,
-        // ).image;
 
         var marker = Marker(
             markerId: MarkerId(uid),
             icon: BitmapDescriptor.defaultMarkerWithHue(
                 BitmapDescriptor.hueOrange),
-            position: LatLng(pos.latitude, pos.longitude),
+            position: LatLng(lat, lng),
             draggable: false,
-            zIndex: 3.0,
             infoWindow: InfoWindow(
               title: userData['displayName'],
             ),
             onTap: () {
-              // print('Update me with widget card');
-              // print(userData['displayName']);
               showModalBottomSheet<void>(
                   context: context, builder: (BuildContext context) {
                     return Text("Show profile page here");
@@ -224,7 +206,7 @@ class _Map2State extends State<Map2> {
 
         _markers.add(marker);
       });
-    });
+    }
   }
 
   Future<void> _signOut(BuildContext context) async {
@@ -271,7 +253,11 @@ class _Map2State extends State<Map2> {
                   child: Icon(Icons.pin_drop, size: 30.0),
                   backgroundColor: themeLight().primaryColor,
                   // onPressed: () => _animateToUser()))
-                  onPressed: () => authService.signOut()))
+                  onPressed: () => _signOut(context)))
+        //           onPressed: () => {_firestore
+        // .collection('Users')
+        // .document('zrHlbJ3oy5hpRPShaFsGL3JVYYl2')
+        // .setData({'position': geo.point(latitude: -35.2777, longitude: 149.1185).data}, merge: true)})),
         ]),
       ),
     );
