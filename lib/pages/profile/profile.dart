@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:core';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eatwithme/pages/chat/chat.dart';
+import 'package:eatwithme/pages/profile/chatRoute.dart';
 import 'package:eatwithme/theme/eatwithme_theme.dart';
 import 'package:eatwithme/utils/constants.dart';
 import 'package:flutter/material.dart';
@@ -197,7 +199,7 @@ class ProfileCard extends StatelessWidget {
                     width: 0.0
                   )
                 ),
-                child: ChatboxLink(uID: widget.uid),
+                child: ChatboxLink(uID: widget.uid, peerName: usersSnapshot.data['displayName'], photoURL: usersSnapshot.data['photoURL']),
               )
             ],
           ),
@@ -235,9 +237,13 @@ class ChatboxLink extends StatelessWidget {
   const ChatboxLink({
     Key key,
     @required this.uID,
+    @required this.peerName,
+    @required this.photoURL,
   }) : super(key: key);
 
   final String uID;
+  final String peerName;
+  final String photoURL;
 
   @override
   Widget build(BuildContext context) {
@@ -247,7 +253,15 @@ class ChatboxLink extends StatelessWidget {
         width: double.infinity,
         child: RaisedButton(
           onPressed: () {
-            //TODO: Go to chat
+            Navigator.push(
+              context,
+              ProfileToChatRoute(widget: Chat(
+                userId: authService.currentUid,
+                peerId: uID,
+                peerName: peerName,
+                peerAvatar: photoURL,
+              ))
+            );
           },
           color: themeLight().primaryColor,
           shape:
