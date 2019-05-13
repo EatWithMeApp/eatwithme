@@ -2,9 +2,9 @@
 
 import 'package:flutter/material.dart';
 
-class ProfileToChatRoute extends PageRouteBuilder {
+class RouteFromBottom extends PageRouteBuilder {
   final Widget widget;
-  ProfileToChatRoute({this.widget})
+  RouteFromBottom({this.widget})
       : super(pageBuilder: (BuildContext context, Animation<double> animation,
             Animation<double> secondaryAnimation) {
           return widget;

@@ -3,9 +3,9 @@ import 'dart:core';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eatwithme/pages/chat/chat.dart';
-import 'package:eatwithme/pages/profile/chatRoute.dart';
 import 'package:eatwithme/theme/eatwithme_theme.dart';
 import 'package:eatwithme/utils/constants.dart';
+import 'package:eatwithme/utils/routeFromBottom.dart';
 import 'package:flutter/material.dart';
 import 'package:eatwithme/pages/interests/interests.dart';
 import 'package:eatwithme/main.dart';
@@ -255,7 +255,7 @@ class ChatboxLink extends StatelessWidget {
           onPressed: () {
             Navigator.push(
               context,
-              ProfileToChatRoute(widget: Chat(
+              RouteFromBottom(widget: Chat(
                 userId: authService.currentUid,
                 peerId: uID,
                 peerName: peerName,

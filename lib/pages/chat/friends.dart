@@ -54,28 +54,31 @@ class _FriendsPageState extends State<FriendsPage> {
           ),
         ),
         body: SafeArea(
-          child: StreamBuilder(
-              stream: _controllerChat.stream,
-              builder: (context, chatSnapshot) {
-                switch (chatSnapshot.connectionState) {
-                  case ConnectionState.none:
-                    return Text("Error loading chat");
-                    break;
-                  case ConnectionState.done:
-                    return noActiveChats();
-                  case ConnectionState.waiting:
-                    return LoadingCircle();
-                    break;
-                  case ConnectionState.active:
-                    if (chatSnapshot.hasData) {
-                      return buildFriendList(chatSnapshot, widget.currentUid);
-                    } else {
-                      //Shouldn't reach here, but assume no chats instead of broken
+          child: Container(
+            color: Colors.white,
+            child: StreamBuilder(
+                stream: _controllerChat.stream,
+                builder: (context, chatSnapshot) {
+                  switch (chatSnapshot.connectionState) {
+                    case ConnectionState.none:
+                      return Text("Error loading chat");
+                      break;
+                    case ConnectionState.done:
                       return noActiveChats();
-                    }
-                    break;
-                }
-              }),
+                    case ConnectionState.waiting:
+                      return LoadingCircle();
+                      break;
+                    case ConnectionState.active:
+                      if (chatSnapshot.hasData) {
+                        return buildFriendList(chatSnapshot, widget.currentUid);
+                      } else {
+                        //Shouldn't reach here, but assume no chats instead of broken
+                        return noActiveChats();
+                      }
+                      break;
+                  }
+                }),
+          ),
         ));
   }
 

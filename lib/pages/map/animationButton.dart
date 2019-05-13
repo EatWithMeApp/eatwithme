@@ -59,6 +59,8 @@ class ButtonState extends State<AnimationButton> with TickerProviderStateMixin {
     // widget.button2 = VoidCallback(_translateButton, 180, color: Colors.red);
     // widget.button3 = VoidCallback(_translateButton, -90, color: Colors.black);
 
+    animate();
+
     super.initState();
   }
 
@@ -113,16 +115,20 @@ class ButtonState extends State<AnimationButton> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return new Stack(
-      fit: StackFit.passthrough,
-      overflow: Overflow.visible,
-      alignment: AlignmentDirectional.bottomEnd,
-      children: <Widget>[
-        FancyButton(_translateButton, -90, Colors.black, Icons.account_circle, widget.button3,),
-        //FancyButton(_translateButton, 180, color: Colors.red),
-        //FancyButton(_translateButton, 225, color: Colors.orange),
-        toggle(),
-      ],
+    return Container(
+      width: 300,
+      height: 300,
+      child: Stack(
+        // fit: StackFit.passthrough,
+        // overflow: Overflow.visible,
+        alignment: AlignmentDirectional.bottomEnd,
+        children: <Widget>[
+          FancyButton(_translateButton, -90, Colors.black, Icons.account_circle, widget.button3,),
+          //FancyButton(_translateButton, 180, color: Colors.red),
+          //FancyButton(_translateButton, 225, color: Colors.orange),
+          toggle(),
+        ],
+      ),
     );
   }
 }
@@ -140,13 +146,6 @@ class FancyButton extends StatelessWidget {
   final VoidCallback onClick;
 
   FancyButton(this.translateButton, this.angle, this.color, this.icon, this.onClick);
-  // {
-  //   this.translateButton = translateButton;
-  //   this.angle = angle;
-  //   this.color = color;
-  //   this.icon = icon;
-  //   this.onClick = onClick;
-  // }
   
   @override
   Widget build(BuildContext context) {
@@ -158,9 +157,9 @@ class FancyButton extends StatelessWidget {
         child: FloatingActionButton(
             child: Icon(icon),
             backgroundColor: color,
-            // onPressed: () => onClick.onClick(),
-            onPressed: () {print('Fuck you');},
-            elevation: 0));
+            onPressed: () => onClick,
+            // onPressed: () {print('FAB clicked');},
+            elevation: 7.0));
   }
 
 }

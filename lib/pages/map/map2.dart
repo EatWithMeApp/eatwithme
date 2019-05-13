@@ -5,10 +5,12 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eatwithme/pages/auth/auth.dart';
+import 'package:eatwithme/pages/chat/friends.dart';
 import 'package:eatwithme/pages/map/animationButton.dart';
 import 'package:eatwithme/pages/profile/profile.dart';
 import 'package:eatwithme/theme/eatwithme_theme.dart';
 import 'package:eatwithme/utils/constants.dart';
+import 'package:eatwithme/utils/routeFromBottom.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -198,9 +200,10 @@ class _Map2State extends State<Map2> {
     for (DocumentSnapshot document in documents) {
       if (document == null) continue;
 
-      // If the pin is us, skip
+      // If the pin is us, or we can't read the uid, skip
       String uid = document.data['uid'];
       if (uid == authService.currentUid) continue;
+      if (uid == null) continue;
 
       // If the person doesn't have any interests in common, skip
       if (document.data['interests'] != null) {}
@@ -309,7 +312,7 @@ class _Map2State extends State<Map2> {
     //SignOutFunction button3;
 
     var button3 = () {
-      print('');
+      print('Pressed button 3');
     };
 
     var animationButton = AnimationButton(
@@ -332,20 +335,53 @@ class _Map2State extends State<Map2> {
             // markers: _markers,
             markers: Set<Marker>.of(_mapMarkers.values),
           ),
-          Positioned(bottom: 5, right: 5, child: animationButton),
+          // Positioned(bottom: 5, right: 5, child: animationButton),
           // animationButton,
-          Positioned(
-              bottom: 5,
-              left: 5,
-              child: FloatingActionButton(
+
+          Row(
+
+            children: <Widget>[
+              FloatingActionButton(
                   child: Icon(Icons.pin_drop, size: 30.0),
+                  foregroundColor: Colors.black,
                   backgroundColor: themeLight().primaryColor,
-                  // onPressed: () => _animateToUser()))
-                  onPressed: () => _signOut(context)))
-          //           onPressed: () => {_firestore
-          // .collection('Users')
-          // .document('zrHlbJ3oy5hpRPShaFsGL3JVYYl2')
-          // .setData({'position': geo.point(latitude: -35.2777, longitude: 149.1185).data}, merge: true)})),
+                  onPressed: () => _animateToUser()),
+              FloatingActionButton(
+                  child: Icon(Icons.chat, size: 30.0),
+                  foregroundColor: Colors.black,
+                  backgroundColor: Colors.red,
+                  heroTag: 'FriendPage',
+                  onPressed: () {
+                    // var route = MaterialPageRoute(
+                    //     builder: (context) => FriendsPage(
+                    //           currentUid: authService.currentUid,
+                    //         ));
+                    Navigator.push(
+                      context,
+                      RouteFromBottom(
+                        widget: FriendsPage(currentUid: authService.currentUid)
+                      )
+                    );
+                  })
+            ],
+          )
+
+          // Positioned(
+          //     bottom: 5,
+          //     left: 5,
+          //     child: FloatingActionButton(
+          //         child: Icon(Icons.pin_drop, size: 30.0),
+          //         foregroundColor: Colors.black,
+          //         backgroundColor: themeLight().primaryColor,
+          //         onPressed: () => _animateToUser())),
+          // Positioned(
+          //     bottom: 5,
+          //     left: 5,
+          //     child: FloatingActionButton(
+          //         child: Icon(Icons.chat, size: 30.0),
+          //         foregroundColor: Colors.black,
+          //         backgroundColor: Colors.red,
+          //         onPressed: () => _animateToUser()))
         ]),
       ),
     );
@@ -366,16 +402,13 @@ class ProfileBottomSheet extends StatefulWidget {
 
 class _ProfileBottomSheetState extends State<ProfileBottomSheet> {
   double height = 800.0;
-  
+
   @override
-  Widget build(BuildContext context) {   
+  Widget build(BuildContext context) {
     return Container(
         height: height,
         decoration: BoxDecoration(
-          border: Border.all(
-            color: Colors.transparent,
-            width: 0.0
-            ),
+          border: Border.all(color: Colors.transparent, width: 0.0),
         ),
         child: ProfilePage(uid: widget.userData['uid']));
   }
@@ -387,3 +420,9 @@ class SignOutFunction extends UseFunction {
     authService.signOut();
   }
 }
+
+// onPressed: () => _signOut(context)))
+//           onPressed: () => {_firestore
+// .collection('Users')
+// .document('zrHlbJ3oy5hpRPShaFsGL3JVYYl2')
+// .setData({'position': geo.point(latitude: -35.2777, longitude: 149.1185).data}, merge: true)})),
