@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eatwithme/pages/chat/chat.dart';
+import 'package:eatwithme/pages/profile/profile.dart';
 import 'package:eatwithme/utils/constants.dart';
+import 'package:eatwithme/utils/routeFromRight.dart';
 import 'package:eatwithme/widgets/loadingCircle.dart';
 import 'package:flutter/material.dart';
 
@@ -10,7 +12,8 @@ class Friend extends StatefulWidget {
   final String userUid;
   final String friendUid;
 
-  const Friend({Key key, @required this.userUid, @required this.friendUid}) : super(key: key);
+  const Friend({Key key, @required this.userUid, @required this.friendUid})
+      : super(key: key);
 
   @override
   _FriendState createState() => _FriendState();
@@ -24,9 +27,8 @@ class _FriendState extends State<Friend> {
   final double _photoHeight = 80.0;
 
   Widget buildInterests(List<dynamic> interests) {
-    //TODO: add formatting to interests (colours, dynamic list on items etc.)
-    return Text('${interests != null ? interests.toString() : 'No interests listed'}',
-        style: TextStyle(color: Colors.black, fontSize: 18.0));
+    // Reduce, reuse, recycle ;)
+    return InterestsList(interests: interests);
   }
 
   Widget showProfilePhoto(String profileURL) {
@@ -108,14 +110,15 @@ class _FriendState extends State<Friend> {
                                     EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
                               ),
                               Container(
-                                child: buildInterests(snapshot.data['interests']),
+                                child:
+                                    buildInterests(snapshot.data['interests']),
                                 alignment: Alignment.centerLeft,
                                 margin:
                                     EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
                               )
                             ],
                           ),
-                          margin: EdgeInsets.only(left: 0.0),
+                          margin: EdgeInsets.only(top: 10.0, left: 0.0),
                         ),
                       ),
                     ],
@@ -123,18 +126,20 @@ class _FriendState extends State<Friend> {
                   onPressed: () {
                     Navigator.push(
                         context,
-                        MaterialPageRoute(
-                            builder: (context) => Chat(
-                                  userId: widget.userUid,
-                                  peerId: widget.friendUid,
-                                  peerAvatar: snapshot.data['photoURL'],
-                                  peerName: (snapshot.data['displayName'] != null) ? snapshot.data['displayName'] : snapshot.data['email'],
-                                )));
+                        RouteFromRight(
+                            widget: Chat(
+                          userId: widget.userUid,
+                          peerId: widget.friendUid,
+                          peerAvatar: snapshot.data['photoURL'],
+                          peerName: (snapshot.data['displayName'] != null)
+                              ? snapshot.data['displayName']
+                              : snapshot.data['email'],
+                        )));
                   },
                   color: Colors.white,
-                  padding: EdgeInsets.fromLTRB(10.0, 6.0, 0.0, 6.0),
+                  padding: EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 10.0),
                 ),
-                margin: EdgeInsets.only(bottom: 0.0, left: 0.0, right: 0.0),
+                margin: EdgeInsets.only(top: 0.0, left: 10.0, right: 0.0),
               );
             } else {
               return Container();

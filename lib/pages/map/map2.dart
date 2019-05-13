@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eatwithme/pages/auth/auth.dart';
 import 'package:eatwithme/pages/chat/friends.dart';
 import 'package:eatwithme/pages/map/animationButton.dart';
+import 'package:eatwithme/pages/profile/editProfile.dart';
 import 'package:eatwithme/pages/profile/profile.dart';
 import 'package:eatwithme/theme/eatwithme_theme.dart';
 import 'package:eatwithme/utils/constants.dart';
@@ -339,7 +340,6 @@ class _Map2State extends State<Map2> {
           // animationButton,
 
           Row(
-
             children: <Widget>[
               FloatingActionButton(
                   child: Icon(Icons.pin_drop, size: 30.0),
@@ -349,19 +349,36 @@ class _Map2State extends State<Map2> {
               FloatingActionButton(
                   child: Icon(Icons.chat, size: 30.0),
                   foregroundColor: Colors.black,
-                  backgroundColor: Colors.red,
+                  backgroundColor: themeLight().primaryColor,
                   heroTag: 'FriendPage',
                   onPressed: () {
-                    // var route = MaterialPageRoute(
-                    //     builder: (context) => FriendsPage(
-                    //           currentUid: authService.currentUid,
-                    //         ));
                     Navigator.push(
-                      context,
-                      RouteFromBottom(
-                        widget: FriendsPage(currentUid: authService.currentUid)
-                      )
-                    );
+                        context,
+                        RouteFromBottom(
+                            widget: FriendsPage(
+                                currentUid: authService.currentUid)));
+                  }),
+              FloatingActionButton(
+                  child: 
+                    StreamBuilder(
+                      stream: _controllerUserProfile.stream,
+                      builder: (context, snapshot) {
+                        String photoURL;
+                        if (snapshot.connectionState == ConnectionState.active) {
+                          photoURL = snapshot.data['photoURL'];
+                        }
+                        return showProfilePhoto(photoURL);
+                      },
+                    ),
+                  foregroundColor: Colors.black,
+                  backgroundColor: Colors.red,
+                  heroTag: 'MyProfilePage',
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        RouteFromBottom(
+                            widget: EditProfilePage(
+                                uid: authService.currentUid)));
                   })
             ],
           )
@@ -420,6 +437,28 @@ class SignOutFunction extends UseFunction {
     authService.signOut();
   }
 }
+
+Widget showProfilePhoto(String profileURL) {
+    //If there is a photo, we have to pull and cache it, otherwise use the asset template
+    if (profileURL != null) {
+      //TODO: Implement Firestore image pull
+      return FadeInImage.assetNetwork(
+        placeholder: PROFILE_PHOTO_PLACEHOLDER_PATH,
+        fadeInCurve: SawTooth(1),
+        image: profileURL,
+        width: 30.0,
+        height: 30.0,
+        fit: BoxFit.fitHeight,
+      );
+    } else {
+      return Image.asset(
+        PROFILE_PHOTO_PLACEHOLDER_PATH,
+        width: 30.0,
+        height: 30.0,
+        fit: BoxFit.scaleDown,
+      );
+    }
+  }
 
 // onPressed: () => _signOut(context)))
 //           onPressed: () => {_firestore

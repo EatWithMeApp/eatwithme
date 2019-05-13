@@ -90,10 +90,10 @@ class _FriendsPageState extends State<FriendsPage> {
       return noActiveChats();
     }
 
-    return ListView.separated(
-      separatorBuilder: (context, index) => Divider(
-        color: Colors.black,
-      ),
+    return ListView.builder(
+      // separatorBuilder: (context, index) => Divider(
+      //   color: Colors.black87,
+      // ),
       padding: EdgeInsets.all(0.0),
       itemBuilder: (context, index) => Friend(
           userUid: currentUid,

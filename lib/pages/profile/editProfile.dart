@@ -15,12 +15,17 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 class EditProfilePage extends StatefulWidget {
+  
+  final String uid;
+
+  const EditProfilePage({Key key, this.uid}) : super(key: key);
+  
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<EditProfilePage> {
-  String uID = 'Oaag40RDDDLof3sjq5QW';
+  // String uid = 'Oaag40RDDDLof3sjq5QW';
   var downURL;
   final Firestore _firestore = Firestore.instance;
   final StreamController _profileController = StreamController();
@@ -50,7 +55,7 @@ class _ProfilePageState extends State<EditProfilePage> {
     super.initState();
     _profileController.addStream(_firestore
         .collection('Users')
-        .document(uID)
+        .document(widget.uid)
         .snapshots()
         .map((snap) => snap.data));
   }
@@ -183,7 +188,7 @@ class _ProfilePageState extends State<EditProfilePage> {
                                     color: Colors.grey,
                                     child: Text('Save'),
                                     onPressed: () {
-                                      submitProfileChanges(_firestore, uID, _aboutMeControler, downURL);
+                                      submitProfileChanges(_firestore, widget.uid, _aboutMeControler, downURL);
                                     },
                                   ),
                                 )
