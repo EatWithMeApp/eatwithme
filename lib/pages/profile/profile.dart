@@ -251,7 +251,7 @@ class ChatboxLink extends StatelessWidget {
         // padding: EdgeInsets.only(top: 25.0),
         height: 40.0,
         width: double.infinity,
-        child: RaisedButton(
+        child: FlatButton(
           onPressed: () {
             Navigator.push(
               context,

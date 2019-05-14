@@ -342,15 +342,16 @@ class _Map2State extends State<Map2> {
           Row(
             children: <Widget>[
               FloatingActionButton(
+                  heroTag: 'GoToPos',
                   child: Icon(Icons.pin_drop, size: 30.0),
                   foregroundColor: Colors.black,
                   backgroundColor: themeLight().primaryColor,
                   onPressed: () => _animateToUser()),
               FloatingActionButton(
+                  heroTag: 'FriendPage',
                   child: Icon(Icons.chat, size: 30.0),
                   foregroundColor: Colors.black,
                   backgroundColor: themeLight().primaryColor,
-                  heroTag: 'FriendPage',
                   onPressed: () {
                     Navigator.push(
                         context,
@@ -359,27 +360,23 @@ class _Map2State extends State<Map2> {
                                 currentUid: authService.currentUid)));
                   }),
               FloatingActionButton(
-                  child: 
-                    StreamBuilder(
-                      stream: _controllerUserProfile.stream,
-                      builder: (context, snapshot) {
-                        String photoURL;
-                        if (snapshot.connectionState == ConnectionState.active) {
-                          photoURL = snapshot.data['photoURL'];
-                        }
-                        return showProfilePhoto(photoURL);
-                      },
-                    ),
+                  heroTag: 'MyUserProfile',
+                  child: Icon(Icons.account_circle, size: 30.0),
                   foregroundColor: Colors.black,
                   backgroundColor: Colors.red,
-                  heroTag: 'MyProfilePage',
                   onPressed: () {
                     Navigator.push(
                         context,
                         RouteFromBottom(
                             widget: EditProfilePage(
                                 uid: authService.currentUid)));
-                  })
+                  }),
+              FloatingActionButton(
+                  heroTag: 'Logout',
+                  child: Icon(Icons.exit_to_app, size: 30.0),
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.black,
+                  onPressed: () => _signOut(context)),
             ],
           )
 

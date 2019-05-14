@@ -41,11 +41,12 @@ class _FriendsPageState extends State<FriendsPage> {
           title: Row(
             children: <Widget>[
               Hero(
-                  tag: 'FriendPage',
-                  child: Icon(
-                    Icons.chat,
-                    size: 35.0,
-                  )),
+                tag: 'FriendPage',
+                child: Icon(
+                  Icons.chat,
+                  size: 35.0,
+                ),
+              ),
               Text(
                 '  Chats',
                 style: TextStyle(fontSize: 20.0),
@@ -100,7 +101,6 @@ class _FriendsPageState extends State<FriendsPage> {
           friendUid: getUidFromChatSnapshot(
               chatSnapshot.data.documents[index], currentUid)),
       itemCount: chatSnapshot.data.documents.length,
-
     );
   }
 
