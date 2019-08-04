@@ -1,3 +1,4 @@
+import 'package:eatwithme/theme/eatwithme_theme.dart';
 import 'package:eatwithme/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:eatwithme/pages/auth/auth.dart';
@@ -14,6 +15,7 @@ class VerifyPage extends StatelessWidget {
         ),
         body: Container(
           alignment: Alignment.center,
+          color: themeLight().backgroundColor,
           child: Text(
             VERIFY_ACCOUNT,
             softWrap: true,
