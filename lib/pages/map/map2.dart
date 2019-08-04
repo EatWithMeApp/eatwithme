@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eatwithme/models/models.dart';
 import 'package:eatwithme/pages/auth/auth.dart';
 import 'package:eatwithme/pages/chat/friends.dart';
 import 'package:eatwithme/pages/map/animationButton.dart';
@@ -33,7 +34,7 @@ class _Map2State extends State<Map2> {
 
   final StreamController _controllerUserLocation = StreamController();
 
-  FirebaseUser user;
+  FirebaseUser loggedInUser;
   final db = DatabaseService();
 
   // GoogleMapController _mapController;
@@ -163,14 +164,14 @@ class _Map2State extends State<Map2> {
 
     // if (distance <= 0.0) return null;
 
-    if (user == null) {
+    if (loggedInUser == null) {
       print('Map currentuid no good');
       return null;
     }
 
     previousUserLocation = point;
 
-    db.updateUserLocation(user.uid, point);
+    db.updateUserLocation(loggedInUser.uid, point);
 
     // return _firestore
     //     .collection('Users')
@@ -198,13 +199,12 @@ class _Map2State extends State<Map2> {
   }
 
   _updateMapMarkers(List<DocumentSnapshot> documents) {
-    print(documents);
     for (DocumentSnapshot document in documents) {
       if (document == null) continue;
 
       // If the pin is us, or we can't read the uid, skip
       String uid = document.data['uid'];
-      if (uid == authService.currentUid) continue;
+      if (uid == loggedInUser.uid) continue;
       if (uid == null) continue;
 
       // If the person doesn't have any interests in common, skip
@@ -217,8 +217,8 @@ class _Map2State extends State<Map2> {
 
       if ((lat == null) || (lng == null)) continue;
 
-      _firestore.collection('Users').document(uid).get().then((snap) {
-        var userData = snap.data;
+      db.getUser(uid).then((currentUser) {
+        // var userData = user.data;
 
         var markerId = MarkerId(uid);
 
@@ -230,13 +230,13 @@ class _Map2State extends State<Map2> {
             position: LatLng(lat, lng),
             draggable: false,
             infoWindow: InfoWindow(
-              title: userData['displayName'],
+              title: currentUser.displayName,
             ),
             onTap: () {
               showModalBottomSheet<void>(
                   context: context,
                   builder: (BuildContext context) {
-                    return ProfileBottomSheet(userData: userData);
+                    return ProfileBottomSheet(user: currentUser);
                   });
             });
 
@@ -313,7 +313,7 @@ class _Map2State extends State<Map2> {
   Widget build(BuildContext context) {
     //SignOutFunction button3;
 
-    user = Provider.of<FirebaseUser>(context);
+    loggedInUser = Provider.of<FirebaseUser>(context);
 
     var button3 = () {
       print('Pressed button 3');
@@ -408,10 +408,10 @@ class _Map2State extends State<Map2> {
 class ProfileBottomSheet extends StatefulWidget {
   const ProfileBottomSheet({
     Key key,
-    @required this.userData,
+    @required this.user,
   }) : super(key: key);
 
-  final Map<String, dynamic> userData;
+  final User user;
 
   @override
   _ProfileBottomSheetState createState() => _ProfileBottomSheetState();
@@ -427,7 +427,7 @@ class _ProfileBottomSheetState extends State<ProfileBottomSheet> {
         decoration: BoxDecoration(
           border: Border.all(color: Colors.transparent, width: 0.0),
         ),
-        child: ProfilePage(uid: widget.userData['uid']));
+        child: ProfilePage(uid: widget.user.uid));
   }
 }
 

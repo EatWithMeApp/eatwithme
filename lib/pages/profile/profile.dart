@@ -2,15 +2,19 @@ import 'dart:async';
 import 'dart:core';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eatwithme/models/models.dart';
 import 'package:eatwithme/pages/chat/chat.dart';
+import 'package:eatwithme/services/db.dart';
 import 'package:eatwithme/theme/eatwithme_theme.dart';
 import 'package:eatwithme/utils/constants.dart';
 import 'package:eatwithme/utils/routeFromBottom.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:eatwithme/pages/interests/interests.dart';
 import 'package:eatwithme/main.dart';
 import 'package:eatwithme/widgets/loadingCircle.dart';
 import 'package:eatwithme/pages/auth/auth.dart';
+import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
   final String uid;
@@ -22,87 +26,94 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final Firestore _firestore = Firestore.instance;
-  final StreamController _profileController = StreamController();
+  // final StreamController _profileController = StreamController();
 
-  double imgWidth = 140.0;
-  double imgHeight = 140.0;
+  DatabaseService db = DatabaseService();
 
   @override
   void initState() {
     super.initState();
-    _profileController.addStream(_firestore
-        .collection('Users')
-        .document(widget.uid)
-        .snapshots()
-        .map((snap) => snap.data));
+    // _profileController.addStream(db.streamUser(widget.uid));
   }
 
   @override
   void dispose() {
     print('Close profile');
-    _profileController.close();
+    // _profileController.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-        stream: _profileController.stream,
-        builder: (context, usersSnapshot) {
-          switch (usersSnapshot.connectionState) {
-            case ConnectionState.none:
-              return Text("Error loading profile");
-              break;
-            case ConnectionState.done:
-              return noActiveProfile();
-            case ConnectionState.waiting:
-              return LoadingCircle();
-              break;
-            case ConnectionState.active:
-              if (usersSnapshot.hasData) {
-                return Container(
-                  child: Stack(
-                    alignment: Alignment.topCenter,
-                    children: <Widget>[
-                      Padding(
-                        padding: EdgeInsets.only(top: imgWidth / 2.0),
-                        child: Container(
-                          constraints: BoxConstraints(
-                            minHeight: 306.0,
-                            maxHeight: 500.0,
-                            minWidth: double.infinity,
-                            maxWidth: double.infinity,
-                          ),
-                          child: ProfileCard(
-                              widget: widget, usersSnapshot: usersSnapshot),
-                        ),
-                      ),
-                      UserImage(
-                        imgHeight: imgHeight,
-                        imgWidth: imgWidth,
-                        photoURL: usersSnapshot.data['photoURL'],
-                      ),
-                    ],
-                  ),
-                );
-              } else {
-                //Shouldn't reach here, but assume no chats instead of broken
-                return noActiveProfile();
-              }
-              break;
-          }
-        });
+    return StreamProvider<User>.value(
+      value: db.streamUser(widget.uid),
+      child: UserProfile(),
+    );
+  }
+  //   return StreamBuilder(
+  //       stream: _profileController.stream,
+  //       builder: (context, usersSnapshot) {
+  //         switch (usersSnapshot.connectionState) {
+  //           case ConnectionState.none:
+  //             return Text("Error loading profile");
+  //             break;
+  //           case ConnectionState.done:
+  //             return noActiveProfile();
+  //           case ConnectionState.waiting:
+  //             return LoadingCircle();
+  //             break;
+  //           case ConnectionState.active:
+  //             if (usersSnapshot.hasData) {
+  //               return new UserProfile(imgWidth: imgWidth, widget: widget, imgHeight: imgHeight);
+  //             } else {
+  //               //Shouldn't reach here, but assume no chats instead of broken
+  //               return noActiveProfile();
+  //             }
+  //             break;
+  //         }
+  //       });
+  // }
+}
+
+class UserProfile extends StatelessWidget {
+  final double imgWidth = 140.0;
+  final double imgHeight = 140.0;
+
+  @override
+  Widget build(BuildContext context) {
+    User user = Provider.of<User>(context);
+
+    return Container(
+      child: Stack(
+        alignment: Alignment.topCenter,
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.only(top: imgWidth / 2.0),
+            child: Container(
+              constraints: BoxConstraints(
+                minHeight: 306.0,
+                maxHeight: 500.0,
+                minWidth: double.infinity,
+                maxWidth: double.infinity,
+              ),
+              child: ProfileCard(user: user),
+            ),
+          ),
+          UserImage(
+            imgHeight: imgHeight,
+            imgWidth: imgWidth,
+            photoURL: user.photoURL
+          ),
+        ],
+      ),
+    );
   }
 }
 
 class ProfileCard extends StatelessWidget {
-  const ProfileCard(
-      {Key key, @required this.widget, @required this.usersSnapshot})
-      : super(key: key);
+  const ProfileCard({Key key, @required this.user}) : super(key: key);
 
-  final ProfilePage widget;
-  final AsyncSnapshot usersSnapshot;
+  final User user;
 
   @override
   Widget build(BuildContext context) {
@@ -122,11 +133,7 @@ class ProfileCard extends StatelessWidget {
                       topRight: const Radius.circular(10.0),
                     )),
                 child: Text(
-                  (usersSnapshot.data['displayName'] ??
-                      usersSnapshot.data['email']
-                          .toString()
-                          .split('@')[0]
-                          .trim()),
+                  user.displayName,
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 30.0,
@@ -136,12 +143,8 @@ class ProfileCard extends StatelessWidget {
               ),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(
-                    color: Colors.transparent,
-                    width: 0.0
-                  )
-                ),
+                    color: Colors.white,
+                    border: Border.all(color: Colors.transparent, width: 0.0)),
                 child: Column(
                   children: <Widget>[
                     SizedBox(
@@ -165,9 +168,7 @@ class ProfileCard extends StatelessWidget {
                           minHeight: 50.0,
                           maxWidth: double.infinity,
                           minWidth: double.infinity),
-                      child: Text(
-                        (usersSnapshot.data['aboutMe'] ?? '(Not provided)'),
-                      ),
+                      child: Text(user.aboutMe),
                     ),
                     Container(
                       // alignment: Alignment(0.0, 0.7),
@@ -183,7 +184,7 @@ class ProfileCard extends StatelessWidget {
                             alignment: Alignment(-1.0, 0.0),
                           ),
                           InterestsList(
-                            interests: List.of(usersSnapshot.data['interests']),
+                            interests: List.of(user.interests),
                           ),
                         ],
                       ),
@@ -193,13 +194,12 @@ class ProfileCard extends StatelessWidget {
               ),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(
-                    color: Colors.transparent,
-                    width: 0.0
-                  )
-                ),
-                child: ChatboxLink(uID: widget.uid, peerName: usersSnapshot.data['displayName'], photoURL: usersSnapshot.data['photoURL']),
+                    color: Colors.white,
+                    border: Border.all(color: Colors.transparent, width: 0.0)),
+                child: ChatboxLink(
+                    peerID: user.uid,
+                    peerName: user.displayName,
+                    photoURL: user.photoURL),
               )
             ],
           ),
@@ -215,7 +215,7 @@ class InterestsList extends StatelessWidget {
     @required this.interests,
   }) : super(key: key);
 
-  final List<dynamic> interests;
+  final List<String> interests;
 
   @override
   Widget build(BuildContext context) {
@@ -236,17 +236,19 @@ class InterestsList extends StatelessWidget {
 class ChatboxLink extends StatelessWidget {
   const ChatboxLink({
     Key key,
-    @required this.uID,
+    @required this.peerID,
     @required this.peerName,
     @required this.photoURL,
   }) : super(key: key);
 
-  final String uID;
+  final String peerID;
   final String peerName;
   final String photoURL;
 
   @override
   Widget build(BuildContext context) {
+    var loggedInUser = Provider.of<FirebaseUser>(context);
+
     return SizedBox(
         // padding: EdgeInsets.only(top: 25.0),
         height: 40.0,
@@ -254,14 +256,14 @@ class ChatboxLink extends StatelessWidget {
         child: FlatButton(
           onPressed: () {
             Navigator.push(
-              context,
-              RouteFromBottom(widget: Chat(
-                userId: authService.currentUid,
-                peerId: uID,
-                peerName: peerName,
-                peerAvatar: photoURL,
-              ))
-            );
+                context,
+                RouteFromBottom(
+                    widget: Chat(
+                  userId: loggedInUser.uid,
+                  peerId: peerID,
+                  peerName: peerName,
+                  peerAvatar: photoURL,
+                )));
           },
           color: themeLight().primaryColor,
           shape:
@@ -326,10 +328,6 @@ class UserImage extends StatelessWidget {
 
 enlargeImage() {
   //TODO find out a way to blow up image size
-}
-
-SendChat(String recipientUID, String message) {
-  //TODO Send the chat to this user
 }
 
 ImageProvider showProfilePhoto(String profileURL, double width, double height) {
