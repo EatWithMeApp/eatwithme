@@ -145,7 +145,7 @@ class Auth implements BaseAuth {
       'uid': user.uid,
       'email': user.email,
       'photoURL': user.photoUrl,
-      'displayName': user.displayName,
+      'displayName': user.email.split('@')[0].trim(),
       'lastSeen': DateTime.now(),
     }, merge: true);
   }

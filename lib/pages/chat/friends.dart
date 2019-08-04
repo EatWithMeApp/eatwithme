@@ -41,11 +41,12 @@ class _FriendsPageState extends State<FriendsPage> {
           title: Row(
             children: <Widget>[
               Hero(
-                  tag: 'FriendPage',
-                  child: Icon(
-                    Icons.chat,
-                    size: 35.0,
-                  )),
+                tag: 'FriendPage',
+                child: Icon(
+                  Icons.chat,
+                  size: 35.0,
+                ),
+              ),
               Text(
                 '  Chats',
                 style: TextStyle(fontSize: 20.0),
@@ -54,28 +55,31 @@ class _FriendsPageState extends State<FriendsPage> {
           ),
         ),
         body: SafeArea(
-          child: StreamBuilder(
-              stream: _controllerChat.stream,
-              builder: (context, chatSnapshot) {
-                switch (chatSnapshot.connectionState) {
-                  case ConnectionState.none:
-                    return Text("Error loading chat");
-                    break;
-                  case ConnectionState.done:
-                    return noActiveChats();
-                  case ConnectionState.waiting:
-                    return LoadingCircle();
-                    break;
-                  case ConnectionState.active:
-                    if (chatSnapshot.hasData) {
-                      return buildFriendList(chatSnapshot, widget.currentUid);
-                    } else {
-                      //Shouldn't reach here, but assume no chats instead of broken
+          child: Container(
+            color: Colors.white,
+            child: StreamBuilder(
+                stream: _controllerChat.stream,
+                builder: (context, chatSnapshot) {
+                  switch (chatSnapshot.connectionState) {
+                    case ConnectionState.none:
+                      return Text("Error loading chat");
+                      break;
+                    case ConnectionState.done:
                       return noActiveChats();
-                    }
-                    break;
-                }
-              }),
+                    case ConnectionState.waiting:
+                      return LoadingCircle();
+                      break;
+                    case ConnectionState.active:
+                      if (chatSnapshot.hasData) {
+                        return buildFriendList(chatSnapshot, widget.currentUid);
+                      } else {
+                        //Shouldn't reach here, but assume no chats instead of broken
+                        return noActiveChats();
+                      }
+                      break;
+                  }
+                }),
+          ),
         ));
   }
 
@@ -87,17 +91,16 @@ class _FriendsPageState extends State<FriendsPage> {
       return noActiveChats();
     }
 
-    return ListView.separated(
-      separatorBuilder: (context, index) => Divider(
-        color: Colors.black,
-      ),
+    return ListView.builder(
+      // separatorBuilder: (context, index) => Divider(
+      //   color: Colors.black87,
+      // ),
       padding: EdgeInsets.all(0.0),
       itemBuilder: (context, index) => Friend(
           userUid: currentUid,
           friendUid: getUidFromChatSnapshot(
               chatSnapshot.data.documents[index], currentUid)),
       itemCount: chatSnapshot.data.documents.length,
-
     );
   }
 

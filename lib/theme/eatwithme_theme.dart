@@ -4,6 +4,7 @@ ThemeData themeLight() {
   return ThemeData(
     primaryColor: Colors.orange,
     backgroundColor: Colors.white,
+    canvasColor: Colors.transparent,
     fontFamily: 'Roboto',
   );
 }
