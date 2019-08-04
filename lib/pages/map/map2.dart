@@ -9,13 +9,16 @@ import 'package:eatwithme/pages/chat/friends.dart';
 import 'package:eatwithme/pages/map/animationButton.dart';
 import 'package:eatwithme/pages/profile/editProfile.dart';
 import 'package:eatwithme/pages/profile/profile.dart';
+import 'package:eatwithme/services/db.dart';
 import 'package:eatwithme/theme/eatwithme_theme.dart';
 import 'package:eatwithme/utils/constants.dart';
 import 'package:eatwithme/utils/routeFromBottom.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
 
@@ -27,9 +30,11 @@ class Map2 extends StatefulWidget {
 class _Map2State extends State<Map2> {
   final Firestore _firestore = Firestore.instance;
   final Geoflutterfire geo = Geoflutterfire();
-  final StreamController _controllerUserProfile = StreamController();
 
   final StreamController _controllerUserLocation = StreamController();
+
+  FirebaseUser user;
+  final db = DatabaseService();
 
   // GoogleMapController _mapController;
   Completer<GoogleMapController> _mapController = Completer();
@@ -49,22 +54,17 @@ class _Map2State extends State<Map2> {
 
   double _zoomValue = 16.0;
 
-  @override
-  void initState() {
-    print('Begin init');
-    super.initState();
-    _controllerUserProfile.addStream(_firestore
-        .collection('Users')
-        .document(authService.currentUid)
-        .snapshots()
-        .map((snap) => snap.data));
+  // @override
+  // void initState() {
+  //   print('Begin init');
+  //   super.initState();
 
-    // Future.delayed(const Duration(seconds: 5), () => "5");
+  //   // Future.delayed(const Duration(seconds: 5), () => "5");
 
-    // startTheQuery();
+  //   // startTheQuery();
 
-    print('End init');
-  }
+  //   print('End init');
+  // }
 
   // void startTheQuery() async {
   //   await _startQuery();
@@ -72,7 +72,6 @@ class _Map2State extends State<Map2> {
 
   @override
   void dispose() {
-    _controllerUserProfile.close();
     subscription.cancel();
     _controllerUserLocation.close();
     radius.close();
@@ -164,27 +163,29 @@ class _Map2State extends State<Map2> {
 
     // if (distance <= 0.0) return null;
 
-    if (authService.currentUid == null) {
+    if (user == null) {
       print('Map currentuid no good');
       return null;
     }
 
     previousUserLocation = point;
 
-    return _firestore
-        .collection('Users')
-        .document(authService.currentUid)
-        .setData({'position': point.data}, merge: true);
+    db.updateUserLocation(user.uid, point);
+
+    // return _firestore
+    //     .collection('Users')
+    //     .document(authService.currentUid)
+    //     .setData({'position': point.data}, merge: true);
   }
 
-  void _addMarker() {
-    // var marker = MarkerOptions(
-    //     position: _mapController.cameraPosition.target,
-    //     icon: BitmapDescriptor.defaultMarker,
-    //     infoWindowText: InfoWindowText('Magic Marker', '🍄🍄🍄'));
+  // void _addMarker() {
+  //   // var marker = MarkerOptions(
+  //   //     position: _mapController.cameraPosition.target,
+  //   //     icon: BitmapDescriptor.defaultMarker,
+  //   //     infoWindowText: InfoWindowText('Magic Marker', '🍄🍄🍄'));
 
-    // _mapController.addMarker(marker);
-  }
+  //   // _mapController.addMarker(marker);
+  // }
 
   _animateToUser() async {
     LocationData pos = await userLocation.getLocation();
@@ -311,6 +312,8 @@ class _Map2State extends State<Map2> {
   @override
   Widget build(BuildContext context) {
     //SignOutFunction button3;
+
+    user = Provider.of<FirebaseUser>(context);
 
     var button3 = () {
       print('Pressed button 3');
