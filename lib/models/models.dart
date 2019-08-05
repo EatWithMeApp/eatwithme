@@ -4,7 +4,6 @@ import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:location/location.dart';
 
 class User {
-
   final String uid;
   final String aboutMe;
   final String displayName;
@@ -43,5 +42,40 @@ class User {
     data['uid'] = doc.documentID;
     return User.fromMap(data);
   }
+
+}
+
+class ChatRoom {
+  final String id;
+  final List<String> userUids;
+  final bool canAddUsers;
+  final List<Message> messages;
+
+  ChatRoom({this.id, this.canAddUsers, this.messages, this.userUids});
+
+  factory ChatRoom.fromMap(Map data) {
+    return ChatRoom(
+      id: data['id'] ?? '',
+      canAddUsers: data['canAddUsers'] ?? false,
+      messages: data['messages'] ?? [],
+      userUids: data['userUids'] ?? [],
+    );
+  }
+
+  factory ChatRoom.fromFirestore(DocumentSnapshot doc) {
+    Map data = doc.data;
+    data['id'] = doc.documentID;
+    return ChatRoom.fromMap(data);
+  }
+
+  static String generateID(List<String> userUids) {
+    // A chat room's ID is the two users joined
+    // A blank ID returned will force Firebase to generate one for us
+    // (blanks will be handy if there are multiple users in a chat room...)
+    return (userUids.length == 2) ? userUids[0] + '-' + userUids[1] : null;
+  }
+}
+
+class Message {
 
 }

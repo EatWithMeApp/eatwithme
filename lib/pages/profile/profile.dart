@@ -26,22 +26,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  // final StreamController _profileController = StreamController();
-
   DatabaseService db = DatabaseService();
-
-  @override
-  void initState() {
-    super.initState();
-    // _profileController.addStream(db.streamUser(widget.uid));
-  }
-
-  @override
-  void dispose() {
-    print('Close profile');
-    // _profileController.close();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,29 +35,6 @@ class _ProfilePageState extends State<ProfilePage> {
       child: UserProfile(),
     );
   }
-  //   return StreamBuilder(
-  //       stream: _profileController.stream,
-  //       builder: (context, usersSnapshot) {
-  //         switch (usersSnapshot.connectionState) {
-  //           case ConnectionState.none:
-  //             return Text("Error loading profile");
-  //             break;
-  //           case ConnectionState.done:
-  //             return noActiveProfile();
-  //           case ConnectionState.waiting:
-  //             return LoadingCircle();
-  //             break;
-  //           case ConnectionState.active:
-  //             if (usersSnapshot.hasData) {
-  //               return new UserProfile(imgWidth: imgWidth, widget: widget, imgHeight: imgHeight);
-  //             } else {
-  //               //Shouldn't reach here, but assume no chats instead of broken
-  //               return noActiveProfile();
-  //             }
-  //             break;
-  //         }
-  //       });
-  // }
 }
 
 class UserProfile extends StatelessWidget {
@@ -249,21 +211,26 @@ class ChatboxLink extends StatelessWidget {
   Widget build(BuildContext context) {
     var loggedInUser = Provider.of<FirebaseUser>(context);
 
+    var db = DatabaseService();
+
     return SizedBox(
         // padding: EdgeInsets.only(top: 25.0),
         height: 40.0,
         width: double.infinity,
         child: FlatButton(
           onPressed: () {
-            Navigator.push(
-                context,
-                RouteFromBottom(
-                    widget: Chat(
-                  userId: loggedInUser.uid,
-                  peerId: peerID,
-                  peerName: peerName,
-                  peerAvatar: photoURL,
-                )));
+
+            db.createChatRoom([loggedInUser.uid, peerID]);
+
+            // Navigator.push(
+            //     context,
+            //     RouteFromBottom(
+            //         widget: Chat(
+            //       userId: loggedInUser.uid,
+            //       peerId: peerID,
+            //       peerName: peerName,
+            //       peerAvatar: photoURL,
+            //     )));
           },
           color: themeLight().primaryColor,
           shape:

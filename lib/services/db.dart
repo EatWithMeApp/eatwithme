@@ -34,4 +34,20 @@ class DatabaseService {
     );
   }
 
+  Future<void> createChatRoom(List<String> userUids) {
+    String id = ChatRoom.generateID(userUids);
+    var room = _db.collection('ChatRooms').document(id);
+    
+    room.setData({
+      'id': id,
+      'userUids': userUids,
+
+      // Rooms with 2 users are user to user and shouldn't allow others
+      'canAddUsers': (userUids.length != 2),
+    }, merge: true);
+
+    //Add the messages subcollection
+    return room.collection('messages').document().setData({});
+  }
+
 }

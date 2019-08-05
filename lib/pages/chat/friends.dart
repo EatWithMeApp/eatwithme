@@ -1,10 +1,13 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eatwithme/models/models.dart';
 import 'package:eatwithme/pages/chat/friend.dart';
 import 'package:eatwithme/utils/constants.dart';
 import 'package:eatwithme/widgets/loadingCircle.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class FriendsPage extends StatefulWidget {
   final String currentUid;
@@ -36,6 +39,8 @@ class _FriendsPageState extends State<FriendsPage> {
 
   @override
   Widget build(BuildContext context) {
+    var loggedInUser = Provider.of<FirebaseUser>(context);
+
     return Scaffold(
         appBar: AppBar(
           title: Row(
@@ -57,6 +62,12 @@ class _FriendsPageState extends State<FriendsPage> {
         body: SafeArea(
           child: Container(
             color: Colors.white,
+            // child: StreamProvider<List<User>>.value(
+            //   value: null,
+            //   child: buildFriendList(chatSnapshot, widget.currentUid),
+            // )
+            
+            
             child: StreamBuilder(
                 stream: _controllerChat.stream,
                 builder: (context, chatSnapshot) {
