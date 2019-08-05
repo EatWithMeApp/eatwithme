@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eatwithme/models/models.dart';
 import 'package:eatwithme/pages/chat/friend.dart';
+import 'package:eatwithme/services/db.dart';
 import 'package:eatwithme/utils/constants.dart';
 import 'package:eatwithme/widgets/loadingCircle.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -40,6 +41,7 @@ class _FriendsPageState extends State<FriendsPage> {
   @override
   Widget build(BuildContext context) {
     var loggedInUser = Provider.of<FirebaseUser>(context);
+    var db = DatabaseService();
 
     return Scaffold(
         appBar: AppBar(
@@ -62,83 +64,100 @@ class _FriendsPageState extends State<FriendsPage> {
         body: SafeArea(
           child: Container(
             color: Colors.white,
-            // child: StreamProvider<List<User>>.value(
-            //   value: null,
-            //   child: buildFriendList(chatSnapshot, widget.currentUid),
-            // )
+            child: StreamProvider<Iterable<ChatRoom>>.value(
+              value: db.streamChatRooms(loggedInUser),
+              child: buildChatRooms(),
+            )
             
             
-            child: StreamBuilder(
-                stream: _controllerChat.stream,
-                builder: (context, chatSnapshot) {
-                  switch (chatSnapshot.connectionState) {
-                    case ConnectionState.none:
-                      return Text("Error loading chat");
-                      break;
-                    case ConnectionState.done:
-                      return noActiveChats();
-                    case ConnectionState.waiting:
-                      return LoadingCircle();
-                      break;
-                    case ConnectionState.active:
-                      if (chatSnapshot.hasData) {
-                        return buildFriendList(chatSnapshot, widget.currentUid);
-                      } else {
-                        //Shouldn't reach here, but assume no chats instead of broken
-                        return noActiveChats();
-                      }
-                      break;
-                  }
-                }),
+            // child: StreamBuilder(
+            //     stream: _controllerChat.stream,
+            //     builder: (context, chatSnapshot) {
+            //       switch (chatSnapshot.connectionState) {
+            //         case ConnectionState.none:
+            //           return Text("Error loading chat");
+            //           break;
+            //         case ConnectionState.done:
+            //           return noActiveChats();
+            //         case ConnectionState.waiting:
+            //           return LoadingCircle();
+            //           break;
+            //         case ConnectionState.active:
+            //           if (chatSnapshot.hasData) {
+            //             return buildFriendList(chatSnapshot, widget.currentUid);
+            //           } else {
+            //             //Shouldn't reach here, but assume no chats instead of broken
+            //             return noActiveChats();
+            //           }
+            //           break;
+            //       }
+            //     }),
           ),
         ));
   }
 
-  Widget buildFriendList(AsyncSnapshot chatSnapshot, String currentUid) {
-    //Check for no chats
-    //If not checked, an empty list will get built over any
-    //messages we want to show
-    if (chatSnapshot.data.documents.length == 0) {
-      return noActiveChats();
-    }
+  Widget buildChatRooms() {
+    var rooms = Provider.of<Iterable<ChatRoom>>(context);
+
+    // Check that rooms comes back properly
+    // Extract other participant
+    // Change Friend widget to stream properly
 
     return ListView.builder(
-      // separatorBuilder: (context, index) => Divider(
-      //   color: Colors.black87,
-      // ),
       padding: EdgeInsets.all(0.0),
-      itemBuilder: (context, index) => Friend(
-          userUid: currentUid,
-          friendUid: getUidFromChatSnapshot(
-              chatSnapshot.data.documents[index], currentUid)),
-      itemCount: chatSnapshot.data.documents.length,
+  //     itemBuilder: (context, index) => Friend(
+  //         userUid: currentUid,
+  //         friendUid: getUidFromChatSnapshot(
+  //             chatSnapshot.data.documents[index], currentUid)),
+  //     itemCount: chatSnapshot.data.documents.length,
     );
   }
 
-  Widget noActiveChats() {
-    return Container(
-      alignment: Alignment.center,
-      child: Text(
-        NO_ACTIVE_CHATS,
-        softWrap: true,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: 25.0,
-        ),
-      ),
-    );
-  }
+  // Widget buildFriendList(AsyncSnapshot chatSnapshot, String currentUid) {
+  //   //Check for no chats
+  //   //If not checked, an empty list will get built over any
+  //   //messages we want to show
+  //   if (chatSnapshot.data.documents.length == 0) {
+  //     return noActiveChats();
+  //   }
 
-  String getUidFromChatSnapshot(DocumentSnapshot snap, String currentUid) {
-    List<String> users = List.from(snap.data['userUids']);
+  //   return ListView.builder(
+  //     // separatorBuilder: (context, index) => Divider(
+  //     //   color: Colors.black87,
+  //     // ),
+  //     padding: EdgeInsets.all(0.0),
+  //     itemBuilder: (context, index) => Friend(
+  //         userUid: currentUid,
+  //         friendUid: getUidFromChatSnapshot(
+  //             chatSnapshot.data.documents[index], currentUid)),
+  //     itemCount: chatSnapshot.data.documents.length,
+  //   );
+  // }
 
-    //Just in case the filter doesn't catch a dud/null chat
-    if (!users.contains(currentUid)) {
-      return null;
-    }
+//   Widget noActiveChats() {
+//     return Container(
+//       alignment: Alignment.center,
+//       child: Text(
+//         NO_ACTIVE_CHATS,
+//         softWrap: true,
+//         textAlign: TextAlign.center,
+//         style: TextStyle(
+//           fontSize: 25.0,
+//         ),
+//       ),
+//     );
+//   }
 
-    //Remove us, return the other person
-    users.remove(currentUid);
-    return users[0];
-  }
+//   String getUidFromChatSnapshot(DocumentSnapshot snap, String currentUid) {
+//     List<String> users = List.from(snap.data['userUids']);
+
+//     //Just in case the filter doesn't catch a dud/null chat
+//     if (!users.contains(currentUid)) {
+//       return null;
+//     }
+
+//     //Remove us, return the other person
+//     users.remove(currentUid);
+//     return users[0];
+//   }
 }

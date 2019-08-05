@@ -39,7 +39,7 @@ class Auth implements BaseAuth {
             .snapshots()
             .map((snap) => snap.data);
       } else {
-        return Observable.just({ });
+        return Observable.just({});
       }
     });
   }
@@ -47,8 +47,10 @@ class Auth implements BaseAuth {
   Future<FirebaseUser> login(String email, String password) async {
     try {
       loading.add(true);
-      FirebaseUser user = await _firebaseAuth.signInWithEmailAndPassword(
+      var result = await _firebaseAuth.signInWithEmailAndPassword(
           email: email, password: password);
+
+      FirebaseUser user = result.user;
 
       updateUserProfile(user);
       print('Signed in ' + user.email);
@@ -62,13 +64,15 @@ class Auth implements BaseAuth {
 
   Future<FirebaseUser> signUp(String email, String password) async {
     try {
-      FirebaseUser user = await _firebaseAuth.createUserWithEmailAndPassword(
+      var result = await _firebaseAuth.createUserWithEmailAndPassword(
           email: email, password: password);
+
+      FirebaseUser user = result.user;
 
       currentUid = user.uid;
 
       await user.sendEmailVerification();
-      
+
       makeUserProfile(user);
       print('Signing up user ' + user.email);
 
@@ -82,10 +86,10 @@ class Auth implements BaseAuth {
 
   Observable<Map<String, dynamic>> getUserProfile(String uid) {
     return _firestore
-            .collection('Users')
-            .document(uid)
-            .snapshots()
-            .map((snap) => snap.data);
+        .collection('Users')
+        .document(uid)
+        .snapshots()
+        .map((snap) => snap.data);
   }
 
   Future<String> signOut() async {
@@ -107,10 +111,8 @@ class Auth implements BaseAuth {
     // FirebaseUser user = await _firebaseAuth.currentUser();
     // return user.isEmailVerified;
     bool verified = false;
-    _firebaseAuth.currentUser().then((user) => {
-      print(user.isEmailVerified),
-      verified = user.isEmailVerified
-      });
+    _firebaseAuth.currentUser().then((user) =>
+        {print(user.isEmailVerified), verified = user.isEmailVerified});
     return verified;
   }
 
@@ -120,7 +122,7 @@ class Auth implements BaseAuth {
 
   void updateUserProfile(FirebaseUser user) async {
     currentUid = user.uid;
-    
+
     DocumentReference ref = _firestore.collection('Users').document(user.uid);
 
     //TODO: Fix rewrite/lack of saving of fields (needs a profile edit page)
@@ -136,7 +138,7 @@ class Auth implements BaseAuth {
 
   void makeUserProfile(FirebaseUser user) async {
     //currentUid = user.uid;
-    
+
     DocumentReference ref = _firestore.collection('Users').document(user.uid);
 
     //TODO: Fix rewrite/lack of saving of fields (needs a profile edit page)

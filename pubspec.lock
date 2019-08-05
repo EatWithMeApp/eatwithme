@@ -35,7 +35,7 @@ packages:
       name: cloud_firestore
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.10.1"
+    version: "0.12.9"
   collection:
     dependency: transitive
     description:
@@ -77,21 +77,21 @@ packages:
       name: firebase_auth
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.8.4+1"
+    version: "0.14.0"
   firebase_core:
     dependency: "direct main"
     description:
       name: firebase_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.4"
+    version: "0.4.0+8"
   firebase_storage:
     dependency: "direct main"
     description:
       name: firebase_storage
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.1+2"
+    version: "3.0.5"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -129,7 +129,7 @@ packages:
       name: geoflutterfire
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.3+3"
+    version: "2.0.3+5"
   google_maps_flutter:
     dependency: "direct main"
     description:

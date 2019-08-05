@@ -72,7 +72,19 @@ class ChatRoom {
     // A chat room's ID is the two users joined
     // A blank ID returned will force Firebase to generate one for us
     // (blanks will be handy if there are multiple users in a chat room...)
-    return (userUids.length == 2) ? userUids[0] + '-' + userUids[1] : null;
+
+    String id = '';
+
+    if (userUids.length != 2) return id;
+
+    // To ensure identical IDs no matter order, ID is placed in hash order
+    if (userUids[0].hashCode <= userUids[1].hashCode) {
+      id = '$userUids[0]-$userUids[1]';
+    } else {
+      id = '$userUids[1]-$userUids[0]';
+    }
+
+    return id;
   }
 }
 
