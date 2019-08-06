@@ -3,7 +3,7 @@
 import 'dart:async';
 
 import 'package:eatwithme/pages/login/verify.dart';
-import 'package:eatwithme/pages/map/map2.dart';
+import 'package:eatwithme/pages/map/map.dart';
 import 'package:eatwithme/widgets/loadingCircle.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
