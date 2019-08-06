@@ -204,7 +204,7 @@ class _ProfilePageState extends State<EditProfilePage> {
                         ),
                         Container(
                             height: 75.0,
-                            child: InterestsList(
+                            child: ProfileInterestsList(
                               interests: [], //List.of(usersSnapshot.data['interests'] ?? [])
                             )
 

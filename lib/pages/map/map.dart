@@ -6,7 +6,7 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eatwithme/models/models.dart';
 import 'package:eatwithme/pages/auth/auth.dart';
-import 'package:eatwithme/pages/chat/friends.dart';
+import 'package:eatwithme/pages/chat/chat_room_list.dart';
 import 'package:eatwithme/pages/map/animationButton.dart';
 import 'package:eatwithme/pages/profile/editProfile.dart';
 import 'package:eatwithme/pages/profile/profile.dart';
@@ -351,13 +351,13 @@ class _Map2State extends State<Map2> {
                   backgroundColor: themeLight().primaryColor,
                   onPressed: () => _animateToUser()),
               FloatingActionButton(
-                  heroTag: 'ChatRoomsPage',
+                  heroTag: 'ChatRoomListPage',
                   child: Icon(Icons.chat, size: 30.0),
                   foregroundColor: Colors.black,
                   backgroundColor: themeLight().primaryColor,
                   onPressed: () {
                     Navigator.push(
-                        context, RouteFromBottom(widget: ChatRoomsPage()));
+                        context, RouteFromBottom(widget: ChatRoomListPage()));
                   }),
               FloatingActionButton(
                   heroTag: 'MyUserProfile',

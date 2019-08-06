@@ -3,7 +3,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:eatwithme/pages/chat/friends.dart';
+import 'package:eatwithme/pages/chat/chat_room_list.dart';
 import 'package:eatwithme/widgets/loadingCircle.dart';
 import 'package:flutter/material.dart';
 import 'package:eatwithme/pages/auth/auth.dart';
@@ -103,14 +103,14 @@ class _HomePageState extends State<HomePage> {
             height: 20.0,
           ),
           Hero(
-              tag: 'ChatRoomsPage',
+              tag: 'ChatRoomListPage',
               child: Material(
                   child: IconButton(
                       icon: Icon(Icons.chat),
                       iconSize: 60.0,
                       onPressed: () {
                         var route = MaterialPageRoute(
-                            builder: (context) => ChatRoomsPage());
+                            builder: (context) => ChatRoomListPage());
                         Navigator.of(context).push(route);
                       })))
         ],

@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eatwithme/models/models.dart';
-import 'package:eatwithme/pages/chat/chat.dart';
+import 'package:eatwithme/pages/chat/chat_room.dart';
 import 'package:eatwithme/pages/profile/profile.dart';
 import 'package:eatwithme/services/db.dart';
 import 'package:eatwithme/utils/constants.dart';
@@ -12,50 +12,25 @@ import 'package:eatwithme/widgets/profile_photo.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class Friend extends StatefulWidget {
-  final String friendUid;
+class ChatRoomListItem extends StatelessWidget {
+  const ChatRoomListItem({Key key, @required this.chatUserUid})
+      : super(key: key);
 
-  const Friend({Key key, @required this.friendUid}) : super(key: key);
-
-  @override
-  _FriendState createState() => _FriendState();
-}
-
-class _FriendState extends State<Friend> {
-  Widget buildInterests(List<dynamic> interests) {
-    // Reduce, reuse, recycle ;)
-    return ProfileInterestsList(interests: interests);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    // _friendController.addStream(_firestore
-    //     .collection('Users')
-    //     .document(widget.friendUid)
-    //     .snapshots()
-    //     .map((snap) => snap.data));
-  }
-
-  @override
-  void dispose() async {
-    // _friendController.close();
-    super.dispose();
-  }
+  final String chatUserUid;
 
   @override
   Widget build(BuildContext context) {
     var db = DatabaseService();
 
     return StreamProvider<User>.value(
-      value: db.streamUser(widget.friendUid),
-      child: FriendCard(),
+      value: db.streamUser(chatUserUid),
+      child: ChatRoomCard(),
     );
   }
 }
 
-class FriendCard extends StatelessWidget {
-  const FriendCard({
+class ChatRoomCard extends StatelessWidget {
+  const ChatRoomCard({
     Key key,
   }) : super(key: key);
 

@@ -3,7 +3,7 @@ import 'dart:core';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eatwithme/models/models.dart';
-import 'package:eatwithme/pages/chat/chat.dart';
+import 'package:eatwithme/pages/chat/chat_room.dart';
 import 'package:eatwithme/services/db.dart';
 import 'package:eatwithme/theme/eatwithme_theme.dart';
 import 'package:eatwithme/utils/constants.dart';
