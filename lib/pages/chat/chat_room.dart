@@ -3,29 +3,57 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eatwithme/models/models.dart';
+import 'package:eatwithme/services/db.dart';
 import 'package:eatwithme/utils/constants.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:eatwithme/pages/chat/constant.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
+// Pass userID and peerID to fix UI
+// Multi provide both peer and chat room
+// Change how chat mesasges are written to firestore
+// Change how chat messages are read to firestore
+
 class ChatRoomPage extends StatelessWidget {
-  final String userId;
+  // final String userId;
   final String peerId;
-  final String peerAvatar;
-  final String peerName;
+  // final String peerAvatar;
+  // final String peerName;
 
   ChatRoomPage(
       {Key key,
-      @required this.userId,
+      // @required this.userId,
       @required this.peerId,
-      @required this.peerAvatar,
-      @required this.peerName})
+      // @required this.peerAvatar,
+      // @required this.peerName
+      })
       : super(key: key);
 
+  
+
+  @override
+  Widget build(BuildContext context) {
+    var db = DatabaseService();
+    
+
+
+    return StreamProvider<User>.value(
+      value: db.streamUser(peerId),
+      child: ChatPage(),
+    );
+  }
+}
+
+class ChatPage extends StatelessWidget {
+  //TODO: test this works for placeholder - if it does replace ProfilePhoto!
   static String buildPeerAvatar(String peerAvatar) {
     String avatarURL = peerAvatar;
 
@@ -38,6 +66,8 @@ class ChatRoomPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var peer = Provider.of<User>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -47,14 +77,14 @@ class ChatRoomPage extends StatelessWidget {
               clipBehavior: Clip.hardEdge,
               child: FadeInImage.assetNetwork(
                 placeholder: PROFILE_PHOTO_PLACEHOLDER_PATH,
-                image: buildPeerAvatar(peerAvatar),
+                image: buildPeerAvatar(peer.photoURL),
                 width: 35.0,
                 height: 35.0,
                 fit: BoxFit.cover,
               ),
             ),
             Text(
-              ' ' + peerName,
+              ' ' + peer.displayName,
               style:
                   TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             ),
@@ -67,44 +97,51 @@ class ChatRoomPage extends StatelessWidget {
         ),
       ),
       body: ChatScreen(
-        userId: userId,
-        peerId: peerId,
-        peerAvatar: peerAvatar,
+        // userId: userId,
+        // peerId: peerId,
+        // peerAvatar: peerAvatar,
       ),
     );
   }
 }
 
 class ChatScreen extends StatefulWidget {
-  final String userId;
-  final String peerId;
-  final String peerAvatar;
+  // final String userId;
+  // final String peerId;
+  // final String peerAvatar;
+
+  final String chatRoomId;
 
   ChatScreen(
-      {Key key,
-      @required this.userId,
-      @required this.peerId,
-      @required this.peerAvatar})
+      {Key key, 
+      @required this.chatRoomId,
+      // @required this.userId,
+      // @required this.peerId,
+      // @required this.peerAvatar
+      })
       : super(key: key);
 
   @override
   State createState() => new ChatScreenState(
-      userId: userId, peerId: peerId, peerAvatar: peerAvatar);
+      // userId: userId, 
+      // peerId: peerId, peerAvatar: peerAvatar
+      );
 }
 
 class ChatScreenState extends State<ChatScreen> {
   ChatScreenState(
       {Key key,
-      @required this.userId,
-      @required this.peerId,
-      @required this.peerAvatar});
+      // @required this.userId,
+      // @required this.peerId,
+      // @required this.peerAvatar
+      });
 
-  String peerId;
-  String peerAvatar;
-  String userId;
+  // String peerId;
+  // String peerAvatar;
+  // String userId;
 
   var listMessage;
-  String groupChatId;
+  // String groupChatId;
   SharedPreferences prefs;
 
   File imageFile;
@@ -122,14 +159,21 @@ class ChatScreenState extends State<ChatScreen> {
     super.initState();
     focusNode.addListener(onFocusChange);
 
-    groupChatId = '';
+    // groupChatId = '';
 
     isLoading = false;
     isShowSticker = false;
     imageUrl = '';
 
     //Make group ID from userID and peerID
-    makeGroupId();
+    // makeGroupId();
+
+    // Future.delayed(Duration.zero, () {
+    //   var loggedInUser = Provider.of<FirebaseUser>(context);
+    //   var peer = 
+    // });
+
+    
   }
 
   void onFocusChange() {
@@ -141,15 +185,15 @@ class ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  makeGroupId() async {
-    if (userId.hashCode <= peerId.hashCode) {
-      groupChatId = '$userId-$peerId';
-    } else {
-      groupChatId = '$peerId-$userId';
-    }
+  // makeGroupId() async {
+  //   if (userId.hashCode <= peerId.hashCode) {
+  //     groupChatId = '$userId-$peerId';
+  //   } else {
+  //     groupChatId = '$peerId-$userId';
+  //   }
 
-    setState(() {});
-  }
+  //   setState(() {});
+  // }
 
   Future getImage() async {
     imageFile = await ImagePicker.pickImage(source: ImageSource.gallery);
@@ -467,6 +511,8 @@ class ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // var chatRoom = Provider.of<ChatRoom>(context);
+    
     return WillPopScope(
       child: Stack(
         children: <Widget>[
@@ -474,19 +520,15 @@ class ChatScreenState extends State<ChatScreen> {
             color: Colors.white,
             child: Column(
               children: <Widget>[
-                // List of messages
-                buildListMessage(),
+                buildMessageList(),
 
-                // Sticker
-                (isShowSticker ? buildSticker() : Container()),
+                // Show sticker picker when selected
+                (isShowSticker ? buildStickerPicker() : Container()),
 
-                // Input content
-                buildInput(),
+                buildInputFields(),
               ],
             ),
           ),
-
-          // Loading
           buildLoading()
         ],
       ),
@@ -494,7 +536,7 @@ class ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget buildSticker() {
+  Widget buildStickerPicker() {
     return Container(
       child: Column(
         children: <Widget>[
@@ -620,7 +662,7 @@ class ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget buildInput() {
+  Widget buildInputFields() {
     return Container(
       child: Row(
         children: <Widget>[
@@ -686,7 +728,7 @@ class ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget buildListMessage() {
+  Widget buildMessageList() {
     print(groupChatId);
     return Flexible(
       child: groupChatId == ''
