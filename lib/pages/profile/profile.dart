@@ -8,6 +8,7 @@ import 'package:eatwithme/services/db.dart';
 import 'package:eatwithme/theme/eatwithme_theme.dart';
 import 'package:eatwithme/utils/constants.dart';
 import 'package:eatwithme/utils/routeFromBottom.dart';
+import 'package:eatwithme/widgets/profile_photo.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:eatwithme/pages/interests/interests.dart';
@@ -62,10 +63,9 @@ class UserProfile extends StatelessWidget {
             ),
           ),
           UserImage(
-            imgHeight: imgHeight,
-            imgWidth: imgWidth,
-            photoURL: user.photoURL
-          ),
+              imgHeight: imgHeight,
+              imgWidth: imgWidth,
+              photoURL: user.photoURL),
         ],
       ),
     );
@@ -145,7 +145,7 @@ class ProfileCard extends StatelessWidget {
                             ),
                             alignment: Alignment(-1.0, 0.0),
                           ),
-                          InterestsList(
+                          ProfileInterestsList(
                             interests: List.of(user.interests),
                           ),
                         ],
@@ -171,8 +171,8 @@ class ProfileCard extends StatelessWidget {
   }
 }
 
-class InterestsList extends StatelessWidget {
-  const InterestsList({
+class ProfileInterestsList extends StatelessWidget {
+  const ProfileInterestsList({
     Key key,
     @required this.interests,
   }) : super(key: key);
@@ -219,7 +219,6 @@ class ChatboxLink extends StatelessWidget {
         width: double.infinity,
         child: FlatButton(
           onPressed: () {
-
             db.createChatRoom([loggedInUser.uid, peerID]);
 
             // Navigator.push(
@@ -268,8 +267,12 @@ class UserImage extends StatelessWidget {
           decoration: ShapeDecoration(
               shape: CircleBorder(),
               image: DecorationImage(
-                  fit: BoxFit.cover,
-                  image: showProfilePhoto(photoURL, imgWidth, imgHeight))),
+                fit: BoxFit.cover,
+                image: ProfilePhoto(
+                  profileURL: photoURL,
+                  width: imgWidth,
+                  height: imgHeight).getImageProvider(),
+              )),
         ),
       ),
     );
@@ -295,28 +298,6 @@ class UserImage extends StatelessWidget {
 
 enlargeImage() {
   //TODO find out a way to blow up image size
-}
-
-ImageProvider showProfilePhoto(String profileURL, double width, double height) {
-  //If there is a photo, we have to pull and cache it, otherwise use the asset template
-  if (profileURL != null) {
-    //TODO: Implement Firestore image pull
-    return FadeInImage.assetNetwork(
-      placeholder: PROFILE_PHOTO_PLACEHOLDER_PATH,
-      fadeInCurve: SawTooth(1),
-      image: profileURL,
-      width: width,
-      height: height,
-      fit: BoxFit.fitHeight,
-    ).image;
-  } else {
-    return Image.asset(
-      PROFILE_PHOTO_PLACEHOLDER_PATH,
-      width: width,
-      height: height,
-      fit: BoxFit.scaleDown,
-    ).image;
-  }
 }
 
 Widget noActiveProfile() {

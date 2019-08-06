@@ -10,33 +10,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class FriendsPage extends StatefulWidget {
-  final String currentUid;
-
-  FriendsPage({Key key, @required this.currentUid}) : super(key: key);
-
-  @override
-  _FriendsPageState createState() => _FriendsPageState();
-}
-
-class _FriendsPageState extends State<FriendsPage> {
-  final Firestore _firestore = Firestore.instance;
-  final StreamController _controllerChat = StreamController();
-
-  @override
-  void initState() {
-    super.initState();
-    _controllerChat.addStream(_firestore
-        .collection('Chats')
-        .where('userUids', arrayContains: widget.currentUid)
-        .snapshots());
-  }
-
-  @override
-  void dispose() async {
-    _controllerChat.close();
-    super.dispose();
-  }
+class ChatRoomsPage extends StatelessWidget {
+  
+  ChatRoomsPage({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +24,7 @@ class _FriendsPageState extends State<FriendsPage> {
           title: Row(
             children: <Widget>[
               Hero(
-                tag: 'FriendPage',
+                tag: 'ChatRoomsPage',
                 child: Icon(
                   Icons.chat,
                   size: 35.0,
@@ -63,54 +39,36 @@ class _FriendsPageState extends State<FriendsPage> {
         ),
         body: SafeArea(
           child: Container(
-            color: Colors.white,
-            child: StreamProvider<Iterable<ChatRoom>>.value(
-              value: db.streamChatRooms(loggedInUser),
-              child: buildChatRooms(),
-            )
-            
-            
-            // child: StreamBuilder(
-            //     stream: _controllerChat.stream,
-            //     builder: (context, chatSnapshot) {
-            //       switch (chatSnapshot.connectionState) {
-            //         case ConnectionState.none:
-            //           return Text("Error loading chat");
-            //           break;
-            //         case ConnectionState.done:
-            //           return noActiveChats();
-            //         case ConnectionState.waiting:
-            //           return LoadingCircle();
-            //           break;
-            //         case ConnectionState.active:
-            //           if (chatSnapshot.hasData) {
-            //             return buildFriendList(chatSnapshot, widget.currentUid);
-            //           } else {
-            //             //Shouldn't reach here, but assume no chats instead of broken
-            //             return noActiveChats();
-            //           }
-            //           break;
-            //       }
-            //     }),
-          ),
+              color: Colors.white,
+              child: StreamProvider<Iterable<ChatRoom>>.value(
+                value: db.streamChatRooms(loggedInUser),
+                child: ChatRoomList(),
+              )
+
+              // child: StreamBuilder(
+              //     stream: _controllerChat.stream,
+              //     builder: (context, chatSnapshot) {
+              //       switch (chatSnapshot.connectionState) {
+              //         case ConnectionState.none:
+              //           return Text("Error loading chat");
+              //           break;
+              //         case ConnectionState.done:
+              //           return noActiveChats();
+              //         case ConnectionState.waiting:
+              //           return LoadingCircle();
+              //           break;
+              //         case ConnectionState.active:
+              //           if (chatSnapshot.hasData) {
+              //             return buildFriendList(chatSnapshot, widget.currentUid);
+              //           } else {
+              //             //Shouldn't reach here, but assume no chats instead of broken
+              //             return noActiveChats();
+              //           }
+              //           break;
+              //       }
+              //     }),
+              ),
         ));
-  }
-
-  Widget buildChatRooms() {
-    var rooms = Provider.of<Iterable<ChatRoom>>(context);
-
-    // Check that rooms comes back properly
-    // Extract other participant
-    // Change Friend widget to stream properly
-
-    return ListView.builder(
-      padding: EdgeInsets.all(0.0),
-  //     itemBuilder: (context, index) => Friend(
-  //         userUid: currentUid,
-  //         friendUid: getUidFromChatSnapshot(
-  //             chatSnapshot.data.documents[index], currentUid)),
-  //     itemCount: chatSnapshot.data.documents.length,
-    );
   }
 
   // Widget buildFriendList(AsyncSnapshot chatSnapshot, String currentUid) {
@@ -134,19 +92,19 @@ class _FriendsPageState extends State<FriendsPage> {
   //   );
   // }
 
-//   Widget noActiveChats() {
-//     return Container(
-//       alignment: Alignment.center,
-//       child: Text(
-//         NO_ACTIVE_CHATS,
-//         softWrap: true,
-//         textAlign: TextAlign.center,
-//         style: TextStyle(
-//           fontSize: 25.0,
-//         ),
-//       ),
-//     );
-//   }
+  // Widget noActiveChats() {
+  //   return Container(
+  //     alignment: Alignment.center,
+  //     child: Text(
+  //       NO_ACTIVE_CHATS,
+  //       softWrap: true,
+  //       textAlign: TextAlign.center,
+  //       style: TextStyle(
+  //         fontSize: 25.0,
+  //       ),
+  //     ),
+  //   );
+  // }
 
 //   String getUidFromChatSnapshot(DocumentSnapshot snap, String currentUid) {
 //     List<String> users = List.from(snap.data['userUids']);
@@ -160,4 +118,44 @@ class _FriendsPageState extends State<FriendsPage> {
 //     users.remove(currentUid);
 //     return users[0];
 //   }
+}
+
+class ChatRoomList extends StatelessWidget {
+  // Check that rooms comes back properly
+  // Extract other participant
+  // Change Friend widget to stream properly
+
+  @override
+  Widget build(BuildContext context) {
+    var loggedInUser = Provider.of<FirebaseUser>(context);
+    var rooms = Provider.of<Iterable<ChatRoom>>(context);
+
+    if (rooms == null || rooms.length == 0) {
+      return Container(
+        alignment: Alignment.center,
+        child: Text(
+          NO_ACTIVE_CHATS,
+          softWrap: true,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 25.0,
+          ),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: EdgeInsets.all(0.0),
+      itemCount: rooms.length,
+      itemBuilder: (context, index) {
+        return Friend(friendUid: rooms.elementAt(index).getOtherUser(loggedInUser.uid));
+        // return Text("${rooms.elementAt(index).getOtherUser(loggedInUser.uid)}");
+      },
+      //     itemBuilder: (context, index) => Friend(
+      //         userUid: currentUid,
+      //         friendUid: getUidFromChatSnapshot(
+      //             chatSnapshot.data.documents[index], currentUid)),
+      //     itemCount: chatSnapshot.data.documents.length,
+    );
+  }
 }

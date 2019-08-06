@@ -58,7 +58,7 @@ class ChatRoom {
       id: data['id'] ?? '',
       canAddUsers: data['canAddUsers'] ?? false,
       messages: data['messages'] ?? [],
-      userUids: data['userUids'] ?? [],
+      userUids: List.from(data['userUids']) ?? [],
     );
   }
 
@@ -79,12 +79,23 @@ class ChatRoom {
 
     // To ensure identical IDs no matter order, ID is placed in hash order
     if (userUids[0].hashCode <= userUids[1].hashCode) {
-      id = '$userUids[0]-$userUids[1]';
+      id = '${userUids[0]}-${userUids[1]}';
     } else {
-      id = '$userUids[1]-$userUids[0]';
+      id = '${userUids[1]}-${userUids[0]}';
     }
 
     return id;
+  }
+
+  String getOtherUser(String userUid) {
+    
+    // Can only use this for inter-user rooms
+    if (userUids.length != 2) return null;
+
+    // We only want the other user if we're actually in this room
+    if (!userUids.contains(userUid)) return null;
+
+    return userUids.where((uid) => uid != userUid).first;
   }
 }
 

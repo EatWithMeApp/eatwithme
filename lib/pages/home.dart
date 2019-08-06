@@ -19,14 +19,13 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    
     _controllerUserProfile.addStream(_firestore
         .collection('Users')
         .document(authService.currentUid)
         .snapshots()
         .map((snap) => snap.data));
-        super.initState();
-        print("initstate");
+    super.initState();
+    print("initstate");
   }
 
   Future<void> _signOut(BuildContext context) async {
@@ -104,16 +103,14 @@ class _HomePageState extends State<HomePage> {
             height: 20.0,
           ),
           Hero(
-              tag: 'FriendPage',
+              tag: 'ChatRoomsPage',
               child: Material(
                   child: IconButton(
                       icon: Icon(Icons.chat),
                       iconSize: 60.0,
                       onPressed: () {
                         var route = MaterialPageRoute(
-                            builder: (context) => FriendsPage(
-                                  currentUid: currentUid,
-                                ));
+                            builder: (context) => ChatRoomsPage());
                         Navigator.of(context).push(route);
                       })))
         ],
