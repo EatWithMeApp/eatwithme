@@ -8,7 +8,6 @@ import 'package:eatwithme/widgets/loadingCircle.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:eatwithme/pages/auth/auth.dart';
-import 'package:eatwithme/pages/home.dart';
 import 'package:eatwithme/pages/map/map.dart';
 import 'package:eatwithme/pages/login/login.dart';
 import 'package:provider/provider.dart';
@@ -28,7 +27,7 @@ class RootPage extends StatelessWidget {
 
     // Check user logged in and verified
     if (user != null) {
-      return (user.isEmailVerified) ? Map2() : VerifyPage();
+      return (user.isEmailVerified) ? MapPage() : VerifyPage();
     } else {
       return LoginPage();
     }

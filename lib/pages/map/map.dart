@@ -23,12 +23,12 @@ import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
 
-class Map2 extends StatefulWidget {
+class MapPage extends StatefulWidget {
   @override
-  _Map2State createState() => _Map2State();
+  _MapPageState createState() => _MapPageState();
 }
 
-class _Map2State extends State<Map2> {
+class _MapPageState extends State<MapPage> {
   final Firestore _firestore = Firestore.instance;
   final Geoflutterfire geo = Geoflutterfire();
 
