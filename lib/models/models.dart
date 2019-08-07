@@ -88,7 +88,6 @@ class ChatRoom {
   }
 
   String getOtherUser(String userUid) {
-    
     // Can only use this for inter-user rooms
     if (userUids.length != 2) return null;
 
@@ -99,6 +98,37 @@ class ChatRoom {
   }
 }
 
+enum MessageType {
+  text,
+  image,
+  sticker,
+}
+
 class Message {
+  final String id;
+  final MessageType type;
+  final String content;
+  final String uidFrom;
+  final DateTime timestamp;
+
+  Message(this.type, this.content, this.uidFrom, this.timestamp, this.id);
+
+  bool isPrevMessageSameSide(Message previousMessage, String loggedInUid) {
+    return (previousMessage.uidFrom == loggedInUid) == (uidFrom == loggedInUid);
+  }
+
+  bool isMessageSameUser(Message message, String uid) {
+    return message.uidFrom == uid;
+  }
+
+  bool isMessageFromUser(String uid) {
+    return uidFrom == uid;
+  }
+
+  bool shouldDrawPeerProfilePhoto(Message mostRecentMessage, String loggedInUid) {
+    // Draw if we are not the logged in user and either 
+    // have a different user to the most recent message or are the most recent ourselves
+    return (!isMessageFromUser(loggedInUid)) && (uidFrom != mostRecentMessage.uidFrom || id == mostRecentMessage.id);
+  }
 
 }
