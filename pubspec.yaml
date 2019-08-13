@@ -57,9 +57,9 @@ dependencies:
   
   location: ^2.3.5
 
-  google_maps_flutter: ^0.5.12
+  google_maps_flutter: ^0.5.20+2
 
-  geoflutterfire: ^2.0.3+3
+  geoflutterfire: ^2.0.3+5
 
 dev_dependencies:
   flutter_test:

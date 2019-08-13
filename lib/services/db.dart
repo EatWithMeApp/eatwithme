@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eatwithme/models/models.dart';
+import 'package:eatwithme/utils/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
 
 class DatabaseService {
   final Firestore _db = Firestore.instance;
+  final Geoflutterfire _geo = Geoflutterfire();
 
   Future<User> getUser(String id) async {
     var snapshot = await _db.collection('Users').document(id).get();
@@ -27,6 +29,22 @@ class DatabaseService {
   //     list.documents.map((doc) => User.fromFirestore(doc))
   //   );
   // }
+
+  Stream<Iterable<User>> streamNearbyUsers(
+      String loggedInUid, GeoFirePoint loggedInPosition) {
+    // Grab all users within our radius (including us - couldn't get it to filter out here)
+
+    // TODO: eventually pass a list of users that we share interests with and restrict checks to them
+
+    return _geo
+        .collection(collectionRef: _db.collection('Users'))
+        .within(
+            center: loggedInPosition,
+            radius: USER_LOCATION_RADIUS,
+            field: 'position',
+            strictMode: true)
+        .map((list) => list.map((doc) => User.fromFirestore(doc)));
+  }
 
   Stream<Iterable<ChatRoom>> streamChatRooms(FirebaseUser user) {
     return _db

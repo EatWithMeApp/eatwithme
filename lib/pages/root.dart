@@ -1,13 +1,10 @@
 //Adapted from https://github.com/bizz84/coding-with-flutter-login-demo/blob/master/lib/root_page.dart
 
-import 'dart:async';
-
 import 'package:eatwithme/pages/login/verify.dart';
 import 'package:eatwithme/pages/map/map.dart';
 import 'package:eatwithme/widgets/loadingCircle.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:eatwithme/pages/auth/auth.dart';
 import 'package:eatwithme/pages/map/map.dart';
 import 'package:eatwithme/pages/login/login.dart';
 import 'package:provider/provider.dart';

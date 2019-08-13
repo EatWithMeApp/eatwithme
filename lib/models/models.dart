@@ -1,7 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:eatwithme/utils/constants.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
-import 'package:location/location.dart';
 
 class User {
   final String uid;
@@ -41,6 +39,10 @@ class User {
     Map data = doc.data;
     data['uid'] = doc.documentID;
     return User.fromMap(data);
+  }
+
+  static GeoFirePoint parseUserLocation(double latitude, double longitude) {
+    return GeoFirePoint(latitude, longitude);
   }
 
 }
