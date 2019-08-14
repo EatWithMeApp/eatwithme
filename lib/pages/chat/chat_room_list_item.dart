@@ -35,6 +35,8 @@ class ChatRoomCard extends StatelessWidget {
   Widget build(BuildContext context) {
     var user = Provider.of<User>(context);
 
+    if (user == null) return Container();
+
     return Container(
       child: FlatButton(
         child: Row(

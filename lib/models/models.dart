@@ -22,6 +22,7 @@ class User {
     GeoPoint pos = data['position']['geopoint'];
     List<String> userInterests = data['interests'].cast<String>();
     String userEmail = data['email'];
+    Timestamp timestamp = data['lastSeen'];
 
     return User(
       aboutMe: data['aboutMe'] ?? '(Not provided)',
@@ -30,7 +31,7 @@ class User {
       position: GeoFirePoint(pos.latitude, pos.longitude) ?? null,
       uid: data['uid'] ?? '',
       photoURL: data['photoURL'] ?? '',
-      lastSeen: DateTime.now() ?? data['lastSeen'],
+      lastSeen: DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch) ?? DateTime.now(),
       interests: userInterests ?? [],
     );
   }
@@ -89,14 +90,14 @@ class ChatRoom {
     return id;
   }
 
-  String getOtherUser(String userUid) {
+  String getOtherUser(String myUid) {
     // Can only use this for inter-user rooms
     if (userUids.length != 2) return null;
 
     // We only want the other user if we're actually in this room
-    if (!userUids.contains(userUid)) return null;
+    if (!userUids.contains(myUid)) return null;
 
-    return userUids.where((uid) => uid != userUid).first;
+    return userUids.where((uid) => uid != myUid).first;
   }
 }
 
