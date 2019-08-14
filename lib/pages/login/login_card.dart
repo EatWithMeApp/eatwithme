@@ -1,7 +1,7 @@
 //Adapted from https://github.com/iampawan/Flutter-UI-Kit/blob/master/lib/ui/page/login/login_one/login_card.dart
 //Adapted from https://github.com/tattwei46/flutter_login_demo/blob/master/lib/pages/login_signup_page.dart
 
-import 'package:eatwithme/pages/auth/auth.dart';
+import 'package:eatwithme/services/auth.dart';
 import 'package:eatwithme/utils/confirmation_toast.dart';
 import 'package:eatwithme/utils/error_toast.dart';
 import 'package:flutter/material.dart';
@@ -58,6 +58,7 @@ class _LoginCardState extends State<LoginCard>
   AnimationController controller;
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  final AuthService auth = AuthService();
 
   String _email;
   String _password;
@@ -78,12 +79,12 @@ class _LoginCardState extends State<LoginCard>
     if (validateAndSave()) {
       try {       
         (_formType == FormType.login)
-            ? await authService.login(_email, _password)
-            : await authService.signUp(_email, _password);
+            ? await auth.login(_email, _password)
+            : await auth.signUp(_email, _password);
 
         // Drop focus and get rid of the keyboard
         FocusScope.of(context).requestFocus(new FocusNode());   
-      } on VerificationException catch (e) {
+      } on VerificationException {
         ErrorToast.show('Please verify this email address');
       } on PlatformException catch (e) {
         //Handle errors from login (based from signInWithEmailAndPassword)
@@ -127,7 +128,7 @@ class _LoginCardState extends State<LoginCard>
 
       validate != null
           ? throw 'Email is invalid'
-          : authService.sendPasswordResetEmail(userEmail);
+          : auth.sendPasswordResetEmail(userEmail);
 
       ConfirmationToast.show(
           'Reset password email sent - please check your inbox');

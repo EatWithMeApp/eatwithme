@@ -31,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    Timer(Duration(seconds: 5), () => MyNavigator.goToIntro(context));
+    Timer(Duration(seconds: 3), () => MyNavigator.goToIntro(context));
     
     //TODO: Uncomment this line to only allow intro on first load
     //checkFirstSeen();

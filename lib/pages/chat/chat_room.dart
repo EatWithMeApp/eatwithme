@@ -12,13 +12,13 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class Chat extends StatelessWidget {
+class ChatRoomPage extends StatelessWidget {
   final String userId;
   final String peerId;
   final String peerAvatar;
   final String peerName;
 
-  Chat(
+  ChatRoomPage(
       {Key key,
       @required this.userId,
       @required this.peerId,
@@ -327,7 +327,7 @@ class ChatScreenState extends State<ChatScreen> {
                     ? Material(
                         child: FadeInImage.assetNetwork(
                           placeholder: PROFILE_PHOTO_PLACEHOLDER_PATH,
-                          image: Chat.buildPeerAvatar(peerAvatar),
+                          image: ChatRoomPage.buildPeerAvatar(peerAvatar),
                           width: 35.0,
                           height: 35.0,
                           fit: BoxFit.cover,

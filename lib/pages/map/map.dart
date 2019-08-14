@@ -1,374 +1,257 @@
-import 'dart:async';
-import 'dart:ui';
-import 'package:eatwithme/pages/auth/auth.dart';
-import 'package:eatwithme/pages/chat/friends.dart';
-import 'package:eatwithme/widgets/loadingCircle.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:location/location.dart';
-import 'package:eatwithme/pages/map/animationButton.dart';
+// Adapted from https://github.com/fireship-io/167-flutter-geolocation-firestore/blob/master/lib/main.dart
 
-class MyMap extends StatefulWidget {
+import 'dart:async';
+
+import 'package:eatwithme/models/models.dart';
+import 'package:eatwithme/services/auth.dart';
+import 'package:eatwithme/pages/chat/chat_room_list.dart';
+import 'package:eatwithme/pages/profile/editProfile.dart';
+import 'package:eatwithme/pages/profile/profile.dart';
+import 'package:eatwithme/services/db.dart';
+import 'package:eatwithme/theme/eatwithme_theme.dart';
+import 'package:eatwithme/utils/constants.dart';
+import 'package:eatwithme/utils/routeFromBottom.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
+import 'package:provider/provider.dart';
+import 'package:geoflutterfire/geoflutterfire.dart';
+
+class MapPage extends StatefulWidget {
   @override
-  _MyAppState createState() => _MyAppState();
+  _MapPageState createState() => _MapPageState();
 }
 
-class _MyAppState extends State<MyMap> with TickerProviderStateMixin {
-  Completer<GoogleMapController> _controller = Completer();
+class _MapPageState extends State<MapPage> {
+  final StreamController _controllerUserLocation = StreamController();
 
-  bool alreadyPushed = false;
-  static const LatLng _center = const LatLng(45.521563, -122.677433);
-  static const LatLng ANU = const LatLng(-35.2777, 149.1185);
-  // store the current location of the user
-  double latitude;
-  double longitude;
-  // store markers (pins)
-  final Set<Marker> _markers = {};
-  LatLng _lastMapPosition = _center;
-  final List<userPosition> userPositions = [];
-  String currentUserName = "u6225609@anu.edu.au";
+  FirebaseUser loggedInUser;
+  final db = DatabaseService();
+  final auth = AuthService();
 
-  final Firestore _firestore = Firestore.instance;
-  final StreamController _controllerUserProfile = StreamController();
+  Completer<GoogleMapController> _mapController = Completer();
 
-  @override
-  void initState() {
-    super.initState();
-    _controllerUserProfile.addStream(_firestore
-        .collection('Users')
-        .document(authService.currentUid)
-        .snapshots()
-        .map((snap) => snap.data));
-  }
+  Location userLocation = new Location();
+  GeoFirePoint previousUserLocation;
+
+  Map<MarkerId, Marker> _mapMarkers = <MarkerId, Marker>{};
+
+  Stream<dynamic> query;
+  StreamSubscription subscription;
+
+  double _zoomValue = INITIAL_ZOOM_VALUE;
 
   @override
   void dispose() {
-    _controllerUserProfile.close();
     super.dispose();
+    subscription.cancel();
+    _controllerUserLocation.close();
   }
 
-  void _onMapCreated(GoogleMapController controller) {
-    _controller.complete(controller);
+  _onMapCreated(GoogleMapController controller) {
+    _startQuery();
+
+    _controllerUserLocation
+        .add(userLocation.onLocationChanged().listen(_updateUserLocation));
+
+    setState(() {
+      _mapController.complete(controller);
+    });
   }
 
-  void _onCameraMove(CameraPosition position) {
-    _lastMapPosition = position.target;
+  _startQuery() async {
+    print('Start Query');
+
+    // Get users location
+    var pos = await userLocation.getLocation();
+    double lat = pos.latitude;
+    double lng = pos.longitude;
+
+    previousUserLocation = GeoFirePoint(lat, lng);
+
+    subscription = db
+        .streamNearbyUsers(loggedInUser.uid, GeoFirePoint(lat, lng))
+        .listen(_updateMapMarkers);
   }
 
-  void addUsers(userPosition user) {
-    if (!userPositions.contains(user)) userPositions.add(user);
+  void _updateUserLocation(LocationData data) async {
+    if (data.latitude == null) return null;
+    if (data.longitude == null) return null;
+
+    GeoFirePoint point = GeoFirePoint(data.latitude, data.longitude);
+
+    var distance = point.distance(
+        lat: previousUserLocation.latitude,
+        lng: previousUserLocation.longitude);
+
+    print('User distance delta: ' + distance.toString());
+
+    // Only update Firestore when we've moved enough to reduce spam
+    if (distance <= 0.5 && _mapMarkers.length > 0) return null;
+
+    if (loggedInUser == null) {
+      print('Map currentuid no good');
+      return null;
+    }
+
+    previousUserLocation = point;
+
+    db.updateUserLocation(loggedInUser.uid, point);
+
+    print("Updated user location");
   }
 
-  // Log out button
+  _animateToUser() async {
+    LocationData pos = await userLocation.getLocation();
+    final GoogleMapController controller = await _mapController.future;
+    controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+      target: LatLng(pos.latitude, pos.longitude),
+      zoom: _zoomValue,
+    )));
+  }
+
+  _updateMapMarkers(Iterable<User> users) {
+    _mapMarkers.clear();
+
+    print('Update markers (${users.length} users on map)');
+
+    for (User user in users) {
+      // If the pin is us, or we can't read the uid, skip
+      String uid = user.uid;
+      if (uid == loggedInUser.uid) continue;
+      if (uid == null || uid == "") continue;
+
+      // TODO: Match filtering goes here
+
+      // Check valid position
+      GeoFirePoint pos = user.position;
+
+      var lat = pos.latitude;
+      var lng = pos.longitude;
+
+      if ((lat == null) || (lng == null)) continue;
+
+      db.getUser(uid).then((currentUser) {
+        var markerId = MarkerId(uid);
+
+        var marker = Marker(
+            markerId: markerId,
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+                BitmapDescriptor.hueOrange),
+            position: LatLng(lat, lng),
+            draggable: false,
+            infoWindow: InfoWindow(
+              title: currentUser.displayName,
+            ),
+            onTap: () {
+              showModalBottomSheet<void>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return ProfileBottomSheet(user: currentUser);
+                  });
+            });
+
+        setState(() {
+          _mapMarkers[markerId] = marker;
+        });
+      });
+    }
+  }
+
   Future<void> _signOut(BuildContext context) async {
     try {
-      await authService.signOut();
+      await auth.signOut();
     } catch (e) {
       print(e);
     }
   }
 
-  // Initiate the state of Firebase
-  // Doesn't know whether it work
-  Future<void> set_state() async {
-    // final FirebaseApp app = await FirebaseApp.configure(
-    //   name: 'eatwithme',
-    //   options: const FirebaseOptions(
-    //     googleAppID: '1:1050553742489:ios:d582d6d5c13ccf2c',
-    //     bundleID: 'com.eatwithme.eatwithme',
-    //     projectID: 'eatwithme-c103e',
-    //   ),
-    // );
-    // final firestore = Firestore(app: app);
-    // await firestore.settings(timestampsInSnapshotsEnabled: true);
-  }
-
-  // load data from Firebase
-  Future<void> loadData() async {
-    pushLocation(latitude, longitude);
-    double lat;
-    double lng;
-    String name;
-    List interest;
-    userPosition up;
-    QuerySnapshot sn =
-        await Firestore.instance.collection('Users').getDocuments();
-
-    // .collection('Users')
-    // .where("location", isEqualTo: GeoPoint(-35.2777, 149.118))
-    // .getDocuments();
-    var list = sn.documents;
-    // print(list.toString());
-    Future.delayed(const Duration(milliseconds: 500));
-    list.forEach((DocumentSnapshot ds) => {
-          (ds.data['location'] == null)
-              ? {
-                  // Should be extremely rare that a user has
-                  // no location at all, but we can ignore those users
-                  // for the map
-                }
-              : {
-                  name = ds.data['displayName'],
-                  lat = ds.data['location'].latitude,
-                  lng = ds.data['location'].longitude,
-                  interest = ds.data['interests'],
-                  getNewPosition(lat, lng),
-                  up = new userPosition(_lastMapPosition, name, interest),
-                  addUsers(up),
-                  updateCurrentLocation(name, ds.documentID),
-                  addMarker(name, _lastMapPosition, interest, ds.data['uid'])
-                }
-        });
-  }
-
-  // Use location package to get the location of the user
-  Future<void> get_location() async {
-    do {
-      var location = new Location();
-      LocationData ld = await location.getLocation();
-      location.onLocationChanged().listen((LocationData currentLocation) {
-        latitude = currentLocation.latitude;
-        longitude = currentLocation.longitude;
-      });
-    } while ((latitude == null) || (longitude != null));
-  }
-
-  // Create a document to put user's name, user's interests
-  // and user's location in
-  Future<void> pushLocation(double latitude, double longitude) async {
-    if (!alreadyPushed) {
-      var db = Firestore.instance;
-      await db.collection('Users').add({
-        'displayName': currentUserName,
-        'location': GeoPoint(latitude, longitude),
-        'interests': ['Hi', 'gogo'],
-      }).then((val) {
-        print("Pushed success");
-      }).catchError((err) {
-        print(err);
-      });
-      alreadyPushed = true;
-    }
-  }
-
-  // update user's location in the firebase when the user moves
-  Future<void> updateCurrentLocation(String name, String id) async {
-    if ((currentUserName == name) & (id != null) & (alreadyPushed = true)) {
-      var db = Firestore.instance;
-      if ((latitude != null) & (longitude != null)) {
-        db
-            .collection("Users")
-            .document(id)
-            .updateData({'location': new GeoPoint(latitude, longitude)});
-        print("updateSuccesss");
-      }
-    }
-  }
-
-  // add and update markers(pins), when name, interest, and location change
-  void addMarker(String name, LatLng pos, List interest, String uid) {
-    if (name == currentUserName) return;
-
-    setState(() {
-      Marker markerChangeName = getMarkerByPos(pos);
-      Marker markerChangePosition = getMarkerByName(name);
-      Marker markerChangeInterest = getMarkerByInterest(interest);
-      _markers.remove(markerChangeName);
-      _markers.remove(markerChangePosition);
-      _markers.remove(markerChangeInterest);
-
-      // ImageInfo img;
-      // ByteData imgBytes;
-
-      // var sunImage = new NetworkImage(
-      //   "https://s.yimg.com/ny/api/res/1.2/9u2kkdYGgTrXtvcOyLk0Uw--~A/YXBwaWQ9aGlnaGxhbmRlcjtzbT0xO3c9ODAw/http://media.zenfs.com/en-US/homerun/fatherly_721/990ffb618eda44035580f02b792bc89f");
-      // sunImage.obtainKey(new ImageConfiguration()).then((val) {
-      //   var load = sunImage.load(val);
-      //   load.addListener((listener, err) async {
-      //     setState(() => {
-      //       print(img),
-      //       img = listener
-      //     });
-      //   });
-      // });
-
-      // print(img);
-
-      // img.image.toByteData(format: ImageByteFormat.png).then((value) => {imgBytes = value});
-
-      // BitmapDescriptor bitmap = BitmapDescriptor.fromBytes(imgBytes.buffer.asUint8List());
-
-      BitmapDescriptor icon;
-      BitmapDescriptor.fromAssetImage(
-              ImageConfiguration(size: Size(5.0, 5.0)), 'images/orange.png')
-          .then((value) => {icon = value});
-
-      _markers.add(Marker(
-          markerId: MarkerId(name),
-          position: pos,
-          infoWindow: InfoWindow(title: name),
-          icon: icon));
-
-      // Image.network('https://s.yimg.com/ny/api/res/1.2/9u2kkdYGgTrXtvcOyLk0Uw--~A/YXBwaWQ9aGlnaGxhbmRlcjtzbT0xO3c9ODAw/http://media.zenfs.com/en-US/homerun/fatherly_721/990ffb618eda44035580f02b792bc89f')
-      // .image.load(key).addListener((ImageInfo image, bool sync) async {});
-    });
-
-    // setState(() {
-    //   Marker markerChangeName = getMarkerByPos(pos);
-    //   Marker markerChangePosition = getMarkerByName(name);
-    //   Marker markerChangeInterest = getMarkerByInterest(interest);
-    //   _markers.remove(markerChangeName);
-    //   _markers.remove(markerChangePosition);
-    //   _markers.remove(markerChangeInterest);
-
-    //   ImageInfo img;
-
-    //   // Image.network(
-    //   //               'https://s.yimg.com/ny/api/res/1.2/9u2kkdYGgTrXtvcOyLk0Uw--~A/YXBwaWQ9aGlnaGxhbmRlcjtzbT0xO3c9ODAw/http://media.zenfs.com/en-US/homerun/fatherly_721/990ffb618eda44035580f02b792bc89f')
-    //   //               )
-
-    //   ByteData imgBytes;
-
-    //   img.image.toByteData(format: ImageByteFormat.png).then((value) => {imgBytes = value});
-
-    //   BitmapDescriptor bitmap = BitmapDescriptor.fromBytes(imgBytes.buffer.asUint8List());
-
-    //   _markers.add(
-    //     Marker(
-    //       markerId: MarkerId(name),
-    //       position: pos,
-    //       infoWindow: InfoWindow(title: name),
-    //       icon: bitmap)
-    //   );
-    // };
-  }
-
-  // These three functions are used to get a specific marker by a position
-  // name, or interest respectively
-  Marker getMarkerByPos(LatLng pos) {
-    for (Marker m in _markers) {
-      if (m.position == pos) return m;
-    }
-  }
-
-  Marker getMarkerByName(String name) {
-    for (Marker m in _markers) {
-      if (m.markerId == MarkerId(name)) return m;
-    }
-  }
-
-  Marker getMarkerByInterest(List interest) {
-    for (Marker m in _markers) {
-      if (m.infoWindow.snippet == "interests: " + interest.toString()) return m;
-    }
-  }
-
-  void getNewPosition(double lat, double lng) {
-    _lastMapPosition = new LatLng(lat, lng);
-  }
-
   @override
   Widget build(BuildContext context) {
-    String currentUid;
-    set_state();
-    get_location();
-    pushLocation(latitude, longitude);
-    loadData();
-    return MaterialApp(
-      home: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(40),
-          child: AppBar(
-            backgroundColor: Colors.orange[700],
-            actions: <Widget>[
-              Hero(
-                  tag: 'FriendPage',
-                  child: Material(
-                      child: IconButton(
-                          icon: Icon(Icons.chat),
-                          iconSize: 60.0,
-                          onPressed: () {
-                            var route = MaterialPageRoute(
-                                builder: (context) => FriendsPage(
-                                      currentUid: currentUid,
-                                    ));
-                            Navigator.of(context).push(route);
-                          }))),
-              FlatButton(
-                child: Text('Logout',
-                    style: TextStyle(fontSize: 17.0, color: Colors.white)),
-                onPressed: () => _signOut(context),
-              )
-            ],
-          ),
+    loggedInUser = Provider.of<FirebaseUser>(context);
+
+    return Scaffold(
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      body: Stack(alignment: AlignmentDirectional.bottomEnd, children: [
+        GoogleMap(
+          initialCameraPosition:
+              CameraPosition(target: GeoPointANU, zoom: _zoomValue),
+          onMapCreated: _onMapCreated,
+          rotateGesturesEnabled: true,
+          compassEnabled: true,
+          myLocationEnabled: true,
+          mapType: MapType.normal,
+          myLocationButtonEnabled: false,
+          markers: Set<Marker>.of(_mapMarkers.values),
+          mapToolbarEnabled: false,
         ),
-        body: StreamBuilder(
-          stream: _controllerUserProfile.stream,
-          builder: (context, snapshot) {
-            switch (snapshot.connectionState) {
-              case ConnectionState.none:
-                return Text("Error reading profile");
-                break;
-              case ConnectionState.done:
-                return Text("Error reading profile");
-              case ConnectionState.waiting:
-                return LoadingCircle();
-                break;
-              case ConnectionState.active:
-                if (snapshot.hasData) {
-                  currentUid = snapshot.data['uid'];
-                  return SafeArea(
-                    child: Stack(
-                      alignment: AlignmentDirectional.bottomEnd,
-                      children: <Widget>[
-                        GoogleMap(
-                          onMapCreated: _onMapCreated,
-                          rotateGesturesEnabled: true,
-                          compassEnabled: true,
-                          myLocationEnabled: true,
-                          initialCameraPosition: CameraPosition(
-                            target: ANU,
-                            zoom: 16.0,
-                          ),
-                          // Add markers
-                          markers: _markers,
-                          onCameraMove: _onCameraMove,
-                        ),
-                        SafeArea(
-                          child: AnimationButton(),
-                        ),
-                      ],
-                    ),
-                  );
-                } else {
-                  return Container(
-                    child: Text("Didn't load user"),
-                  );
-                }
-                break;
-            }
-          },
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      ),
+
+        // TODO: Replace with radial menu (except for user position button)
+        Row(
+          children: <Widget>[
+            FloatingActionButton(
+                heroTag: 'GoToPos',
+                child: Icon(Icons.pin_drop, size: 30.0),
+                foregroundColor: Colors.black,
+                backgroundColor: themeLight().primaryColor,
+                onPressed: () => _animateToUser()),
+            FloatingActionButton(
+                heroTag: 'ChatRoomListPage',
+                child: Icon(Icons.chat, size: 30.0),
+                foregroundColor: Colors.black,
+                backgroundColor: themeLight().primaryColor,
+                onPressed: () {
+                  Navigator.push(
+                      context, RouteFromBottom(widget: ChatRoomListPage()));
+                }),
+            FloatingActionButton(
+                heroTag: 'MyUserProfile',
+                child: Icon(Icons.account_circle, size: 30.0),
+                foregroundColor: Colors.black,
+                backgroundColor: Colors.red,
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      RouteFromBottom(
+                          widget:
+                              EditProfilePage(uid: loggedInUser.uid)));
+                }),
+            FloatingActionButton(
+                heroTag: 'Logout',
+                child: Icon(Icons.exit_to_app, size: 30.0),
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.black,
+                onPressed: () => _signOut(context)),
+          ],
+        )
+      ]),
     );
   }
 }
 
-class userPosition {
-  String user;
-  LatLng position;
-  List interest;
-  userPosition(LatLng position, String user, List interest) {
-    this.position = position;
-    this.user = user;
-    this.interest = interest;
-  }
+class ProfileBottomSheet extends StatefulWidget {
+  const ProfileBottomSheet({
+    Key key,
+    @required this.user,
+  }) : super(key: key);
+
+  final User user;
+
   @override
-  String toString() {
-    return user + position.toString();
+  _ProfileBottomSheetState createState() => _ProfileBottomSheetState();
+}
+
+class _ProfileBottomSheetState extends State<ProfileBottomSheet> {
+  double height = 800.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        // height: height,
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.transparent, width: 0.0),
+        ),
+        child: ProfilePage(uid: widget.user.uid));
   }
 }

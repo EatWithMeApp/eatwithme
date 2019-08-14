@@ -1,14 +1,13 @@
 import 'dart:async';
 import 'dart:core';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:eatwithme/pages/profile/profile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eatwithme/utils/constants.dart';
 import 'package:eatwithme/main.dart';
 import 'package:eatwithme/widgets/loadingCircle.dart';
-import 'package:eatwithme/pages/auth/auth.dart';
+import 'package:eatwithme/services/auth.dart';
 
 class Interests extends StatefulWidget {
   @override

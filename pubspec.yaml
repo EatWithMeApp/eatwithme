@@ -14,7 +14,7 @@ description: A new Flutter project.
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.2.0 <3.0.0"
 
 dependencies:
   flutter:
@@ -25,14 +25,16 @@ dependencies:
   cupertino_icons: ^0.1.2
   english_words: ^3.1.0
 
-  firebase_core: ^0.3.0
-  cloud_firestore: ^0.10.1
+  firebase_core: ^0.4.0+8
+  cloud_firestore: ^0.12.9
   # cloud_firestore: 0.8.2+3
 
   # To address AndroidX issues, go no higher than specifed https://goo.gl/CP92wY
-  firebase_auth: 0.8.4+1
+  firebase_auth: 0.14.0
   # firebase_auth: 0.7.0
   
+  provider: ^3.0.0+1
+
   flutter_redux: ^0.5.3
   redux: ^3.0.0
 
@@ -42,11 +44,11 @@ dependencies:
 
   fluttertoast: ^3.0.3
 
-  cached_network_image: ^0.7.0
+  cached_network_image: ^1.1.1
 
   shared_preferences: ^0.5.2
 
-  firebase_storage: ^2.1.0 #1.0.4
+  firebase_storage: ^3.0.5 #1.0.4
 
 
   intl: ^0.15.7
@@ -55,9 +57,9 @@ dependencies:
   
   location: ^2.3.5
 
-  google_maps_flutter: ^0.5.12
+  google_maps_flutter: ^0.5.20+2
 
-  geoflutterfire: ^2.0.3+3
+  geoflutterfire: ^2.0.3+5
 
 dev_dependencies:
   flutter_test:
