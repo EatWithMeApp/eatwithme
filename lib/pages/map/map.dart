@@ -3,9 +3,8 @@
 import 'dart:async';
 
 import 'package:eatwithme/models/models.dart';
-import 'package:eatwithme/pages/auth/auth.dart';
+import 'package:eatwithme/services/auth.dart';
 import 'package:eatwithme/pages/chat/chat_room_list.dart';
-import 'package:eatwithme/pages/map/animationButton.dart';
 import 'package:eatwithme/pages/profile/editProfile.dart';
 import 'package:eatwithme/pages/profile/profile.dart';
 import 'package:eatwithme/services/db.dart';
@@ -29,6 +28,7 @@ class _MapPageState extends State<MapPage> {
 
   FirebaseUser loggedInUser;
   final db = DatabaseService();
+  final auth = AuthService();
 
   Completer<GoogleMapController> _mapController = Completer();
 
@@ -139,7 +139,6 @@ class _MapPageState extends State<MapPage> {
             markerId: markerId,
             icon: BitmapDescriptor.defaultMarkerWithHue(
                 BitmapDescriptor.hueOrange),
-            // icon: BitmapDescriptor.defaultMarker;
             position: LatLng(lat, lng),
             draggable: false,
             infoWindow: InfoWindow(
@@ -162,7 +161,7 @@ class _MapPageState extends State<MapPage> {
 
   Future<void> _signOut(BuildContext context) async {
     try {
-      await authService.signOut();
+      await auth.signOut();
     } catch (e) {
       print(e);
     }
@@ -216,7 +215,7 @@ class _MapPageState extends State<MapPage> {
                       context,
                       RouteFromBottom(
                           widget:
-                              EditProfilePage(uid: authService.currentUid)));
+                              EditProfilePage(uid: loggedInUser.uid)));
                 }),
             FloatingActionButton(
                 heroTag: 'Logout',
@@ -254,12 +253,5 @@ class _ProfileBottomSheetState extends State<ProfileBottomSheet> {
           border: Border.all(color: Colors.transparent, width: 0.0),
         ),
         child: ProfilePage(uid: widget.user.uid));
-  }
-}
-
-class SignOutFunction extends UseFunction {
-  @override
-  void onClick() {
-    authService.signOut();
   }
 }

@@ -1,16 +1,18 @@
 import 'package:eatwithme/theme/eatwithme_theme.dart';
 import 'package:eatwithme/utils/constants.dart';
 import 'package:flutter/material.dart';
-import 'package:eatwithme/pages/auth/auth.dart';
+import 'package:eatwithme/services/auth.dart';
 
 class VerifyPage extends StatelessWidget {
+  final AuthService auth = AuthService();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
-            onPressed: () => {authService.signOut()},
+            onPressed: () => {auth.signOut()},
           ),
         ),
         body: Container(

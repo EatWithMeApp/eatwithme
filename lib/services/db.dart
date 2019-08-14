@@ -61,6 +61,23 @@ class DatabaseService {
         .setData({'position': point.data}, merge: true);
   }
 
+  Future<void> updateLoggedInUser(String uid) {
+    return _db
+        .collection('Users')
+        .document(uid)
+        .setData({'lastSeen': DateTime.now()}, merge: true);
+  }
+
+  Future<void> createNewUser(FirebaseUser verifiedUser) {
+    return _db.collection('Users').document(verifiedUser.uid).setData({
+      'uid': verifiedUser.uid,
+      'email': verifiedUser.email,
+      'photoURL': verifiedUser.photoUrl,
+      'displayName': verifiedUser.email.split('@')[0].trim(),
+      'lastSeen': DateTime.now(),
+    }, merge: true);
+  }
+
   Future<void> createChatRoom(List<String> userUids) {
     String id = ChatRoom.generateID(userUids);
     var room = _db.collection('ChatRooms').document(id);
