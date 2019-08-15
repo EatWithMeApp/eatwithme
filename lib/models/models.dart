@@ -114,7 +114,25 @@ class Message {
   final String uidFrom;
   final DateTime timestamp;
 
-  Message(this.type, this.content, this.uidFrom, this.timestamp, this.id);
+  Message({this.type, this.content, this.uidFrom, this.timestamp, this.id});
+
+  factory Message.fromMap(Map data) {
+    Timestamp timestamp = data['timestamp'];
+    
+    return Message(
+      id: data['id'] ?? '',
+      type: MessageType.values[data['type']] ?? MessageType.text,
+      content: data['content'] ?? '',
+      uidFrom: data['uidFrom'] ?? '',
+      timestamp: DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch) ?? DateTime.now(),
+    );
+  }
+
+  factory Message.fromFirestore(DocumentSnapshot doc) {
+    Map data = doc.data;
+    data['id'] = doc.documentID;
+    return Message.fromMap(data);
+  } 
 
   bool isPrevMessageSameSide(Message previousMessage, String loggedInUid) {
     return (previousMessage.uidFrom == loggedInUid) == (uidFrom == loggedInUid);
@@ -126,6 +144,11 @@ class Message {
 
   bool isMessageFromUser(String uid) {
     return uidFrom == uid;
+  }
+
+  bool isPeerMessage(String loggedInUid) {
+    // A peer message is one not sent by us
+    return !isMessageSameUser(this, loggedInUid);
   }
 
   bool shouldDrawPeerProfilePhoto(Message mostRecentMessage, String loggedInUid) {

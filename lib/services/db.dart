@@ -32,8 +32,9 @@ class DatabaseService {
 
   Stream<Iterable<User>> streamNearbyUsers(
       String loggedInUid, GeoFirePoint loggedInPosition) {
-    // Grab all users within our radius (including us - couldn't get it to filter out here)
-
+    // Grab all users within our radius 
+    
+    // TODO: filter us out here
     // TODO: eventually pass a list of users that we share interests with and restrict checks to them
 
     return _geo
@@ -46,12 +47,45 @@ class DatabaseService {
         .map((list) => list.map((doc) => User.fromFirestore(doc)));
   }
 
-  Stream<Iterable<ChatRoom>> streamChatRooms(FirebaseUser user) {
+  Stream<Iterable<ChatRoom>> streamChatRoomsOfUser(FirebaseUser user) {
     return _db
         .collectionGroup('ChatRooms')
         .where('userUids', arrayContains: user.uid)
         .snapshots()
-        .map((list) => list.documents.map((doc) => ChatRoom.fromMap(doc.data)));
+        .map(
+            (list) => list.documents.map((doc) => ChatRoom.fromFirestore(doc)));
+  }
+
+  Stream<Iterable<Message>> streamMessagesFromChatRoom(
+      String roomId, String loggedInUid) {
+    return _db
+        .collection('ChatRooms')
+        .document(roomId)
+        .collection('messages')
+        .orderBy('timestamp', descending: true)
+        .limit(20)
+        .snapshots()
+        .map((list) => list.documents.map((doc) => Message.fromFirestore(doc)));
+  }
+
+  Stream<Iterable<User>> streamUsersInChatRoom(String roomId, String loggedInUid) {
+    List<User> roomUsers;
+
+    _db.collection('ChatRooms').document(roomId).get().then(
+      (room) {
+        roomUsers = room.data['userUids'].cast<String>();
+        roomUsers.remove(loggedInUid);
+      }
+    );
+
+
+    // Only pull out users that are in the above list
+
+    return _db
+        .collection('Users')
+        .snapshots()
+        .map(
+            (list) => list.documents.map((doc) => User.fromFirestore(doc)));
   }
 
   Future<void> updateUserLocation(String uid, GeoFirePoint point) {
