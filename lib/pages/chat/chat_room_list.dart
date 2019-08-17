@@ -68,7 +68,7 @@ class ChatRoomList extends StatelessWidget {
       itemCount: rooms.length,
       itemBuilder: (context, index) {
         return ChatRoomListItem(
-            chatUserUid: rooms.elementAt(index).getOtherUser(loggedInUser.uid));
+            roomId: rooms.elementAt(index).getOtherUser(loggedInUser.uid));
       },
     );
   }

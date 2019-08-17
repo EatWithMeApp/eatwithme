@@ -6,21 +6,25 @@ import 'package:eatwithme/utils/constants.dart';
 import 'package:eatwithme/utils/routeFromRight.dart';
 import 'package:eatwithme/widgets/loadingCircle.dart';
 import 'package:eatwithme/widgets/profile_photo.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ChatRoomListItem extends StatelessWidget {
-  const ChatRoomListItem({Key key, @required this.chatUserUid})
+  const ChatRoomListItem({Key key, @required this.roomId})
       : super(key: key);
 
-  final String chatUserUid;
+  final String roomId;
 
   @override
   Widget build(BuildContext context) {
     var db = DatabaseService();
+    var loggedInUid = Provider.of<FirebaseUser>(context);
+    
+    if (roomId == '$loggedInUid-$loggedInUid') return Container();
 
     return StreamProvider<User>.value(
-      value: db.streamUser(chatUserUid),
+      value: db.streamUser(roomId),
       child: ChatRoomCard(),
     );
   }
@@ -67,17 +71,7 @@ class ChatRoomCard extends StatelessWidget {
           ],
         ),
         onPressed: () {
-          // Navigator.push(
-          //     context,
-          //     RouteFromRight(
-          //         widget: Chat(
-          //       userId: widget.userUid,
-          //       peerId: widget.friendUid,
-          //       peerAvatar: snapshot.data['photoURL'],
-          //       peerName: (snapshot.data['displayName'] != null)
-          //           ? snapshot.data['displayName']
-          //           : snapshot.data['email'],
-          //     )));
+          Navigator.push(context, RouteFromRight(widget: ChatRoomPage(peerId: user.uid,)));
         },
         color: Colors.white,
         padding: EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 10.0),

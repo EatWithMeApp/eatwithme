@@ -7,9 +7,6 @@ import 'chat_message_item.dart';
 class ChatMessageList extends StatelessWidget {
   final ScrollController listScrollController = ScrollController();
 
-  //0.0
-  //300
-  //Curves.easeOut
   void scrollToPosition(double offset, int milliseconds, Curve curve) {
     listScrollController.animateTo(offset,
         duration: Duration(milliseconds: milliseconds), curve: curve);
@@ -18,9 +15,9 @@ class ChatMessageList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var messages = Provider.of<Iterable<Message>>(context);
-    var roomUsers = Provider.of<Iterable<User>>(context);
+    var roomUser = Provider.of<User>(context);
 
-    if (messages == null || messages.length == 0) {
+    if (messages == null) {
       // TODO: Build nice widget if wrong/bad chat room got loaded
       return Container();
     }
@@ -30,9 +27,9 @@ class ChatMessageList extends StatelessWidget {
       padding: EdgeInsets.all(10.0),
       itemBuilder: (context, index) => ChatMessageItem(
         message: messages.elementAt(index),
-        prevMessage: messages.elementAt(index - 1),
+        prevMessage: messages.elementAt((index < 1) ? 0 : index - 1),
         mostRecentMessage: messages.last,
-        photoURL: roomUsers.singleWhere((user) => messages.elementAt(index).uidFrom == user.uid).photoURL,
+        photoURL: roomUser.photoURL,
       ),
       itemCount: messages.length,
       reverse: true,

@@ -108,7 +108,7 @@ enum MessageType {
 }
 
 class Message {
-  final String id;
+  String id;
   final MessageType type;
   final String content;
   final String uidFrom;
@@ -133,6 +133,16 @@ class Message {
     data['id'] = doc.documentID;
     return Message.fromMap(data);
   } 
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'type': type.index,
+      'content': content,
+      'uidFrom': uidFrom,
+      'timestamp': timestamp,
+    };
+  }
 
   bool isPrevMessageSameSide(Message previousMessage, String loggedInUid) {
     return (previousMessage.uidFrom == loggedInUid) == (uidFrom == loggedInUid);

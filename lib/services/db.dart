@@ -68,24 +68,17 @@ class DatabaseService {
         .map((list) => list.documents.map((doc) => Message.fromFirestore(doc)));
   }
 
-  Stream<Iterable<User>> streamUsersInChatRoom(String roomId, String loggedInUid) {
-    List<User> roomUsers;
+  Future<ChatRoom> getChatRoom(String id) async {
+    var snapshot = await _db.collection('ChatRooms').document(id).get();
 
-    _db.collection('ChatRooms').document(roomId).get().then(
-      (room) {
-        roomUsers = room.data['userUids'].cast<String>();
-        roomUsers.remove(loggedInUid);
-      }
-    );
+    return ChatRoom.fromFirestore(snapshot);
+  }
 
+  Stream<User> streamUserInChatRoom(String roomId, String loggedInUid) {
+    var uids = roomId.split('-');
+    uids.remove(loggedInUid);
 
-    // Only pull out users that are in the above list
-
-    return _db
-        .collection('Users')
-        .snapshots()
-        .map(
-            (list) => list.documents.map((doc) => User.fromFirestore(doc)));
+    return streamUser(uids.first);
   }
 
   Future<void> updateUserLocation(String uid, GeoFirePoint point) {
@@ -112,19 +105,46 @@ class DatabaseService {
     }, merge: true);
   }
 
-  Future<void> createChatRoom(List<String> userUids) {
+  Future<void> verifyChatRoom(List<String> userUids) async {
     String id = ChatRoom.generateID(userUids);
     var room = _db.collection('ChatRooms').document(id);
 
-    room.setData({
-      'id': id,
+    return room.get().then((doc) {
+      if (doc.exists == false) {
+        createChatRoom(id, userUids);
+      }
+    }).catchError((doc) {
+      if (!doc.exists) {
+        createChatRoom(id, userUids);
+      }
+    });
+  }
+
+  Future<void> createChatRoom(String roomId, List<String> userUids) {
+    var room = _db.collection('ChatRooms').document(roomId);
+
+    return room.setData({
+      'id': roomId,
       'userUids': userUids,
 
       // Rooms with 2 users are user to user and shouldn't allow others
       'canAddUsers': (userUids.length != 2),
     }, merge: true);
+  }
 
-    //Add the messages subcollection
-    return room.collection('messages').document().setData({});
+  Future<void> writeMessageToChatRoom(List<String> userUids, Message message) {
+    verifyChatRoom(userUids);    
+
+    String id = ChatRoom.generateID(userUids);
+    var room = _db.collection('ChatRooms').document(id);
+
+    //Write message to the messages subcollection
+    var documentReference = room.collection('messages').document();
+
+    message.id = documentReference.documentID;
+
+    return _db.runTransaction((transaction) async {
+      await transaction.set(documentReference, message.toMap());
+    });
   }
 }

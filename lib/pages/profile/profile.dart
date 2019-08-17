@@ -156,9 +156,8 @@ class ProfileCard extends StatelessWidget {
                     color: Colors.white,
                     border: Border.all(color: Colors.transparent, width: 0.0)),
                 child: ChatboxLink(
-                    peerID: user.uid,
-                    peerName: user.displayName,
-                    photoURL: user.photoURL),
+                  peerID: user.uid,
+                ),
               )
             ],
           ),
@@ -196,19 +195,19 @@ class ChatboxLink extends StatelessWidget {
   const ChatboxLink({
     Key key,
     @required this.peerID,
-    @required this.peerName,
-    @required this.photoURL,
+    // @required this.peerName,
+    // @required this.photoURL,
   }) : super(key: key);
 
   final String peerID;
-  final String peerName;
-  final String photoURL;
+  // final String peerName;
+  // final String photoURL;
 
   @override
   Widget build(BuildContext context) {
-    var loggedInUser = Provider.of<FirebaseUser>(context);
+    // var loggedInUser = Provider.of<FirebaseUser>(context);
 
-    var db = DatabaseService();
+    // var db = DatabaseService();
 
     return SizedBox(
         // padding: EdgeInsets.only(top: 25.0),
@@ -216,7 +215,13 @@ class ChatboxLink extends StatelessWidget {
         width: double.infinity,
         child: FlatButton(
           onPressed: () {
-            db.createChatRoom([loggedInUser.uid, peerID]);
+            Navigator.push(
+                context,
+                RouteFromBottom(
+                    widget: ChatRoomPage(
+                  peerId: peerID,
+                )));
+            // db.createChatRoom([loggedInUser.uid, peerID]);
 
             // Navigator.push(
             //     context,
@@ -266,9 +271,10 @@ class UserImage extends StatelessWidget {
               image: DecorationImage(
                 fit: BoxFit.cover,
                 image: ProfilePhoto(
-                  profileURL: photoURL,
-                  width: imgWidth,
-                  height: imgHeight).getImageProvider(),
+                        profileURL: photoURL,
+                        width: imgWidth,
+                        height: imgHeight)
+                    .getImageProvider(),
               )),
         ),
       ),

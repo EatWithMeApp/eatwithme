@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class RouteFromRight extends PageRouteBuilder {
   final Widget widget;
-  RouteFromRight({this.widget})
+  RouteFromRight({@required this.widget})
       : super(pageBuilder: (BuildContext context, Animation<double> animation,
             Animation<double> secondaryAnimation) {
           return widget;

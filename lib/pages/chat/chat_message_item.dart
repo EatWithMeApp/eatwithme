@@ -131,7 +131,7 @@ class ChatMessageItem extends StatelessWidget {
   }
 
   Widget timestamp(String loggedInUid) {
-    return message.isPeerMessage(loggedInUid)
+    return message.isPeerMessage(loggedInUid) && (message.id == mostRecentMessage.id)
         ? Container(
             child: Text(
               DateFormat('dd MMM kk:mm').format(message.timestamp),
