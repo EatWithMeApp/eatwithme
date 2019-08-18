@@ -10,18 +10,11 @@ import 'package:provider/provider.dart';
 class ChatMessageItem extends StatelessWidget {
   const ChatMessageItem({
     Key key,
-    // @required this.widget,
-    // @required this.index,
     @required this.message,
     @required this.prevMessage,
     @required this.mostRecentMessage,
     @required this.photoURL,
-    // @required this.messages,
   }) : super(key: key);
-
-  // final ChatScreen widget;
-  // final List<Message> messages;
-  // final int index;
 
   final Message message;
   final Message prevMessage;
@@ -98,7 +91,7 @@ class ChatMessageItem extends StatelessWidget {
         margin: EdgeInsets.only(bottom: bottomMargin, right: rightMargin),
       );
     } else if (message.type == MessageType.sticker) {
-      Container(
+      content = Container(
         child: new Image.asset(
           'images/${message.content}.gif',
           width: stickerWidth,
