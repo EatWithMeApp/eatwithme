@@ -1,43 +1,60 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:eatwithme/utils/constants.dart';
+import 'package:eatwithme/models/models.dart';
+import 'package:eatwithme/pages/chat/chat_message_list.dart';
+import 'package:eatwithme/services/db.dart';
+import 'package:eatwithme/widgets/profile_photo.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:eatwithme/pages/chat/constant.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+
+import 'chat_message_list.dart';
 
 class ChatRoomPage extends StatelessWidget {
-  final String userId;
   final String peerId;
-  final String peerAvatar;
-  final String peerName;
 
-  ChatRoomPage(
-      {Key key,
-      @required this.userId,
-      @required this.peerId,
-      @required this.peerAvatar,
-      @required this.peerName})
-      : super(key: key);
+  ChatRoomPage({
+    Key key,
+    @required this.peerId,
+  }) : super(key: key);
 
-  static String buildPeerAvatar(String peerAvatar) {
-    String avatarURL = peerAvatar;
-
-    if (avatarURL == null) {
-      avatarURL = PROFILE_PHOTO_PLACEHOLDER_PATH;
-    }
-
-    return avatarURL;
+  void verifyChatRoom(List<String> userUids) async {
+    var db = DatabaseService();
+    await db.verifyChatRoom(userUids);
   }
 
   @override
   Widget build(BuildContext context) {
+    var db = DatabaseService();
+    var loggedInUser = Provider.of<FirebaseUser>(context);
+    var userUids = [loggedInUser.uid, peerId];
+    var roomId = ChatRoom.generateID(userUids);
+
+    verifyChatRoom(userUids);
+
+    return MultiProvider(
+      providers: [
+        StreamProvider<Iterable<Message>>.value(
+            value: db.streamMessagesFromChatRoom(roomId, loggedInUser.uid)),
+        StreamProvider<User>.value(
+            value: db.streamUserInChatRoom(roomId, loggedInUser.uid)),
+      ],
+      child: ChatPage(),
+    );
+  }
+}
+
+class ChatPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var peerUser = Provider.of<User>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -45,16 +62,14 @@ class ChatRoomPage extends StatelessWidget {
             Material(
               borderRadius: BorderRadius.all(Radius.circular(180.0)),
               clipBehavior: Clip.hardEdge,
-              child: FadeInImage.assetNetwork(
-                placeholder: PROFILE_PHOTO_PLACEHOLDER_PATH,
-                image: buildPeerAvatar(peerAvatar),
-                width: 35.0,
+              child: ProfilePhoto(
+                profileURL: peerUser.photoURL,
                 height: 35.0,
-                fit: BoxFit.cover,
-              ),
+                width: 35.0,
+              ).getWidget(),
             ),
             Text(
-              ' ' + peerName,
+              ' ' + peerUser.displayName,
               style:
                   TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             ),
@@ -66,70 +81,38 @@ class ChatRoomPage extends StatelessWidget {
           color: Colors.white,
         ),
       ),
-      body: ChatScreen(
-        userId: userId,
-        peerId: peerId,
-        peerAvatar: peerAvatar,
-      ),
+      body: ChatScreen(),
     );
   }
 }
 
 class ChatScreen extends StatefulWidget {
-  final String userId;
-  final String peerId;
-  final String peerAvatar;
-
-  ChatScreen(
-      {Key key,
-      @required this.userId,
-      @required this.peerId,
-      @required this.peerAvatar})
-      : super(key: key);
-
   @override
-  State createState() => new ChatScreenState(
-      userId: userId, peerId: peerId, peerAvatar: peerAvatar);
+  State createState() => new ChatScreenState();
 }
 
 class ChatScreenState extends State<ChatScreen> {
-  ChatScreenState(
-      {Key key,
-      @required this.userId,
-      @required this.peerId,
-      @required this.peerAvatar});
-
-  String peerId;
-  String peerAvatar;
-  String userId;
-
-  var listMessage;
-  String groupChatId;
-  SharedPreferences prefs;
 
   File imageFile;
   bool isLoading;
   bool isShowSticker;
   String imageUrl;
 
-  final TextEditingController textEditingController =
-      new TextEditingController();
-  final ScrollController listScrollController = new ScrollController();
-  final FocusNode focusNode = new FocusNode();
+  final textEditingController = TextEditingController();
+  final focusNode = FocusNode();
+
+  final chatMessageList = ChatMessageList();
 
   @override
   void initState() {
     super.initState();
     focusNode.addListener(onFocusChange);
 
-    groupChatId = '';
+    // groupChatId = '';
 
     isLoading = false;
     isShowSticker = false;
     imageUrl = '';
-
-    //Make group ID from userID and peerID
-    makeGroupId();
   }
 
   void onFocusChange() {
@@ -139,16 +122,6 @@ class ChatScreenState extends State<ChatScreen> {
         isShowSticker = false;
       });
     }
-  }
-
-  makeGroupId() async {
-    if (userId.hashCode <= peerId.hashCode) {
-      groupChatId = '$userId-$peerId';
-    } else {
-      groupChatId = '$peerId-$userId';
-    }
-
-    setState(() {});
   }
 
   Future getImage() async {
@@ -178,9 +151,9 @@ class ChatScreenState extends State<ChatScreen> {
     storageTaskSnapshot.ref.getDownloadURL().then((downloadUrl) {
       imageUrl = downloadUrl;
       setState(() {
-        isLoading = false;
-        onSendMessage(imageUrl, 1);
+        isLoading = false; 
       });
+      onSendMessage(imageUrl, MessageType.image);
     }, onError: (err) {
       setState(() {
         isLoading = false;
@@ -189,268 +162,36 @@ class ChatScreenState extends State<ChatScreen> {
     });
   }
 
-  void onSendMessage(String content, int type) {
-    // type: 0 = text, 1 = image, 2 = sticker
-    if (content.trim() != '') {
-      textEditingController.clear();
-
-      var userUids = List<String>();
-      userUids.add(groupChatId.split('-')[0]);
-      userUids.add(groupChatId.split('-')[1]);
-
-      var rightNow = DateTime.now();
-
-      // Make Chat in Chats
-      Firestore.instance.collection('Chats')
-      .document(groupChatId)
-      .setData(
-        {
-          'userUids': userUids,
-          'lastModified': rightNow
-        },
-        merge: true
-      );
-
-      // Make Message in Messages
-      var documentReference =
-          Firestore.instance.collection('Messages').document();
-
-      Firestore.instance.runTransaction((transaction) async {
-        await transaction.set(
-          documentReference,
-          {
-            'chatId': groupChatId,
-            'idFrom': userId,
-            'idTo': peerId,
-            'timestamp': rightNow.millisecondsSinceEpoch.toString(),
-            'content': content,
-            'type': type
-          },
-        );
-      });
-      listScrollController.animateTo(0.0,
-          duration: Duration(milliseconds: 300), curve: Curves.easeOut);
-    } else {
+  void onSendMessage(String content, MessageType messageType) {
+    if (content.trim() == '') {
       Fluttertoast.showToast(msg: 'Nothing to send');
+      return;
     }
-  }
 
-  //TODO: Clean widget tree so it's not so long and has less nesting
-  Widget buildItem(int index, DocumentSnapshot document) {
-    if (document['idFrom'] == userId) {
-      // Right (my message)
-      return Row(
-        children: <Widget>[
-          document['type'] == 0
-              // Text
-              ? Container(
-                  child: Text(
-                    document['content'],
-                    style: TextStyle(color: primaryColor),
-                  ),
-                  padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
-                  width: 200.0,
-                  decoration: BoxDecoration(
-                      color: greyColor2,
-                      borderRadius: BorderRadius.circular(8.0)),
-                  margin: EdgeInsets.only(
-                      bottom: isLastMessageRight(index) ? 20.0 : 10.0,
-                      right: 10.0),
-                )
-              : document['type'] == 1
-                  // Image
-                  ? Container(
-                      child: Material(
-                        child: CachedNetworkImage(
-                          placeholder: (context, url) => Container(
-                                child: CircularProgressIndicator(
-                                  valueColor:
-                                      AlwaysStoppedAnimation<Color>(themeColor),
-                                ),
-                                width: 200.0,
-                                height: 200.0,
-                                padding: EdgeInsets.all(70.0),
-                                decoration: BoxDecoration(
-                                  color: greyColor2,
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(8.0),
-                                  ),
-                                ),
-                              ),
-                          errorWidget: (context, url, error) => Material(
-                                child: Image.asset(
-                                  'images/img_not_available.jpeg',
-                                  width: 200.0,
-                                  height: 200.0,
-                                  fit: BoxFit.cover,
-                                ),
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(8.0),
-                                ),
-                                clipBehavior: Clip.hardEdge,
-                              ),
-                          imageUrl: document['content'],
-                          width: 200.0,
-                          height: 200.0,
-                          fit: BoxFit.cover,
-                        ),
-                        borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                        clipBehavior: Clip.hardEdge,
-                      ),
-                      margin: EdgeInsets.only(
-                          bottom: isLastMessageRight(index) ? 20.0 : 10.0,
-                          right: 10.0),
-                    )
-                  // Sticker
-                  : Container(
-                      child: new Image.asset(
-                        'images/${document['content']}.gif',
-                        width: 100.0,
-                        height: 100.0,
-                        fit: BoxFit.cover,
-                      ),
-                      margin: EdgeInsets.only(
-                          bottom: isLastMessageRight(index) ? 20.0 : 10.0,
-                          right: 10.0),
-                    ),
-        ],
-        mainAxisAlignment: MainAxisAlignment.end,
-      );
-    } else {
-      // Left (peer message)
-      return Container(
-        child: Column(
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                isLastMessageLeft(index)
-                    ? Material(
-                        child: FadeInImage.assetNetwork(
-                          placeholder: PROFILE_PHOTO_PLACEHOLDER_PATH,
-                          image: ChatRoomPage.buildPeerAvatar(peerAvatar),
-                          width: 35.0,
-                          height: 35.0,
-                          fit: BoxFit.cover,
-                        ),
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(18.0),
-                        ),
-                        clipBehavior: Clip.hardEdge,
-                      )
-                    : Container(width: 35.0),
-                document['type'] == 0
-                    ? Container(
-                        child: Text(
-                          document['content'],
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
-                        width: 200.0,
-                        decoration: BoxDecoration(
-                            color: primaryColor,
-                            borderRadius: BorderRadius.circular(8.0)),
-                        margin: EdgeInsets.only(left: 10.0),
-                      )
-                    : document['type'] == 1
-                        ? Container(
-                            child: Material(
-                              child: CachedNetworkImage(
-                                placeholder: (context, url) => Container(
-                                      child: CircularProgressIndicator(
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                                themeColor),
-                                      ),
-                                      width: 200.0,
-                                      height: 200.0,
-                                      padding: EdgeInsets.all(70.0),
-                                      decoration: BoxDecoration(
-                                        color: greyColor2,
-                                        borderRadius: BorderRadius.all(
-                                          Radius.circular(8.0),
-                                        ),
-                                      ),
-                                    ),
-                                errorWidget: (context, url, error) => Material(
-                                      child: Image.asset(
-                                        'images/img_not_available.jpeg',
-                                        width: 200.0,
-                                        height: 200.0,
-                                        fit: BoxFit.cover,
-                                      ),
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(8.0),
-                                      ),
-                                      clipBehavior: Clip.hardEdge,
-                                    ),
-                                imageUrl: document['content'],
-                                width: 200.0,
-                                height: 200.0,
-                                fit: BoxFit.cover,
-                              ),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(8.0)),
-                              clipBehavior: Clip.hardEdge,
-                            ),
-                            margin: EdgeInsets.only(left: 10.0),
-                          )
-                        : Container(
-                            child: new Image.asset(
-                              'images/${document['content']}.gif',
-                              width: 100.0,
-                              height: 100.0,
-                              fit: BoxFit.cover,
-                            ),
-                            margin: EdgeInsets.only(
-                                bottom: isLastMessageRight(index) ? 20.0 : 10.0,
-                                right: 10.0),
-                          ),
-              ],
-            ),
+    textEditingController.clear();
 
-            // Time
-            isLastMessageLeft(index)
-                ? Container(
-                    child: Text(
-                      DateFormat('dd MMM kk:mm').format(
-                          DateTime.fromMillisecondsSinceEpoch(
-                              int.parse(document['timestamp']))),
-                      style: TextStyle(
-                          color: greyColor,
-                          fontSize: 12.0,
-                          fontStyle: FontStyle.italic),
-                    ),
-                    margin: EdgeInsets.only(left: 50.0, top: 5.0, bottom: 5.0),
-                  )
-                : Container()
-          ],
-          crossAxisAlignment: CrossAxisAlignment.start,
-        ),
-        margin: EdgeInsets.only(bottom: 10.0),
-      );
-    }
-  }
+    var userUids = List<String>();
+    var loggedInUid = Provider.of<FirebaseUser>(context).uid;
+    userUids.add(loggedInUid);
+    userUids.add(Provider.of<User>(context).uid);
 
-  bool isLastMessageLeft(int index) {
-    if ((index > 0 &&
-            listMessage != null &&
-            listMessage[index - 1]['idFrom'] == userId) ||
-        index == 0) {
-      return true;
-    } else {
-      return false;
-    }
-  }
+    var db = DatabaseService();
 
-  bool isLastMessageRight(int index) {
-    if ((index > 0 &&
-            listMessage != null &&
-            listMessage[index - 1]['idFrom'] != userId) ||
-        index == 0) {
-      return true;
-    } else {
-      return false;
-    }
+    db.writeMessageToChatRoom(
+        userUids,
+        Message.fromMap({
+          'type': messageType.index,
+          'content': content,
+          'uidFrom': loggedInUid,
+          'timestamp': Timestamp.fromMillisecondsSinceEpoch(
+              DateTime.now().millisecondsSinceEpoch),
+        }));
+
+    chatMessageList.scrollToPosition(0.0, 300, Curves.easeOut);
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
   Future<bool> onBackPress() {
@@ -474,14 +215,13 @@ class ChatScreenState extends State<ChatScreen> {
             color: Colors.white,
             child: Column(
               children: <Widget>[
-                // List of messages
-                buildListMessage(),
+                ChatMessageList(),
 
                 // Sticker
-                (isShowSticker ? buildSticker() : Container()),
+                (isShowSticker ? buildStickerList() : Container()),
 
                 // Input content
-                buildInput(),
+                buildInputFields(),
               ],
             ),
           ),
@@ -494,115 +234,36 @@ class ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget buildSticker() {
-    return Container(
-      child: Column(
-        children: <Widget>[
-          Row(
-            children: <Widget>[
-              FlatButton(
-                onPressed: () => onSendMessage('mimi1', 2),
-                child: new Image.asset(
-                  'images/mimi1.gif',
-                  width: 50.0,
-                  height: 50.0,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              FlatButton(
-                onPressed: () => onSendMessage('mimi2', 2),
-                child: new Image.asset(
-                  'images/mimi2.gif',
-                  width: 50.0,
-                  height: 50.0,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              FlatButton(
-                onPressed: () => onSendMessage('mimi3', 2),
-                child: new Image.asset(
-                  'images/mimi3.gif',
-                  width: 50.0,
-                  height: 50.0,
-                  fit: BoxFit.cover,
-                ),
-              )
-            ],
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          ),
-          Row(
-            children: <Widget>[
-              FlatButton(
-                onPressed: () => onSendMessage('mimi4', 2),
-                child: new Image.asset(
-                  'images/mimi4.gif',
-                  width: 50.0,
-                  height: 50.0,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              FlatButton(
-                onPressed: () => onSendMessage('mimi5', 2),
-                child: new Image.asset(
-                  'images/mimi5.gif',
-                  width: 50.0,
-                  height: 50.0,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              FlatButton(
-                onPressed: () => onSendMessage('mimi6', 2),
-                child: new Image.asset(
-                  'images/mimi6.gif',
-                  width: 50.0,
-                  height: 50.0,
-                  fit: BoxFit.cover,
-                ),
-              )
-            ],
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          ),
-          Row(
-            children: <Widget>[
-              FlatButton(
-                onPressed: () => onSendMessage('mimi7', 2),
-                child: new Image.asset(
-                  'images/mimi7.gif',
-                  width: 50.0,
-                  height: 50.0,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              FlatButton(
-                onPressed: () => onSendMessage('mimi8', 2),
-                child: new Image.asset(
-                  'images/mimi8.gif',
-                  width: 50.0,
-                  height: 50.0,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              FlatButton(
-                onPressed: () => onSendMessage('mimi9', 2),
-                child: new Image.asset(
-                  'images/mimi9.gif',
-                  width: 50.0,
-                  height: 50.0,
-                  fit: BoxFit.cover,
-                ),
-              )
-            ],
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          )
-        ],
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  Widget buildSticker(int index) {
+    var content = 'mimi$index';
+    var imagePath = 'images/mimi$index.gif';
+
+    return FlatButton(
+      onPressed: () => onSendMessage(content, MessageType.sticker),
+      child: new Image.asset(
+        imagePath,
+        width: 50.0,
+        height: 50.0,
+        fit: BoxFit.cover,
       ),
-      decoration: new BoxDecoration(
-          border:
-              new Border(top: new BorderSide(color: greyColor2, width: 0.5)),
-          color: Colors.white),
-      padding: EdgeInsets.all(5.0),
+    );
+  }
+
+  Widget buildStickerList() {
+    return Container(
       height: 180.0,
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: greyColor2, width: 0.5)),
+        color: greyColor2,
+      ),
+      child: GridView.count(
+        crossAxisCount: 3,
+        scrollDirection: Axis.vertical,
+        mainAxisSpacing: 5.0,
+        children: List.generate(9, (index) {
+          return buildSticker(index + 1);
+        }),
+      ),
     );
   }
 
@@ -620,7 +281,7 @@ class ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget buildInput() {
+  Widget buildInputFields() {
     return Container(
       child: Row(
         children: <Widget>[
@@ -669,7 +330,8 @@ class ChatScreenState extends State<ChatScreen> {
               margin: new EdgeInsets.symmetric(horizontal: 8.0),
               child: new IconButton(
                 icon: new Icon(Icons.send),
-                onPressed: () => onSendMessage(textEditingController.text, 0),
+                onPressed: () =>
+                    onSendMessage(textEditingController.text, MessageType.text),
                 color: primaryColor,
               ),
             ),
@@ -683,42 +345,6 @@ class ChatScreenState extends State<ChatScreen> {
           border:
               new Border(top: new BorderSide(color: greyColor2, width: 0.5)),
           color: Colors.white),
-    );
-  }
-
-  Widget buildListMessage() {
-    print(groupChatId);
-    return Flexible(
-      child: groupChatId == ''
-          ? Center(
-              child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(themeColor)))
-          : StreamBuilder(
-              stream: Firestore.instance
-                  .collection('Messages')
-                  .where('chatId', isEqualTo: groupChatId)
-                  .orderBy('timestamp', descending: true)
-                  .limit(20)
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return Center(
-                      child: CircularProgressIndicator(
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(themeColor)));
-                } else {
-                  listMessage = snapshot.data.documents;
-                  return ListView.builder(
-                    padding: EdgeInsets.all(10.0),
-                    itemBuilder: (context, index) =>
-                        buildItem(index, listMessage[index]),
-                    itemCount: snapshot.data.documents.length,
-                    reverse: true,
-                    controller: listScrollController,
-                  );
-                }
-              },
-            ),
     );
   }
 }

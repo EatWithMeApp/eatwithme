@@ -36,7 +36,7 @@ class ChatRoomListPage extends StatelessWidget {
           child: Container(
               color: Colors.white,
               child: StreamProvider<Iterable<ChatRoom>>.value(
-                value: db.streamChatRooms(loggedInUser),
+                value: db.streamChatRoomsOfUser(loggedInUser),
                 child: ChatRoomList(),
               )),
         ));
@@ -68,7 +68,7 @@ class ChatRoomList extends StatelessWidget {
       itemCount: rooms.length,
       itemBuilder: (context, index) {
         return ChatRoomListItem(
-            chatUserUid: rooms.elementAt(index).getOtherUser(loggedInUser.uid));
+            roomId: rooms.elementAt(index).getOtherUser(loggedInUser.uid));
       },
     );
   }
