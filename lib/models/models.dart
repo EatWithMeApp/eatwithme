@@ -46,6 +46,19 @@ class User {
     return GeoFirePoint(latitude, longitude);
   }
 
+  Map<String, dynamic> toMap() {
+    return {
+      'aboutMe': aboutMe,
+      'email': email,
+      'displayName': displayName,
+      'position': position,
+      'uid': uid,
+      'photoURL': photoURL,
+      'lastSeen': lastSeen,
+      'interests': interests,
+    };
+  }
+
 }
 
 class ChatRoom {

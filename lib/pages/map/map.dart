@@ -212,10 +212,7 @@ class _MapPageState extends State<MapPage> {
                 backgroundColor: Colors.red,
                 onPressed: () {
                   Navigator.push(
-                      context,
-                      RouteFromBottom(
-                          widget:
-                              EditProfilePage(uid: loggedInUser.uid)));
+                      context, RouteFromBottom(widget: EditProfilePage()));
                 }),
             FloatingActionButton(
                 heroTag: 'Logout',
