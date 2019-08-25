@@ -80,20 +80,20 @@ class _ProfilePageState extends State<EditProfilePage> {
     // var loggedInUser = Provider.of<FirebaseUser>(context);
 
     // // Read from DB just once as opposed to stream - otherwise we'll never get to save...
-    // db.getUser(loggedInUser.uid).then((user) {
-    //   setState(() {
-    //     var about = user.aboutMe;
-    //     var name = user.displayName;
+    db.getUser(loggedInUser.uid).then((user) {
+      setState(() {
+        var about = user.aboutMe;
+        var name = user.displayName;
 
-    //     aboutMe = about;
-    //     _aboutMeController.text = about;
+        aboutMe = about;
+        _aboutMeController.text = about;
 
-    //     displayName = name;
-    //     _displayNameController.text = name;
+        displayName = name;
+        _displayNameController.text = name;
 
-    //     downloadURL = user.photoURL;
-    //   });
-    // });
+        downloadURL = user.photoURL;
+      });
+    });
   }
 
   @override
