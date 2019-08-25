@@ -15,7 +15,7 @@ class AuthService {
           email: email, password: password);
 
       FirebaseUser user = result.user;
-      db.updateLoggedInUser(user.uid);
+      db.updateUserLastSeen(user.uid);
 
       print('Signed in ' + user.email);
     } catch (e) {

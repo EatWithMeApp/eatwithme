@@ -9,7 +9,6 @@ import 'package:eatwithme/utils/routeFromBottom.dart';
 import 'package:eatwithme/widgets/profile_photo.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:eatwithme/pages/interests/interests.dart';
 import 'package:eatwithme/main.dart';
 import 'package:eatwithme/widgets/loadingCircle.dart';
 import 'package:provider/provider.dart';
