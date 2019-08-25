@@ -1,75 +1,57 @@
 import 'dart:async';
 import 'dart:core';
-import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eatwithme/pages/profile/profile.dart';
 import 'package:eatwithme/services/db.dart';
-import 'package:eatwithme/utils/constants.dart';
 import 'package:eatwithme/utils/routeFromRight.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:eatwithme/pages/interests/old_interests.dart';
-import 'package:eatwithme/main.dart';
-import 'package:eatwithme/widgets/loadingCircle.dart';
-import 'package:eatwithme/services/auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:provider/provider.dart';
 
 class EditProfilePage extends StatefulWidget {
-  // final String uid;
+  final String uid;
 
-  // const EditProfilePage({Key key, this.uid}) : super(key: key);
+  const EditProfilePage({Key key, @required this.uid}) : super(key: key);
 
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<EditProfilePage> {
-  // String uid = 'Oaag40RDDDLof3sjq5QW';
-  
-  // final Firestore _firestore = Firestore.instance;
-  // final StreamController _profileController = StreamController();
-  
   final db = DatabaseService();
-  
+
   final TextEditingController _aboutMeController = TextEditingController();
   final TextEditingController _displayNameController = TextEditingController();
   final StorageReference storageReference =
-      FirebaseStorage.instance.ref().child('ProfilePicture');
-
-  DocumentSnapshot usersSnapshot;
+      FirebaseStorage.instance.ref();
 
   String aboutMe;
   String displayName;
-  var downloadURL;
-
-  File _image;
-  Future getImage() async {
-    var loggedInUser = Provider.of<FirebaseUser>(context);
-    
-    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
-
-    if (image == null) return null;
-
-    setState(() {
-      _image = image;
-    });
-    //Uploads image to firebase storage
-    final StorageUploadTask uploadTask = storageReference.putFile(_image);
-    downloadURL = await (await uploadTask.onComplete).ref.getDownloadURL();
-
-    setState(() {
-      db.updateUserPhoto(loggedInUser.uid, downloadURL);
-    });
-  }
+  String photoURL;
 
   double imgYPos = 45.0;
   double imgWidth = 200.0;
   double imgHeight = 200.0;
   double imgXPos = 100.0;
+
+  Future getImage() async {
+    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
+
+    if (image == null) return null;
+
+    //Uploads image to firebase storage
+    final StorageUploadTask uploadTask = storageReference.child(widget.uid).putFile(image);
+
+    photoURL = await (await uploadTask.onComplete).ref.getDownloadURL();
+
+    setState(() {
+      db.updateUserPhoto(widget.uid, photoURL);
+    });
+  }
 
   @override
   void initState() {
@@ -77,10 +59,7 @@ class _ProfilePageState extends State<EditProfilePage> {
 
     print('Edit profile start');
 
-    // var loggedInUser = Provider.of<FirebaseUser>(context);
-
-    // // Read from DB just once as opposed to stream - otherwise we'll never get to save...
-    db.getUser(loggedInUser.uid).then((user) {
+    db.getUser(widget.uid).then((user) {
       setState(() {
         var about = user.aboutMe;
         var name = user.displayName;
@@ -91,7 +70,9 @@ class _ProfilePageState extends State<EditProfilePage> {
         displayName = name;
         _displayNameController.text = name;
 
-        downloadURL = user.photoURL;
+        photoURL = user.photoURL;
+
+        print('InitState editprofile');
       });
     });
   }
@@ -103,33 +84,8 @@ class _ProfilePageState extends State<EditProfilePage> {
     super.dispose();
   }
 
-  void pullUserFields(FirebaseUser loggedInUser) async {
-    // Read from DB just once as opposed to stream - otherwise we'll never get to save...
-    var user = await db.getUser(loggedInUser.uid);
-
-    var about = user.aboutMe;
-    var name = user.displayName;
-
-    setState(() {
-      aboutMe = about;
-    _aboutMeController.text = about;
-
-    displayName = name;
-    _displayNameController.text = name;
-
-    downloadURL = user.photoURL;
-    });
-
-    
-  }
-
   @override
   Widget build(BuildContext context) {
-    var loggedInUser = Provider.of<FirebaseUser>(context);
-
-    pullUserFields(loggedInUser);
-
-    // Set initial values on first load
     return SafeArea(
       child: ListView(
         children: <Widget>[
@@ -266,16 +222,8 @@ class _ProfilePageState extends State<EditProfilePage> {
                 UserImage(
                   imgHeight: imgHeight,
                   imgWidth: imgWidth,
-                  photoURL: usersSnapshot.data['photoURL'],
+                  photoURL: photoURL,
                 ),
-                // FadeInImage.assetNetwork(
-                //   placeholder: PROFILE_PHOTO_PLACEHOLDER_PATH,
-                //   fadeInCurve: SawTooth(1),
-                //   image: downloadURL,
-                //   width: 125.0,
-                //   height: 125.0,
-                //   fit: BoxFit.fitHeight,
-                // ),
                 Positioned(
                   top: imgYPos + 120.0,
                   // left: imgXPos + 150.0,
@@ -296,101 +244,6 @@ class _ProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  // @override
-  // Widget build(BuildContext context) {
-  //   return Scaffold(
-  //     backgroundColor: Colors.white,
-  //     body: Column(
-  //       children: <Widget>[
-  //         Container(
-  //           // height: 400.0,
-  //           child: Column(
-  //             mainAxisSize: MainAxisSize.max,
-  //             children: <Widget>[
-  //               Container(
-  //                 height: 100.0,
-  //                 decoration: BoxDecoration(
-  //                     color: Color(0xFF333333),
-  //                     borderRadius: BorderRadius.only(
-  //                       topLeft: const Radius.circular(10.0),
-  //                       topRight: const Radius.circular(10.0),
-  //                     )),
-  //                 child: Text(
-  //                   (usersSnapshot.data['displayName'] ??
-  //                       usersSnapshot.data['email']
-  //                           .toString()
-  //                           .split('@')[0]
-  //                           .trim()),
-  //                   style: TextStyle(
-  //                       color: Colors.white,
-  //                       fontSize: 30.0,
-  //                       fontWeight: FontWeight.bold),
-  //                 ),
-  //                 alignment: Alignment(0.0, 1.0),
-  //               ),
-  //               Container(
-  //                 decoration: BoxDecoration(
-  //                   color: Colors.white,
-  //                   border: Border.all(
-  //                     color: Colors.transparent,
-  //                     width: 0.0
-  //                   )
-  //                 ),
-  //                 child: Column(
-  //                   children: <Widget>[
-  //                     SizedBox(
-  //                       height: 10.0,
-  //                     ),
-  //                     Container(
-  //                       child: Text(
-  //                         'About',
-  //                         style: TextStyle(
-  //                             fontSize: 20.0, fontWeight: FontWeight.bold),
-  //                       ),
-  //                       alignment: Alignment(-1.0, 0.0),
-  //                     ),
-  //                     Container(
-  //                       // height: 110.0,
-  //                       padding: EdgeInsets.only(
-  //                         top: 10.0,
-  //                       ),
-  //                       constraints: BoxConstraints(
-  //                           maxHeight: 90.0,
-  //                           minHeight: 50.0,
-  //                           maxWidth: double.infinity,
-  //                           minWidth: double.infinity),
-  //                       child: Text(
-  //                         (usersSnapshot.data['aboutMe'] ?? ''),
-  //                       ),
-  //                     ),
-  //                     Container(
-  //                       child: Column(
-  //                         children: <Widget>[
-  //                           Container(
-  //                             padding: EdgeInsets.only(top: 10.0),
-  //                             child: Text(
-  //                               'Interests',
-  //                               style: TextStyle(
-  //                                   fontSize: 20.0, fontWeight: FontWeight.bold),
-  //                             ),
-  //                             alignment: Alignment(-1.0, 0.0),
-  //                           ),
-  //                           InterestsList(
-  //                             interests: (usersSnapshot.data['interests'] != null) ? List.of(usersSnapshot.data['interests']) : [],
-  //                           ),
-  //                         ],
-  //                       ),
-  //                     ),
-  //                   ],
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //         )
-  //       ],
-  //     ),
-  //   );
-  // }
 }
 
 class CloseButton extends StatelessWidget {
@@ -415,12 +268,10 @@ class CloseButton extends StatelessWidget {
 class SaveButton extends StatelessWidget {
   const SaveButton({
     Key key,
-    // @required this.uid,
     @required this.aboutMe,
     @required this.displayName,
   }) : super(key: key);
 
-  // final String uid;
   final String aboutMe;
   final String displayName;
 
@@ -436,7 +287,6 @@ class SaveButton extends StatelessWidget {
         child: Text('Save'),
         onPressed: () {
           try {
-            // submitProfileChanges(uid, aboutMe, displayName);
             db.updateUserProfileText(loggedInUser.uid, aboutMe, displayName);
           } catch (e) {
             print(e);
@@ -448,55 +298,3 @@ class SaveButton extends StatelessWidget {
     );
   }
 }
-
-// void submitProfileChanges(String uid, String aboutMe, String displayName) {
-//   print('submitProfileChanges ' + displayName);
-
-//   Firestore.instance.collection('Users').document(uid).setData(
-//     {
-//       'displayName': displayName,
-//       'aboutMe': aboutMe,
-//     },
-//     merge: true,
-//   );
-// }
-
-// Widget showProfilePhoto(String profileURL) {
-//   //If there is a photo, we have to pull and cache it, otherwise use the asset template
-
-//   if (profileURL == null) {
-//     profileURL = PROFILE_PHOTO_PLACEHOLDER_PATH;
-//   }
-
-//   // if (profileURL != null) {
-//   return FadeInImage.assetNetwork(
-//     placeholder: PROFILE_PHOTO_PLACEHOLDER_PATH,
-//     fadeInCurve: SawTooth(1),
-//     image: profileURL,
-//     width: 125.0,
-//     height: 125.0,
-//     fit: BoxFit.fitHeight,
-//   );
-//   // } else {
-//   //   return Image.asset(
-//   //     PROFILE_PHOTO_PLACEHOLDER_PATH,
-//   //     width: 125.0,
-//   //     height: 125.0,
-//   //     fit: BoxFit.scaleDown,
-//   //   );
-//   // }
-// }
-
-// Widget noActiveProfile() {
-//   return Container(
-//     alignment: Alignment.center,
-//     child: Text(
-//       'Error 404',
-//       softWrap: true,
-//       textAlign: TextAlign.center,
-//       style: TextStyle(
-//         fontSize: 25.0,
-//       ),
-//     ),
-//   );
-// }
