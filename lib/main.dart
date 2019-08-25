@@ -1,6 +1,8 @@
 //Adapted from https://github.com/bizz84/coding-with-flutter-login-demo/blob/master/lib/main.dart
 
+import 'package:eatwithme/pages/interests/interests.dart';
 import 'package:eatwithme/pages/root.dart';
+import 'package:eatwithme/pages/settings/settings.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:eatwithme/theme/eatwithme_theme.dart';
@@ -27,7 +29,8 @@ class MyApp extends StatelessWidget {
         title: APP_TITLE,
         theme: themeLight(),
         routes: routes,
-        home: SplashScreen(),
+        home: SettingsPage(),
+        //home: SplashScreen(),
       ),
     );
   }
