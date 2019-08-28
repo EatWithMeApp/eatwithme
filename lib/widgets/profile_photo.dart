@@ -12,13 +12,18 @@ class ProfilePhoto {
     String photoURL = profileURL;
 
     if (photoURL == null || photoURL == '') {
-      photoURL = PROFILE_PHOTO_PLACEHOLDER_PATH;
+      return Image.asset(
+        PROFILE_PHOTO_PLACEHOLDER_PATH,
+        width: width,
+        height: height,
+        fit: BoxFit.scaleDown,
+      );
     }
 
     //If there is a photo, we have to pull and cache it, otherwise use the asset template
     return FadeInImage.assetNetwork(
-      placeholder: PROFILE_PHOTO_PLACEHOLDER_PATH,
-      fadeInCurve: SawTooth(1),
+      placeholder: PROFILE_PHOTO_LOADING_PATH,
+      fadeInCurve: Curves.elasticIn,//SawTooth(1),
       image: photoURL,
       width: width,
       height: height,
@@ -30,13 +35,18 @@ class ProfilePhoto {
     String photoURL = profileURL;
 
     if (photoURL == null || photoURL == '') {
-      photoURL = PROFILE_PHOTO_PLACEHOLDER_PATH;
+      return Image.asset(
+        PROFILE_PHOTO_PLACEHOLDER_PATH,
+        width: width,
+        height: height,
+        fit: BoxFit.scaleDown,
+      ).image;
     }
 
     //If there is a photo, we have to pull and cache it, otherwise use the asset template
     return FadeInImage.assetNetwork(
-      placeholder: PROFILE_PHOTO_PLACEHOLDER_PATH,
-      fadeInCurve: SawTooth(1),
+      placeholder: PROFILE_PHOTO_LOADING_PATH,
+      fadeInCurve: Curves.elasticIn,//SawTooth(1),
       image: photoURL,
       width: width,
       height: height,

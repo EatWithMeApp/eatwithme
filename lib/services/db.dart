@@ -88,11 +88,28 @@ class DatabaseService {
         .setData({'position': point.data}, merge: true);
   }
 
-  Future<void> updateLoggedInUser(String uid) {
+  Future<void> updateUserLastSeen(String uid) {
     return _db
         .collection('Users')
         .document(uid)
         .setData({'lastSeen': DateTime.now()}, merge: true);
+  }
+
+  Future<void> updateUserPhoto(String uid, String photoURL) {
+    return _db
+        .collection('Users')
+        .document(uid)
+        .setData({'photoURL': photoURL}, merge: true);
+  }
+
+  Future<void> updateUserProfileText(String uid, String aboutMe, String displayName) {
+    return _db
+        .collection('Users')
+        .document(uid)
+        .setData({
+          'aboutMe': aboutMe,
+          'displayName': displayName,
+        }, merge: true);
   }
 
   Future<void> createNewUser(FirebaseUser verifiedUser) {
