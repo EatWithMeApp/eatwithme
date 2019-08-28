@@ -158,6 +158,15 @@ class ProfileCard extends StatelessWidget {
                 child: ChatboxLink(
                   peerID: user.uid,
                 ),
+              ),
+              ListTile(
+                title: Text('Block User'),
+                subtitle: Text('Removes user from map and removes chat history'),
+                trailing: Icon(Icons.block),
+                onTap: ()
+                {
+                  //TODO implement user blocking
+                },
               )
             ],
           ),
