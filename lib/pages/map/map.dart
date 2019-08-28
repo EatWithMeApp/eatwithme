@@ -217,7 +217,7 @@ class _MapPageState extends State<MapPage> {
                 }),
             FloatingActionButton(
                 heroTag: 'Settings',
-                child: Icon(Icons.block, size: 30.0),
+                child: Icon(Icons.settings, size: 30.0),
                 foregroundColor: Colors.black,
                 backgroundColor: Colors.red,
                 onPressed: () {
