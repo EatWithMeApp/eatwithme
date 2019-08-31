@@ -20,7 +20,7 @@ class User {
 
   factory User.fromMap(Map data) {
     GeoPoint pos = data['position']['geopoint'];
-    List<String> userInterests = data['interests'].cast<String>();
+    List<String> userInterests = data['interests'].cast<String>(); //Fix me dingus
     String userEmail = data['email'];
     Timestamp timestamp = data['lastSeen'];
 
@@ -180,4 +180,24 @@ class Message {
     return (!isMessageFromUser(loggedInUid)) && (uidFrom != mostRecentMessage.uidFrom || id == mostRecentMessage.id);
   }
 
+}
+
+class Interest {
+  String id;
+  final String name;
+
+  Interest({this.name, this.id});
+
+  factory Interest.fromMap(Map data) {
+    
+    return Interest(
+      id: data['id'] ?? '',
+    );
+  }
+
+  factory Interest.fromFirestore(DocumentSnapshot doc) {
+    Map data = doc.data;
+    data['id'] = doc.documentID;
+    return Interest.fromMap(data);
+  } 
 }
