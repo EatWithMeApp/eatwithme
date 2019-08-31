@@ -25,7 +25,8 @@ dependencies:
   cupertino_icons: ^0.1.2
   english_words: ^3.1.0
 
-  firebase_core: ^0.4.0+8
+  #firebase_core: ^0.4.0+8
+  firebase_core: ^0.4.0
   cloud_firestore: ^0.12.9
   # cloud_firestore: 0.8.2+3
 
