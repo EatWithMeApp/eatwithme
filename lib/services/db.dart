@@ -32,8 +32,8 @@ class DatabaseService {
 
   Stream<Iterable<User>> streamNearbyUsers(
       String loggedInUid, GeoFirePoint loggedInPosition) {
-    // Grab all users within our radius 
-    
+    // Grab all users within our radius
+
     // TODO: filter us out here
     // TODO: eventually pass a list of users that we share interests with and restrict checks to them
 
@@ -66,6 +66,11 @@ class DatabaseService {
         .limit(20)
         .snapshots()
         .map((list) => list.documents.map((doc) => Message.fromFirestore(doc)));
+  }
+
+  Stream<Iterable<Interest>> streamAllInterests() {
+    return _db.collection('Interests').snapshots().map(
+        (list) => list.documents.map((doc) => Interest.fromFirestore(doc)));
   }
 
   Future<ChatRoom> getChatRoom(String id) async {
@@ -102,14 +107,20 @@ class DatabaseService {
         .setData({'photoURL': photoURL}, merge: true);
   }
 
-  Future<void> updateUserProfileText(String uid, String aboutMe, String displayName) {
-    return _db
-        .collection('Users')
-        .document(uid)
-        .setData({
-          'aboutMe': aboutMe,
-          'displayName': displayName,
-        }, merge: true);
+  Future<void> updateUserProfileText(
+      String uid, String aboutMe, String displayName) {
+    return _db.collection('Users').document(uid).setData({
+      'aboutMe': aboutMe,
+      'displayName': displayName,
+    }, merge: true);
+  }
+
+  Future<void> updateUserInterests(String uid, List<Interest> interests) {
+    return _db.collection('Users').document(uid).setData({
+      'interests': [
+        for (var interest in interests) {interest.id}
+      ],
+    }, merge: true);
   }
 
   Future<void> createNewUser(FirebaseUser verifiedUser) {
@@ -150,7 +161,7 @@ class DatabaseService {
   }
 
   Future<void> writeMessageToChatRoom(List<String> userUids, Message message) {
-    verifyChatRoom(userUids);    
+    verifyChatRoom(userUids);
 
     String id = ChatRoom.generateID(userUids);
     var room = _db.collection('ChatRooms').document(id);
