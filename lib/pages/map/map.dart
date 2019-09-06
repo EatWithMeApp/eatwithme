@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:eatwithme/models/models.dart';
+import 'package:eatwithme/pages/settings/settings.dart';
 import 'package:eatwithme/services/auth.dart';
 import 'package:eatwithme/pages/chat/chat_room_list.dart';
 import 'package:eatwithme/pages/profile/editProfile.dart';
@@ -213,6 +214,18 @@ class _MapPageState extends State<MapPage> {
                 onPressed: () {
                   Navigator.push(
                       context, RouteFromBottom(widget: EditProfilePage(uid: loggedInUser.uid,)));
+                }),
+            FloatingActionButton(
+                heroTag: 'Settings',
+                child: Icon(Icons.settings, size: 30.0),
+                foregroundColor: Colors.black,
+                backgroundColor: Colors.red,
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      RouteFromBottom(
+                          widget:
+                              SettingsPage()));
                 }),
             FloatingActionButton(
                 heroTag: 'Logout',
