@@ -51,6 +51,9 @@ class _InterestsState extends State<Interests> {
 
   @override
   Widget build(BuildContext context) {
+    final sizeX = MediaQuery.of(context).size.width;
+    final sizeY = MediaQuery.of(context).size.height;
+    TextEditingController interest;
     return StreamBuilder(
       stream: _interestsListController.stream,
       builder: (context, interestsListSnapshot)
@@ -77,42 +80,46 @@ class _InterestsState extends State<Interests> {
                       backgroundColor: Colors.deepOrangeAccent,
                     ),
                     body: Container(
+                      padding: EdgeInsets.only(top: 10.0),
+                      width: sizeX,
+                      height: sizeY,
+                      color: Colors.white,
                       child: Column(
                         children: <Widget>[
-                          Text(
-                            'Select Your Interests',
-                            style: TextStyle(fontSize: 50.0),
-                            textAlign: TextAlign.center,
+                          TextField(
+                            controller: interest,
+                            decoration: InputDecoration(
+                              labelText: "Search",
+                              hintText: "Search",
+                              prefixIcon: Icon(Icons.search),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(25.0)))
+                            ),
                           ),
-                          Text(
-                            'Up to 5',
-                            style: TextStyle(fontSize: 20.0),
-                            textAlign: TextAlign.center,
-                          ),
-                          new DropdownButton(
-                              value: dropdownValue,
-                              onChanged: (newValue) {
-                                setState(() {
-                                 dropdownValue = newValue; 
-                                });
-                              },
-                              items: interestList.map((value) {
-                                return new DropdownMenuItem(
-                                  child: Text(value),
-                                  value: value,
-                                );
-                              }).toList()),
+                          // new DropdownButton(
+                          //     value: dropdownValue,
+                          //     onChanged: (newValue) {
+                          //       setState(() {
+                          //        dropdownValue = newValue; 
+                          //       });
+                          //     },
+                          //     items: interestList.map((value) {
+                          //       return new DropdownMenuItem(
+                          //         child: Text(value),
+                          //         value: value,
+                          //       );
+                          //     }).toList()),
+                          
                           new RaisedButton(
                             child: Text("Add Interest"),
                             elevation: 5.0,
                             color: Colors.deepOrange,
                             onPressed: () {
                               if(usersInterests.length < 5)
-                                usersInterests.add(dropdownValue);
+                                usersInterests.add(interest.toString());
                             },
                           ),
                           Expanded(
-                              child: new ListView.builder(
+                              child: ListView.builder(
                             itemCount: usersInterests.length,
                             itemBuilder: (BuildContext context, int index) {
                               return Dismissible(
@@ -124,7 +131,14 @@ class _InterestsState extends State<Interests> {
                                     });
                                      
                                   },
-                                  child: ListTile(title: Text('${usersInterests[index]}')),
+                                  child: ListTile(title: Text('${usersInterests[index]}'), 
+                                  trailing: Icon(Icons.delete),
+                                  onTap: ()
+                                  {
+                                    usersInterests.remove(usersInterests[index]);
+                                    print(usersInterests);
+                                  },
+                                  ),
                                   );
                             },
                           )),
