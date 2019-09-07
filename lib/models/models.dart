@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:equatable/equatable.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
 
-class User {
+class User extends Equatable{
   final String uid;
   final String aboutMe;
   final String displayName;
@@ -13,26 +14,21 @@ class User {
 
   User({this.uid, this.aboutMe, this.displayName, this.email, this.lastSeen, this.photoURL, this.interests, this.position});
 
-  User intialData() {
-    //TODO: Implement initial data
-    return null;
-  }
-
   factory User.fromMap(Map data) {
     GeoPoint pos = data['position']['geopoint'];
-    List<String> userInterests = data['interests'].cast<String>();
+    // List<String> userInterests = data['interests'].cast<String>();
     String userEmail = data['email'];
     Timestamp timestamp = data['lastSeen'];
 
     return User(
       aboutMe: data['aboutMe'] ?? '(Not provided)',
       email: userEmail ?? '(No email available)',
-      displayName: data['displayName'] ?? (userEmail.split('@')[0].trim() ?? ''),
+      displayName: data['displayName'] ?? (userEmail.split('@')[0].trim() ?? '') ?? '',
       position: GeoFirePoint(pos.latitude, pos.longitude) ?? null,
       uid: data['uid'] ?? '',
       photoURL: data['photoURL'] ?? '',
       lastSeen: DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch) ?? DateTime.now(),
-      interests: userInterests ?? [],
+      interests: data['interests'] ?? [],
     );
   }
 
@@ -61,7 +57,7 @@ class User {
 
 }
 
-class ChatRoom {
+class ChatRoom extends Equatable {
   final String id;
   final List<String> userUids;
   final bool canAddUsers;
@@ -120,7 +116,7 @@ enum MessageType {
   sticker,
 }
 
-class Message {
+class Message extends Equatable{
   String id;
   final MessageType type;
   final String content;
@@ -180,4 +176,31 @@ class Message {
     return (!isMessageFromUser(loggedInUid)) && (uidFrom != mostRecentMessage.uidFrom || id == mostRecentMessage.id);
   }
 
+}
+
+class Interest extends Equatable{
+  String id;
+  final String name;
+  List<Interest> interests;
+
+  Interest({this.name, this.id, this.interests});
+
+  void addSubInterests(List<Interest> subInterests) {
+    interests.addAll(subInterests);
+    interests = interests.toSet().toList();
+  }
+
+  factory Interest.fromMap(Map data) {
+    return Interest(
+      id: data['id'] ?? '',
+      name: data['name'] ?? '',
+      interests: List.from(data['interests']) ?? [], // Add sub interests another time
+    );
+  }
+
+  factory Interest.fromFirestore(DocumentSnapshot doc) {
+    Map data = doc.data;
+    data['id'] = doc.documentID;
+    return Interest.fromMap(data);
+  } 
 }
