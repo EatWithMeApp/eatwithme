@@ -16,7 +16,7 @@ class User extends Equatable{
 
   factory User.fromMap(Map data) {
     GeoPoint pos = data['position']['geopoint'];
-    // List<String> userInterests = data['interests'].cast<String>();
+    List<String> userInterests = List<String>.from(data['interests']);
     String userEmail = data['email'];
     Timestamp timestamp = data['lastSeen'];
 
@@ -28,7 +28,7 @@ class User extends Equatable{
       uid: data['uid'] ?? '',
       photoURL: data['photoURL'] ?? '',
       lastSeen: DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch) ?? DateTime.now(),
-      interests: data['interests'] ?? [],
+      interests: userInterests ?? [],
     );
   }
 
@@ -194,7 +194,7 @@ class Interest extends Equatable{
     return Interest(
       id: data['id'] ?? '',
       name: data['name'] ?? '',
-      interests: List.from(data['interests']) ?? [], // Add sub interests another time
+      interests: [] ?? [], // Add sub interests another time
     );
   }
 

@@ -7,7 +7,7 @@ import 'package:eatwithme/utils/routeFromRight.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:eatwithme/pages/interests/old_interests.dart';
+import 'package:eatwithme/pages/interests/interests.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:provider/provider.dart';
@@ -174,7 +174,7 @@ class _ProfilePageState extends State<EditProfilePage> {
                               child: FlatButton(
                                 onPressed: () {
                                   Navigator.push(context,
-                                      RouteFromRight(widget: Interests()));
+                                      RouteFromRight(widget: InterestPage(uid: widget.uid)));
                                 },
                                 color: Colors.orange,
                                 child: Text('Edit Interests'),

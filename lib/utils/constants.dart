@@ -28,7 +28,7 @@ const String gotIt = "GOT IT";
 //Geopoints
 const LatLng GeoPointANU = const LatLng(-35.2777, 149.1185);
 
-const double USER_LOCATION_RADIUS = 500.0;
+const double USER_LOCATION_RADIUS = 5000.0;
 const double INITIAL_ZOOM_VALUE = 16.0;
 
 //Margins

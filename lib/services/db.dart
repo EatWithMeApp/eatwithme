@@ -123,6 +123,12 @@ class DatabaseService {
     }, merge: true);
   }
 
+  Future<void> updateUserInterestsFromIds(String uid, List<String> interestsIds) {
+    return _db.collection('Users').document(uid).setData({
+      'interests': interestsIds,
+    }, merge: true);
+  }
+
   Future<void> createNewUser(FirebaseUser verifiedUser) {
     return _db.collection('Users').document(verifiedUser.uid).setData({
       'uid': verifiedUser.uid,
