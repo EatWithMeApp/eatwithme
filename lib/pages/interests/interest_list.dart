@@ -1,10 +1,11 @@
 import 'package:eatwithme/models/models.dart';
+import 'package:eatwithme/widgets/loadingCircle.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class InterestList extends StatefulWidget {
-  final ValueChanged<String> addInterest;
-  final ValueChanged<String> removeInterest;
+  final ValueChanged<Interest> addInterest;
+  final ValueChanged<Interest> removeInterest;
 
   const InterestList(
       {Key key, @required this.addInterest, @required this.removeInterest})
@@ -17,15 +18,26 @@ class InterestList extends StatefulWidget {
 class _InterestListState extends State<InterestList> {
   @override
   Widget build(BuildContext context) {
-    var interests = Provider.of<Iterable<Interest>>(context);
+    var dbInterests = Provider.of<Iterable<Interest>>(context);
+    var userInterests = Provider.of<Set<Interest>>(context);
+    
+    if (dbInterests == null || userInterests == null) {
+      return Expanded(child: LoadingCircle(),);
+    }
+    
     return Expanded(
         child: GridView.builder(
-            itemCount: interests.length,
+            itemCount: dbInterests.length,
             gridDelegate:
                 SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
             itemBuilder: (BuildContext context, int index) {
+              var interest = dbInterests.elementAt(index);
+
+              if (interest == null) return LoadingCircle();
+
               return InterestButton(
-                interest: interests.elementAt(index),
+                interest: interest,
+                isInitiallyOn: userInterests.contains(interest),
                 addInterest: widget.addInterest,
                 removeInterest: widget.removeInterest,
               );
@@ -35,14 +47,16 @@ class _InterestListState extends State<InterestList> {
 
 class InterestButton extends StatefulWidget {
   final Interest interest;
-  final ValueChanged<String> addInterest;
-  final ValueChanged<String> removeInterest;
+  final ValueChanged<Interest> addInterest;
+  final ValueChanged<Interest> removeInterest;
+  final bool isInitiallyOn;
 
   const InterestButton(
       {Key key,
       @required this.interest,
+      @required this.isInitiallyOn,
       @required this.addInterest,
-      @required this.removeInterest})
+      @required this.removeInterest,})
       : super(key: key);
 
   @override
@@ -50,10 +64,25 @@ class InterestButton extends StatefulWidget {
 }
 
 class _InterestButtonState extends State<InterestButton> {
-  bool _isPressed = false;
+  bool _isPressed;
 
   // TODO: Replace colours with animation to show state
   Color _colour;
+
+  void _updateColour() {
+    setState(() {
+      _colour = (_isPressed) ? Colors.orange : Colors.white;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      _isPressed = widget.isInitiallyOn;
+      _updateColour();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,11 +92,9 @@ class _InterestButtonState extends State<InterestButton> {
       onPressed: () {
         setState(() {
           _isPressed = !_isPressed;
-          _colour = (_isPressed) ? Colors.orange : Colors.white;
+          _updateColour();
 
-          String id = widget.interest.id;
-
-          _isPressed ? widget.addInterest(id) : widget.removeInterest(id);
+          _isPressed ? widget.addInterest(widget.interest) : widget.removeInterest(widget.interest);
         });
       },
     );

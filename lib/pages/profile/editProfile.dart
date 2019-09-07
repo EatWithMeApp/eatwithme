@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:core';
 
+import 'package:eatwithme/models/models.dart';
 import 'package:eatwithme/pages/profile/profile.dart';
 import 'package:eatwithme/services/db.dart';
 import 'package:eatwithme/utils/routeFromRight.dart';
@@ -26,12 +27,12 @@ class _ProfilePageState extends State<EditProfilePage> {
 
   final TextEditingController _aboutMeController = TextEditingController();
   final TextEditingController _displayNameController = TextEditingController();
-  final StorageReference storageReference =
-      FirebaseStorage.instance.ref();
+  final StorageReference storageReference = FirebaseStorage.instance.ref();
 
   String aboutMe;
   String displayName;
   String photoURL;
+  Set<Interest> _interests;
 
   double imgYPos = 45.0;
   double imgWidth = 200.0;
@@ -44,12 +45,19 @@ class _ProfilePageState extends State<EditProfilePage> {
     if (image == null) return null;
 
     //Uploads image to firebase storage
-    final StorageUploadTask uploadTask = storageReference.child(widget.uid).putFile(image);
+    final StorageUploadTask uploadTask =
+        storageReference.child(widget.uid).putFile(image);
 
     photoURL = await (await uploadTask.onComplete).ref.getDownloadURL();
 
     setState(() {
       db.updateUserPhoto(widget.uid, photoURL);
+    });
+  }
+
+  _updateInterests(Set<Interest> interests) {
+    setState(() {
+      _interests = Set<Interest>.from(interests);
     });
   }
 
@@ -71,6 +79,8 @@ class _ProfilePageState extends State<EditProfilePage> {
         _displayNameController.text = name;
 
         photoURL = user.photoURL;
+
+        _interests = user.interests;
 
         print('InitState editprofile');
       });
@@ -173,8 +183,14 @@ class _ProfilePageState extends State<EditProfilePage> {
                               padding: EdgeInsets.only(top: 10.0),
                               child: FlatButton(
                                 onPressed: () {
-                                  Navigator.push(context,
-                                      RouteFromRight(widget: InterestPage(uid: widget.uid)));
+                                  Navigator.push(
+                                      context,
+                                      RouteFromRight(
+                                          widget: InterestPage(
+                                        uid: widget.uid,
+                                        updateParentInterestIds:
+                                            _updateInterests,
+                                      )));
                                 },
                                 color: Colors.orange,
                                 child: Text('Edit Interests'),
@@ -185,32 +201,8 @@ class _ProfilePageState extends State<EditProfilePage> {
                         Container(
                             height: 75.0,
                             child: ProfileInterestsList(
-                              interests: [], //List.of(usersSnapshot.data['interests'] ?? [])
-                            )
-
-                            // ListView.builder(
-                            //     scrollDirection: Axis.horizontal,
-                            //     itemCount: List.of(
-                            //             usersSnapshot.data['interests'])
-                            //         .length,
-                            //     itemBuilder:
-                            //         (BuildContext context, int index) {
-                            //       return ButtonBar(
-                            //         alignment: MainAxisAlignment.start,
-                            //         children: <Widget>[
-                            //           RaisedButton(
-                            //             onPressed: null,
-                            //             elevation: 5.0,
-                            //             child: Text('#' +
-                            //                 List.of(usersSnapshot
-                            //                         .data['interests'])
-                            //                     .elementAt(index)),
-                            //           ),
-                            //         ],
-                            //       );
-                            //     })
-
-                            ),
+                              interests: _interests,
+                            )),
                         SaveButton(
                           aboutMe: aboutMe,
                           displayName: displayName,
@@ -243,7 +235,6 @@ class _ProfilePageState extends State<EditProfilePage> {
       ),
     );
   }
-
 }
 
 class CloseButton extends StatelessWidget {

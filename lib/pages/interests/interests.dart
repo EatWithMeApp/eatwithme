@@ -1,14 +1,16 @@
+import 'package:eatwithme/models/models.dart';
 import 'package:eatwithme/pages/interests/interest_list.dart';
 import 'package:eatwithme/services/db.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:eatwithme/models/models.dart';
 
 class InterestPage extends StatefulWidget {
   final String uid;
+  final ValueChanged<Set<Interest>> updateParentInterestIds;
 
-  const InterestPage({Key key, @required this.uid}) : super(key: key);
+  const InterestPage(
+      {Key key, @required this.uid, @required this.updateParentInterestIds})
+      : super(key: key);
 
   @override
   _InterestPageState createState() => _InterestPageState();
@@ -16,27 +18,27 @@ class InterestPage extends StatefulWidget {
 
 class _InterestPageState extends State<InterestPage> {
   final db = DatabaseService();
-  Set<String> loggedInInterestsIds;
+  Set<Interest> loggedInInterests;
 
   @override
   void initState() {
     super.initState();
     db.getUser(widget.uid).then((user) {
       setState(() {
-        loggedInInterestsIds = Set<String>.from(user.interests);
+        loggedInInterests = Set<Interest>.from(user.interests);
       });
     });
   }
 
-  _addInterest(String interestId) {
+  _addInterest(Interest interest) {
     setState(() {
-      loggedInInterestsIds.add(interestId);
+      loggedInInterests = Set.from(loggedInInterests)..add(interest);
     });
   }
 
-  _removeInterest(String interestId) {
+  _removeInterest(Interest interest) {
     setState(() {
-      loggedInInterestsIds.remove(interestId);
+      loggedInInterests = Set.from(loggedInInterests)..remove(interest);
     });
   }
 
@@ -46,8 +48,11 @@ class _InterestPageState extends State<InterestPage> {
     final sizeY = MediaQuery.of(context).size.height;
     TextEditingController interest;
 
-    return StreamProvider.value(
-      value: db.streamAllInterests(),
+    return MultiProvider(
+      providers: [
+        StreamProvider.value(value: db.streamAllInterests()),
+        Provider.value(value: loggedInInterests),
+      ],
       child: Scaffold(
           appBar: AppBar(
             title: Text('Interests'),
@@ -70,49 +75,21 @@ class _InterestPageState extends State<InterestPage> {
                           borderRadius:
                               BorderRadius.all(Radius.circular(25.0)))),
                 ),
-
-                // RaisedButton(
-                //   child: Text("Add Interest"),
-                //   elevation: 5.0,
-                //   color: Colors.deepOrange,
-                //   onPressed: () {
-                //     if(usersInterests.length < 5)
-                //       usersInterests.add(interest.toString());
-                //   },
-                // ),
-                // Expanded(
-                //     child: ListView.builder(
-                //   itemCount: usersInterests.length,
-                //   itemBuilder: (BuildContext context, int index) {
-                //     return Dismissible(
-                //         key: Key(usersInterests[index]),
-                //         onDismissed: (direction) {
-                //           setState(() {
-                //            usersInterests.remove(usersInterests[index]);
-                //            print(usersInterests);
-                //           });
-
-                //         },
-                //         child: ListTile(title: Text('${usersInterests[index]}'),
-                //         trailing: Icon(Icons.delete),
-                //         onTap: ()
-                //         {
-                //           usersInterests.remove(usersInterests[index]);
-                //           print(usersInterests);
-                //         },
-                //         ),
-                //         );
-                //   },
-                // )),
-                InterestList(addInterest: _addInterest, removeInterest: _removeInterest,),
+                InterestList(
+                  addInterest: _addInterest,
+                  removeInterest: _removeInterest,
+                ),
                 RaisedButton(
-                  child: Text('SAVE'),
+                  child: Text('Save My Interests'),
                   elevation: 5.0,
                   color: Colors.deepOrange,
                   onPressed: () {
-                    db.updateUserInterestsFromIds(
-                        widget.uid, List<String>.from(loggedInInterestsIds)
-                        );
+                    setState(() {
+                      widget.updateParentInterestIds(loggedInInterests);
+                      db.updateUserInterestsFromIds(
+                          widget.uid, loggedInInterests);
+                    });
+                    Navigator.pop(context);
                   },
                 ),
               ],

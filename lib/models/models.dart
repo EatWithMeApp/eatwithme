@@ -9,14 +9,14 @@ class User extends Equatable{
   final String email;
   final DateTime lastSeen;
   final String photoURL;
-  final List<String> interests;
+  final Set<Interest> interests;
   final GeoFirePoint position;
 
   User({this.uid, this.aboutMe, this.displayName, this.email, this.lastSeen, this.photoURL, this.interests, this.position});
 
   factory User.fromMap(Map data) {
     GeoPoint pos = data['position']['geopoint'];
-    List<String> userInterests = List<String>.from(data['interests']);
+    Set<Interest> userInterests = Set<Interest>.from(data['interests']);
     String userEmail = data['email'];
     Timestamp timestamp = data['lastSeen'];
 
@@ -203,4 +203,13 @@ class Interest extends Equatable{
     data['id'] = doc.documentID;
     return Interest.fromMap(data);
   } 
+
+  @override
+  String toString() {
+    return "$name";
+  }
+
+  List<String> toArray() {
+    return [id, name];
+  }
 }
