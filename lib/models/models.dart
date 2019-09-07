@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
 
-class User {
+class User extends Equatable{
   final String uid;
   final String aboutMe;
   final String displayName;
@@ -16,7 +16,7 @@ class User {
 
   factory User.fromMap(Map data) {
     GeoPoint pos = data['position']['geopoint'];
-    // List<String> userInterests = data['interests'].cast<String>(); //Fix me dingus
+    // List<String> userInterests = data['interests'].cast<String>();
     String userEmail = data['email'];
     Timestamp timestamp = data['lastSeen'];
 
@@ -57,7 +57,7 @@ class User {
 
 }
 
-class ChatRoom {
+class ChatRoom extends Equatable {
   final String id;
   final List<String> userUids;
   final bool canAddUsers;
@@ -116,7 +116,7 @@ enum MessageType {
   sticker,
 }
 
-class Message {
+class Message extends Equatable{
   String id;
   final MessageType type;
   final String content;
@@ -194,7 +194,7 @@ class Interest extends Equatable{
     return Interest(
       id: data['id'] ?? '',
       name: data['name'] ?? '',
-      interests: [], // Add sub interests another time
+      interests: List.from(data['interests']) ?? [], // Add sub interests another time
     );
   }
 
