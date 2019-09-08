@@ -57,7 +57,7 @@ class ChatRoomCard extends StatelessWidget {
                       margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
                     ),
                     Container(
-                      child: ProfileInterestsList(interests: user.interests),
+                      child: ProfileInterestsList(interests: user.interests,),
                       alignment: Alignment.centerLeft,
                       margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
                     )

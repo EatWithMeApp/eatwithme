@@ -4,13 +4,9 @@ import 'package:eatwithme/models/models.dart';
 import 'package:eatwithme/pages/chat/chat_room.dart';
 import 'package:eatwithme/services/db.dart';
 import 'package:eatwithme/theme/eatwithme_theme.dart';
-import 'package:eatwithme/utils/constants.dart';
 import 'package:eatwithme/utils/routeFromBottom.dart';
 import 'package:eatwithme/widgets/profile_photo.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:eatwithme/main.dart';
-import 'package:eatwithme/widgets/loadingCircle.dart';
 import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -142,7 +138,7 @@ class ProfileCard extends StatelessWidget {
                             alignment: Alignment(-1.0, 0.0),
                           ),
                           ProfileInterestsList(
-                            interests: List.of(user.interests),
+                            interests: user.interests,
                           ),
                         ],
                       ),
@@ -160,10 +156,10 @@ class ProfileCard extends StatelessWidget {
               ),
               ListTile(
                 title: Text('Block User'),
-                subtitle: Text('Removes user from map and removes chat history'),
+                subtitle:
+                    Text('Removes user from map and removes chat history'),
                 trailing: Icon(Icons.block),
-                onTap: ()
-                {
+                onTap: () {
                   //TODO implement user blocking
                 },
               )
@@ -175,27 +171,65 @@ class ProfileCard extends StatelessWidget {
   }
 }
 
-class ProfileInterestsList extends StatelessWidget {
+class ProfileInterestsList extends StatefulWidget {
   const ProfileInterestsList({
     Key key,
     @required this.interests,
   }) : super(key: key);
 
-  final List<String> interests;
+  final Set<Interest> interests;
 
   @override
+  _ProfileInterestsListState createState() => _ProfileInterestsListState();
+}
+
+class _ProfileInterestsListState extends State<ProfileInterestsList> {
+  @override
   Widget build(BuildContext context) {
+    if (widget.interests == null) return Container();
+
     return Container(
         height: 50.0,
         child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            itemCount: interests.length,
+            itemCount: widget.interests.length,
             itemBuilder: (BuildContext context, int index) {
-              return Chip(
-                backgroundColor: Colors.orangeAccent,
-                label: Text('#' + interests.elementAt(index).toString()),
+              var interest = widget.interests.elementAt(index);
+
+              if (interest == null) return Container();
+
+              // return Text('$interestId ');
+
+              return InterestChip(
+                interest: interest,
               );
             }));
+  }
+}
+
+class InterestChip extends StatefulWidget {
+  final Interest interest;
+
+  const InterestChip({Key key, @required this.interest}) : super(key: key);
+
+  @override
+  _InterestChipState createState() => _InterestChipState();
+}
+
+class _InterestChipState extends State<InterestChip> {  
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.interest == null) return Container();
+
+    return Chip(
+      backgroundColor: Colors.orangeAccent,
+      label: Text('#' + widget.interest.name),
+    );
   }
 }
 
@@ -203,22 +237,13 @@ class ChatboxLink extends StatelessWidget {
   const ChatboxLink({
     Key key,
     @required this.peerID,
-    // @required this.peerName,
-    // @required this.photoURL,
   }) : super(key: key);
 
   final String peerID;
-  // final String peerName;
-  // final String photoURL;
 
   @override
   Widget build(BuildContext context) {
-    // var loggedInUser = Provider.of<FirebaseUser>(context);
-
-    // var db = DatabaseService();
-
     return SizedBox(
-        // padding: EdgeInsets.only(top: 25.0),
         height: 40.0,
         width: double.infinity,
         child: InkWell(
@@ -238,17 +263,6 @@ class ChatboxLink extends StatelessWidget {
                       widget: ChatRoomPage(
                     peerId: peerID,
                   )));
-              // db.createChatRoom([loggedInUser.uid, peerID]);
-
-              // Navigator.push(
-              //     context,
-              //     RouteFromBottom(
-              //         widget: Chat(
-              //       userId: loggedInUser.uid,
-              //       peerId: peerID,
-              //       peerName: peerName,
-              //       peerAvatar: photoURL,
-              //     )));
             },
             color: themeLight().primaryColor,
             shape: RoundedRectangleBorder(
@@ -297,23 +311,6 @@ class UserImage extends StatelessWidget {
         ),
       ),
     );
-
-    // return Positioned(
-    //   top: imgYPos,
-    //   left: imgXPos,
-    //   // height: imgHeight,
-    //   // width: imgWidth,
-    //   child: GestureDetector(
-    //     onTap: () {
-    //       enlargeImage();
-    //     },
-    //     child: Material(
-    //       child: showProfilePhoto(photoURL, imgWidth, imgHeight),
-    //       borderRadius: BorderRadius.all(Radius.circular(100.0)),
-    //       clipBehavior: Clip.hardEdge,
-    //     ),
-    //   ),
-    // );
   }
 }
 

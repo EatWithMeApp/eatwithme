@@ -14,6 +14,12 @@ class DatabaseService {
     return User.fromFirestore(snapshot);
   }
 
+  Future<Interest> getInterest(String id) async {
+    var snapshot = await _db.collection('Interests').document(id).get();
+
+    return Interest.fromFirestore(snapshot);
+  }
+
   Stream<User> streamUser(String id) {
     return _db
         .collection('Users')
@@ -115,11 +121,11 @@ class DatabaseService {
     }, merge: true);
   }
 
-  Future<void> updateUserInterests(String uid, List<Interest> interests) {
+  Future<void> updateUserInterests(String uid, Set<Interest> interests) {
     return _db.collection('Users').document(uid).setData({
-      'interests': [
-        for (var interest in interests) {interest.id}
-      ],
+      'interests': interests.map((interest) {
+        return interest.toMap();
+      }).toList(),
     }, merge: true);
   }
 

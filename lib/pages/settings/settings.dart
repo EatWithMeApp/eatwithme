@@ -37,6 +37,7 @@ class SettingsPage extends StatelessWidget {
               ),
               onTap: ()
               {
+                Navigator.pop(context);
                 _signOut(context);
               },
             ),
