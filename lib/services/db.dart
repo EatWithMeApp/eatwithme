@@ -121,19 +121,11 @@ class DatabaseService {
     }, merge: true);
   }
 
-  Future<void> updateUserInterests(String uid, List<Interest> interests) {
+  Future<void> updateUserInterests(String uid, Set<Interest> interests) {
     return _db.collection('Users').document(uid).setData({
-      'interests': [
-        for (var interest in interests) {interest.id}
-      ],
-    }, merge: true);
-  }
-
-  Future<void> updateUserInterestsFromIds(String uid, Set<Interest> interests) {
-    return _db.collection('Users').document(uid).setData({
-      'interests': [
-        for (var interest in interests) {interest.toArray()}
-      ],
+      'interests': interests.map((interest) {
+        return interest.toMap();
+      }).toList(),
     }, merge: true);
   }
 

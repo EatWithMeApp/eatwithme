@@ -188,7 +188,7 @@ class _ProfilePageState extends State<EditProfilePage> {
                                       RouteFromRight(
                                           widget: InterestPage(
                                         uid: widget.uid,
-                                        updateParentInterestIds:
+                                        updateParentInterests:
                                             _updateInterests,
                                       )));
                                 },

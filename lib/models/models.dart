@@ -16,9 +16,15 @@ class User extends Equatable{
 
   factory User.fromMap(Map data) {
     GeoPoint pos = data['position']['geopoint'];
-    Set<Interest> userInterests = Set<Interest>.from(data['interests']);
+    Set<Interest> userInterests = Set();
     String userEmail = data['email'];
     Timestamp timestamp = data['lastSeen'];
+
+    for (var interest in data['interests']) {
+      if (interest.runtimeType == String) continue;
+
+      userInterests.add(Interest.fromMap(interest));
+    }
 
     return User(
       aboutMe: data['aboutMe'] ?? '(Not provided)',
@@ -209,7 +215,20 @@ class Interest extends Equatable{
     return "$name";
   }
 
-  List<String> toArray() {
-    return [id, name];
+  Map<String, String> toMap() {
+    return {
+      'id': id,
+      'name': name,
+    };
   }
+
+  @override
+  bool operator ==(Object other) =>
+    identical(this, other) ||
+    other is Interest &&
+    runtimeType == other.runtimeType &&
+    name == other.name;
+
+  @override
+  int get hashCode => name.hashCode;
 }

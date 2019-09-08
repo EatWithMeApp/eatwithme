@@ -4,13 +4,9 @@ import 'package:eatwithme/models/models.dart';
 import 'package:eatwithme/pages/chat/chat_room.dart';
 import 'package:eatwithme/services/db.dart';
 import 'package:eatwithme/theme/eatwithme_theme.dart';
-import 'package:eatwithme/utils/constants.dart';
 import 'package:eatwithme/utils/routeFromBottom.dart';
 import 'package:eatwithme/widgets/profile_photo.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:eatwithme/main.dart';
-import 'package:eatwithme/widgets/loadingCircle.dart';
 import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {

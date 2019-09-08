@@ -6,10 +6,10 @@ import 'package:provider/provider.dart';
 
 class InterestPage extends StatefulWidget {
   final String uid;
-  final ValueChanged<Set<Interest>> updateParentInterestIds;
+  final ValueChanged<Set<Interest>> updateParentInterests;
 
   const InterestPage(
-      {Key key, @required this.uid, @required this.updateParentInterestIds})
+      {Key key, @required this.uid, @required this.updateParentInterests})
       : super(key: key);
 
   @override
@@ -85,9 +85,8 @@ class _InterestPageState extends State<InterestPage> {
                   color: Colors.deepOrange,
                   onPressed: () {
                     setState(() {
-                      widget.updateParentInterestIds(loggedInInterests);
-                      db.updateUserInterestsFromIds(
-                          widget.uid, loggedInInterests);
+                      widget.updateParentInterests(loggedInInterests);
+                      db.updateUserInterests(widget.uid, loggedInInterests);
                     });
                     Navigator.pop(context);
                   },
