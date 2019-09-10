@@ -75,7 +75,7 @@ class DatabaseService {
   }
 
   Stream<Iterable<Interest>> streamAllInterests() {
-    return _db.collection('Interests').snapshots().map(
+    return _db.collectionGroup('Interests').snapshots().map(
         (list) => list.documents.map((doc) => Interest.fromFirestore(doc)));
   }
 
