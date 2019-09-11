@@ -41,7 +41,7 @@ class User extends Equatable {
       email: userEmail ?? '(No email available)',
       displayName:
           data['displayName'] ?? (userEmail.split('@')[0].trim() ?? '') ?? '',
-      position: GeoFirePoint(pos.latitude, pos.longitude) ?? null,
+      position: (pos != null) ? GeoFirePoint(pos.latitude, pos.longitude) : null,
       uid: data['uid'] ?? '',
       photoURL: data['photoURL'] ?? '',
       lastSeen: DateTime.fromMillisecondsSinceEpoch(
