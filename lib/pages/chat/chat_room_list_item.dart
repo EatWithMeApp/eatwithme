@@ -9,20 +9,20 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ChatRoomListItem extends StatelessWidget {
-  const ChatRoomListItem({Key key, @required this.roomId})
+  const ChatRoomListItem({Key key, @required this.peerId})
       : super(key: key);
 
-  final String roomId;
+  final String peerId;
 
   @override
   Widget build(BuildContext context) {
     var db = DatabaseService();
     var loggedInUid = Provider.of<FirebaseUser>(context);
     
-    if (roomId == '$loggedInUid-$loggedInUid') return Container();
+    if (peerId == '$loggedInUid-$loggedInUid') return Container();
 
     return StreamProvider<User>.value(
-      value: db.streamUser(roomId),
+      value: db.streamUser(peerId),
       child: ChatRoomCard(),
     );
   }
