@@ -11,10 +11,10 @@ description: A new Flutter project.
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.0+1
+version: 0.1.0+1
 
 environment:
-  sdk: ">=2.2.0 <3.0.0"
+  sdk: ">=2.2.2 <3.0.0"
 
 dependencies:
   flutter:
@@ -25,8 +25,7 @@ dependencies:
   cupertino_icons: ^0.1.2
   english_words: ^3.1.0
 
-  #firebase_core: ^0.4.0+8
-  firebase_core: ^0.4.0
+  firebase_core: ^0.4.0+8
   cloud_firestore: ^0.12.9
   # cloud_firestore: 0.8.2+3
 
@@ -62,6 +61,8 @@ dependencies:
 
   geoflutterfire: ^2.0.3+5
 
+  equatable: ^0.1.5
+
   test: 
 
 dev_dependencies:
@@ -87,16 +88,6 @@ flutter:
 
 
   assets:
-    # - images/img_not_available.jpeg
-    # - images/mimi1.gif
-    # - images/mimi2.gif
-    # - images/mimi3.gif
-    # - images/mimi4.gif
-    # - images/mimi5.gif
-    # - images/mimi6.gif
-    # - images/mimi7.gif
-    # - images/mimi8.gif
-    # - images/mimi9.gif
     - images/
     - fonts/
 
