@@ -5,11 +5,14 @@ import 'package:provider/provider.dart';
 import 'chat_message_item.dart';
 
 class ChatMessageList extends StatelessWidget {
-  final ScrollController listScrollController = ScrollController();
+  final ScrollController listScrollController =
+      ScrollController(initialScrollOffset: 0.0);
 
   void scrollToPosition(double offset, int milliseconds, Curve curve) {
-    listScrollController.animateTo(offset,
-        duration: Duration(milliseconds: milliseconds), curve: curve);
+    if (listScrollController.hasClients) {
+      listScrollController.animateTo(offset,
+          duration: Duration(milliseconds: milliseconds), curve: curve);
+    }
   }
 
   @override

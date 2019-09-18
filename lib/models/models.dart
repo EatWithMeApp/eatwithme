@@ -1,37 +1,52 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:equatable/equatable.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
 
-class User {
+class User extends Equatable {
   final String uid;
   final String aboutMe;
   final String displayName;
   final String email;
   final DateTime lastSeen;
   final String photoURL;
-  final List<String> interests;
+  final Set<Interest> interests;
   final GeoFirePoint position;
 
-  User({this.uid, this.aboutMe, this.displayName, this.email, this.lastSeen, this.photoURL, this.interests, this.position});
-
-  User intialData() {
-    //TODO: Implement initial data
-    return null;
-  }
+  User(
+      {this.uid,
+      this.aboutMe,
+      this.displayName,
+      this.email,
+      this.lastSeen,
+      this.photoURL,
+      this.interests,
+      this.position});
 
   factory User.fromMap(Map data) {
     GeoPoint pos = data['position']['geopoint'];
-    List<String> userInterests = data['interests'].cast<String>();
+    Set<Interest> userInterests = Set();
     String userEmail = data['email'];
     Timestamp timestamp = data['lastSeen'];
+
+    if (data['interests'] != null) {
+      for (var interest in data['interests']) {
+        if (interest.runtimeType == String) continue;
+
+        userInterests.add(Interest.fromMap(interest));
+      }
+    }
 
     return User(
       aboutMe: data['aboutMe'] ?? '(Not provided)',
       email: userEmail ?? '(No email available)',
-      displayName: data['displayName'] ?? (userEmail.split('@')[0].trim() ?? ''),
-      position: GeoFirePoint(pos.latitude, pos.longitude) ?? null,
+      displayName:
+          data['displayName'] ?? (userEmail.split('@')[0].trim() ?? '') ?? '',
+      position: (pos != null) ? GeoFirePoint(pos.latitude, pos.longitude) : null,
       uid: data['uid'] ?? '',
       photoURL: data['photoURL'] ?? '',
-      lastSeen: DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch) ?? DateTime.now(),
+      lastSeen: DateTime.fromMillisecondsSinceEpoch(
+              timestamp.millisecondsSinceEpoch) ??
+          DateTime.now(),
       interests: userInterests ?? [],
     );
   }
@@ -58,10 +73,9 @@ class User {
       'interests': interests,
     };
   }
-
 }
 
-class ChatRoom {
+class ChatRoom extends Equatable {
   final String id;
   final List<String> userUids;
   final bool canAddUsers;
@@ -120,7 +134,7 @@ enum MessageType {
   sticker,
 }
 
-class Message {
+class Message extends Equatable {
   String id;
   final MessageType type;
   final String content;
@@ -131,13 +145,15 @@ class Message {
 
   factory Message.fromMap(Map data) {
     Timestamp timestamp = data['timestamp'];
-    
+
     return Message(
       id: data['id'] ?? '',
       type: MessageType.values[data['type']] ?? MessageType.text,
       content: data['content'] ?? '',
       uidFrom: data['uidFrom'] ?? '',
-      timestamp: DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch) ?? DateTime.now(),
+      timestamp: DateTime.fromMillisecondsSinceEpoch(
+              timestamp.millisecondsSinceEpoch) ??
+          DateTime.now(),
     );
   }
 
@@ -145,7 +161,7 @@ class Message {
     Map data = doc.data;
     data['id'] = doc.documentID;
     return Message.fromMap(data);
-  } 
+  }
 
   Map<String, dynamic> toMap() {
     return {
@@ -174,10 +190,60 @@ class Message {
     return !isMessageSameUser(this, loggedInUid);
   }
 
-  bool shouldDrawPeerProfilePhoto(Message mostRecentMessage, String loggedInUid) {
-    // Draw if we are not the logged in user and either 
+  bool shouldDrawPeerProfilePhoto(
+      Message mostRecentMessage, String loggedInUid) {
+    // Draw if we are not the logged in user and either
     // have a different user to the most recent message or are the most recent ourselves
-    return (!isMessageFromUser(loggedInUid)) && (uidFrom != mostRecentMessage.uidFrom || id == mostRecentMessage.id);
+    return (!isMessageFromUser(loggedInUid)) &&
+        (uidFrom != mostRecentMessage.uidFrom || id == mostRecentMessage.id);
+  }
+}
+
+class Interest extends Equatable {
+  String id;
+  final String name;
+  List<Interest> interests;
+
+  Interest({this.name, this.id, this.interests});
+
+  void addSubInterests(List<Interest> subInterests) {
+    interests.addAll(subInterests);
+    interests = interests.toSet().toList();
   }
 
+  factory Interest.fromMap(Map data) {
+    return Interest(
+      id: data['id'] ?? '',
+      name: data['name'] ?? '',
+      interests: [] ?? [], // Add sub interests another time
+    );
+  }
+
+  factory Interest.fromFirestore(DocumentSnapshot doc) {
+    Map data = doc.data;
+    data['id'] = doc.documentID;
+    return Interest.fromMap(data);
+  }
+
+  @override
+  String toString() {
+    return "$name";
+  }
+
+  Map<String, String> toMap() {
+    return {
+      'id': id,
+      'name': name,
+    };
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Interest &&
+          runtimeType == other.runtimeType &&
+          name == other.name;
+
+  @override
+  int get hashCode => name.hashCode;
 }
