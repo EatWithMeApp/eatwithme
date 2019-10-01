@@ -73,6 +73,18 @@ class User extends Equatable {
       'interests': interests,
     };
   }
+
+  bool doesUserShareInterests(User otherUser) {
+    for (Interest otherInterest in otherUser.interests) {
+      for (Interest myInterest in interests) {
+        if (myInterest == otherInterest) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
 }
 
 class ChatRoom extends Equatable {

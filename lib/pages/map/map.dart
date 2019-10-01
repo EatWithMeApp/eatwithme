@@ -28,6 +28,7 @@ class _MapPageState extends State<MapPage> {
   final StreamController _controllerUserLocation = StreamController();
 
   FirebaseUser loggedInUser;
+  // User loggedInUser;
   final db = DatabaseService();
   final auth = AuthService();
 
@@ -42,6 +43,8 @@ class _MapPageState extends State<MapPage> {
   StreamSubscription subscription;
 
   double _zoomValue = INITIAL_ZOOM_VALUE;
+
+  bool isFliteringUsers = false;
 
   @override
   void dispose() {
@@ -124,6 +127,11 @@ class _MapPageState extends State<MapPage> {
       if (uid == null || uid == "") continue;
 
       // TODO: Match filtering goes here
+      // if (isFliteringUsers) {
+      //   if (!loggedInUser.doesUserShareInterests(user)) {
+      //     continue;
+      //   }
+      // }
 
       // Check valid position
       GeoFirePoint pos = user.position;
@@ -170,11 +178,22 @@ class _MapPageState extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
+    // FirebaseUser firebaseUser = Provider.of<FirebaseUser>(context);
+
+    // if (loggedInUser == null && firebaseUser != null) {
+    //   db.getUser(firebaseUser.uid).then((user) {
+    //     setState(() {
+    //       loggedInUser = user;
+    //     });
+    //   });
+    // }
+
     loggedInUser = Provider.of<FirebaseUser>(context);
 
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      body: Stack(alignment: AlignmentDirectional.bottomEnd, children: [
+      body: Stack(//alignment: AlignmentDirectional.bottomEnd,
+          children: [
         GoogleMap(
           initialCameraPosition:
               CameraPosition(target: GeoPointANU, zoom: _zoomValue),
@@ -188,52 +207,86 @@ class _MapPageState extends State<MapPage> {
           mapToolbarEnabled: false,
         ),
 
+        SafeArea(
+          child: FractionallySizedBox(
+            alignment: Alignment(1.0, -1.0),
+            heightFactor: 0.08,
+            widthFactor: 0.6,
+            child: Container(
+              height: 50.0,
+              width: 50.0,
+              alignment: Alignment(0.0, 0.0),
+              decoration: BoxDecoration(
+                shape: BoxShape.rectangle,
+                borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                color: themeLight().primaryColor,
+              ),
+              child: SwitchListTile.adaptive(
+                onChanged: (bool value) {
+                  setState(() {
+                    isFliteringUsers = value;
+                  });
+                },
+                isThreeLine: false,
+                value: isFliteringUsers,
+                title: Text("Same interests"),
+              ),
+            ),
+          ),
+        ),
+
         // TODO: Replace with radial menu (except for user position button)
-        Row(
-          children: <Widget>[
-            FloatingActionButton(
-                heroTag: 'GoToPos',
-                child: Icon(Icons.pin_drop, size: 30.0),
-                foregroundColor: Colors.black,
-                backgroundColor: themeLight().primaryColor,
-                onPressed: () => _animateToUser()),
-            FloatingActionButton(
-                heroTag: 'ChatRoomListPage',
-                child: Icon(Icons.chat, size: 30.0),
-                foregroundColor: Colors.black,
-                backgroundColor: themeLight().primaryColor,
-                onPressed: () {
-                  Navigator.push(
-                      context, RouteFromBottom(widget: ChatRoomListPage()));
-                }),
-            FloatingActionButton(
-                heroTag: 'MyUserProfile',
-                child: Icon(Icons.account_circle, size: 30.0),
-                foregroundColor: Colors.black,
-                backgroundColor: Colors.red,
-                onPressed: () {
-                  Navigator.push(
-                      context, RouteFromBottom(widget: EditProfilePage(uid: loggedInUser.uid,)));
-                }),
-            FloatingActionButton(
-                heroTag: 'Settings',
-                child: Icon(Icons.settings, size: 30.0),
-                foregroundColor: Colors.black,
-                backgroundColor: Colors.red,
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      RouteFromBottom(
-                          widget:
-                              SettingsPage()));
-                }),
-            FloatingActionButton(
-                heroTag: 'Logout',
-                child: Icon(Icons.exit_to_app, size: 30.0),
-                foregroundColor: Colors.white,
-                backgroundColor: Colors.black,
-                onPressed: () => _signOut(context)),
-          ],
+        SafeArea(
+          child: Container(
+            alignment: Alignment(-1.0, 1.0),
+            child: Row(
+              children: <Widget>[
+                FloatingActionButton(
+                    heroTag: 'GoToPos',
+                    child: Icon(Icons.pin_drop, size: 30.0),
+                    foregroundColor: Colors.black,
+                    backgroundColor: themeLight().primaryColor,
+                    onPressed: () => _animateToUser()),
+                FloatingActionButton(
+                    heroTag: 'ChatRoomListPage',
+                    child: Icon(Icons.chat, size: 30.0),
+                    foregroundColor: Colors.black,
+                    backgroundColor: themeLight().primaryColor,
+                    onPressed: () {
+                      Navigator.push(
+                          context, RouteFromBottom(widget: ChatRoomListPage()));
+                    }),
+                FloatingActionButton(
+                    heroTag: 'MyUserProfile',
+                    child: Icon(Icons.account_circle, size: 30.0),
+                    foregroundColor: Colors.black,
+                    backgroundColor: Colors.red,
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          RouteFromBottom(
+                              widget: EditProfilePage(
+                            uid: loggedInUser.uid,
+                          )));
+                    }),
+                FloatingActionButton(
+                    heroTag: 'Settings',
+                    child: Icon(Icons.settings, size: 30.0),
+                    foregroundColor: Colors.black,
+                    backgroundColor: Colors.red,
+                    onPressed: () {
+                      Navigator.push(
+                          context, RouteFromBottom(widget: SettingsPage()));
+                    }),
+                FloatingActionButton(
+                    heroTag: 'Logout',
+                    child: Icon(Icons.exit_to_app, size: 30.0),
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.black,
+                    onPressed: () => _signOut(context)),
+              ],
+            ),
+          ),
         )
       ]),
     );
