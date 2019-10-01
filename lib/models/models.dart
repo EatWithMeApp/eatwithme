@@ -75,15 +75,7 @@ class User extends Equatable {
   }
 
   bool doesUserShareInterests(User otherUser) {
-    for (Interest otherInterest in otherUser.interests) {
-      for (Interest myInterest in interests) {
-        if (myInterest == otherInterest) {
-          return true;
-        }
-      }
-    }
-
-    return false;
+    return interests.toSet().intersection(otherUser.interests.toSet()).length > 0;
   }
 }
 
