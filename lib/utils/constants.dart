@@ -24,6 +24,7 @@ const String wc4 =
 const String skip = "SKIP";
 const String next = "NEXT";
 const String gotIt = "GOT IT";
+const String FILTER_USERS_TEXT = "Same Interests";
 
 //Geopoints
 const LatLng GeoPointANU = const LatLng(-35.2777, 149.1185);

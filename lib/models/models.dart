@@ -73,6 +73,10 @@ class User extends Equatable {
       'interests': interests,
     };
   }
+
+  bool doesUserShareInterests(User otherUser) {
+    return interests.toSet().intersection(otherUser.interests.toSet()).length > 0;
+  }
 }
 
 class ChatRoom extends Equatable {
