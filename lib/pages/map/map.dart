@@ -12,6 +12,7 @@ import 'package:eatwithme/services/db.dart';
 import 'package:eatwithme/theme/eatwithme_theme.dart';
 import 'package:eatwithme/utils/constants.dart';
 import 'package:eatwithme/utils/routeFromBottom.dart';
+import 'package:eatwithme/widgets/gradient_button.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
@@ -61,10 +62,12 @@ class _MapPageState extends State<MapPage> {
     setState(() {
       _mapController.complete(controller);
     });
+
+    showCautionDialog();
   }
 
   _startQuery() async {
-    print('Start Query');
+    print('Start Query $loggedInUser');
 
     // Get users location
     var pos = await userLocation.getLocation();
@@ -175,9 +178,41 @@ class _MapPageState extends State<MapPage> {
     });
   }
 
+  Future<void> showCautionDialog() {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Be safe out there!'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(
+                    "Always be mindful of your surroundings and let a friend know when you're meeting new people."),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              color: themeLight().primaryColor,
+              textColor: Colors.black,
+              child: Text("I'll let my friend know"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _signOut(BuildContext context) async {
     try {
       await auth.signOut();
+      loggedInUser = null;
+      dispose();
     } catch (e) {
       print(e);
     }
