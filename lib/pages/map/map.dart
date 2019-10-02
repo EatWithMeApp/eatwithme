@@ -181,15 +181,14 @@ class _MapPageState extends State<MapPage> {
   Future<void> showCautionDialog() {
     return showDialog<void>(
       context: context,
-      barrierDismissible: false, // user must tap button!
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Be safe out there!'),
+          title: Text(SAFETY_MESSAGE_TITLE),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Text(
-                    "Always be mindful of your surroundings and let a friend know when you're meeting new people."),
+                Text(SAFETY_MESSAGE),
               ],
             ),
           ),
@@ -197,7 +196,7 @@ class _MapPageState extends State<MapPage> {
             FlatButton(
               color: themeLight().primaryColor,
               textColor: Colors.black,
-              child: Text("I'll let my friend know"),
+              child: Text(CONFIRM_SAFETY_MESSAGE),
               onPressed: () {
                 Navigator.of(context).pop();
               },

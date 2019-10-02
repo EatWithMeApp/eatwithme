@@ -1,4 +1,5 @@
 import 'package:eatwithme/theme/eatwithme_theme.dart';
+import 'package:eatwithme/utils/constants.dart';
 import 'package:flutter/material.dart';
 
 class MapLoading extends StatelessWidget {
@@ -16,7 +17,7 @@ class MapLoading extends StatelessWidget {
             children: <Widget>[
               const ListTile(
                 leading: CircularProgressIndicator(),
-                title: Text("We're loading the map for you, sit tight!"),
+                title: Text(MAP_LOADING),
               ),
             ],
           ),
