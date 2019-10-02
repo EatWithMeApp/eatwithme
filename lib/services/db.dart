@@ -9,9 +9,15 @@ class DatabaseService {
   final Geoflutterfire _geo = Geoflutterfire();
 
   Future<User> getUser(String id) async {
-    var snapshot = await _db.collection('Users').document(id).get();
+    if (id == null) return null;
 
-    return User.fromFirestore(snapshot);
+    try {
+      var snapshot = await _db.collection('Users').document(id).get();
+      return User.fromFirestore(snapshot);
+    }
+    catch (e) {
+      return null;
+    }
   }
 
   Future<Interest> getInterest(String id) async {
@@ -39,10 +45,6 @@ class DatabaseService {
   Stream<Iterable<User>> streamNearbyUsers(
       String loggedInUid, GeoFirePoint loggedInPosition) {
     // Grab all users within our radius
-
-    // TODO: filter us out here
-    // TODO: eventually pass a list of users that we share interests with and restrict checks to them
-
     return _geo
         .collection(collectionRef: _db.collection('Users'))
         .within(
@@ -182,6 +184,7 @@ class DatabaseService {
     });
   }
 
+  // Use this function if you need to repopulate or add to interests, modify list and attach function to button
   Future<void> addInterestsToDb() async {
     var list = [
       '3D printing',

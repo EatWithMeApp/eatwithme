@@ -12,7 +12,7 @@ import 'package:eatwithme/services/db.dart';
 import 'package:eatwithme/theme/eatwithme_theme.dart';
 import 'package:eatwithme/utils/constants.dart';
 import 'package:eatwithme/utils/routeFromBottom.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:eatwithme/widgets/gradient_button.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
@@ -27,7 +27,7 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   final StreamController _controllerUserLocation = StreamController();
 
-  FirebaseUser loggedInUser;
+  User loggedInUser;
   final db = DatabaseService();
   final auth = AuthService();
 
@@ -37,11 +37,14 @@ class _MapPageState extends State<MapPage> {
   GeoFirePoint previousUserLocation;
 
   Map<MarkerId, Marker> _mapMarkers = <MarkerId, Marker>{};
+  Map<String, User> _mapUsers = <String, User>{};
 
   Stream<dynamic> query;
   StreamSubscription subscription;
 
   double _zoomValue = INITIAL_ZOOM_VALUE;
+
+  bool isFilteringUsers = false;
 
   @override
   void dispose() {
@@ -59,10 +62,12 @@ class _MapPageState extends State<MapPage> {
     setState(() {
       _mapController.complete(controller);
     });
+
+    showCautionDialog();
   }
 
   _startQuery() async {
-    print('Start Query');
+    print('Start Query $loggedInUser');
 
     // Get users location
     var pos = await userLocation.getLocation();
@@ -123,8 +128,6 @@ class _MapPageState extends State<MapPage> {
       if (uid == loggedInUser.uid) continue;
       if (uid == null || uid == "") continue;
 
-      // TODO: Match filtering goes here
-
       // Check valid position
       GeoFirePoint pos = user.position;
 
@@ -155,14 +158,60 @@ class _MapPageState extends State<MapPage> {
 
         setState(() {
           _mapMarkers[markerId] = marker;
+          _mapUsers[uid] = currentUser;
         });
       });
     }
   }
 
+  void filterUserMarkers() {
+    _mapMarkers.forEach((id, mapMarker) {
+      bool isVisible = true;
+      User markerUser = _mapUsers[id.value];
+
+      if (isFilteringUsers &&
+          !loggedInUser.doesUserShareInterests(markerUser)) {
+        isVisible = false;
+      }
+
+      _mapMarkers[id] = mapMarker.copyWith(visibleParam: isVisible);
+    });
+  }
+
+  Future<void> showCautionDialog() {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(SAFETY_MESSAGE_TITLE),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(SAFETY_MESSAGE),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              color: themeLight().primaryColor,
+              textColor: Colors.black,
+              child: Text(CONFIRM_SAFETY_MESSAGE),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _signOut(BuildContext context) async {
     try {
       await auth.signOut();
+      loggedInUser = null;
+      dispose();
     } catch (e) {
       print(e);
     }
@@ -170,11 +219,11 @@ class _MapPageState extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
-    loggedInUser = Provider.of<FirebaseUser>(context);
+    loggedInUser = Provider.of<User>(context);
 
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      body: Stack(alignment: AlignmentDirectional.bottomEnd, children: [
+      body: Stack(children: [
         GoogleMap(
           initialCameraPosition:
               CameraPosition(target: GeoPointANU, zoom: _zoomValue),
@@ -188,52 +237,89 @@ class _MapPageState extends State<MapPage> {
           mapToolbarEnabled: false,
         ),
 
+        SafeArea(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: FractionallySizedBox(
+              heightFactor: 0.08,
+              widthFactor: 0.6,
+              child: Container(
+                height: 50.0,
+                width: 50.0,
+                alignment: Alignment(0.0, 0.0),
+                decoration: BoxDecoration(
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                  color: themeLight().primaryColor,
+                ),
+                child: SwitchListTile.adaptive(
+                  onChanged: (bool value) {
+                    setState(() {
+                      isFilteringUsers = value;
+                      filterUserMarkers();
+                    });
+                  },
+                  isThreeLine: false,
+                  value: isFilteringUsers,
+                  title: Text(FILTER_USERS_TEXT),
+                ),
+              ),
+            ),
+          ),
+        ),
+
         // TODO: Replace with radial menu (except for user position button)
-        Row(
-          children: <Widget>[
-            FloatingActionButton(
-                heroTag: 'GoToPos',
-                child: Icon(Icons.pin_drop, size: 30.0),
-                foregroundColor: Colors.black,
-                backgroundColor: themeLight().primaryColor,
-                onPressed: () => _animateToUser()),
-            FloatingActionButton(
-                heroTag: 'ChatRoomListPage',
-                child: Icon(Icons.chat, size: 30.0),
-                foregroundColor: Colors.black,
-                backgroundColor: themeLight().primaryColor,
-                onPressed: () {
-                  Navigator.push(
-                      context, RouteFromBottom(widget: ChatRoomListPage()));
-                }),
-            FloatingActionButton(
-                heroTag: 'MyUserProfile',
-                child: Icon(Icons.account_circle, size: 30.0),
-                foregroundColor: Colors.black,
-                backgroundColor: Colors.red,
-                onPressed: () {
-                  Navigator.push(
-                      context, RouteFromBottom(widget: EditProfilePage(uid: loggedInUser.uid,)));
-                }),
-            FloatingActionButton(
-                heroTag: 'Settings',
-                child: Icon(Icons.settings, size: 30.0),
-                foregroundColor: Colors.black,
-                backgroundColor: Colors.red,
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      RouteFromBottom(
-                          widget:
-                              SettingsPage()));
-                }),
-            FloatingActionButton(
-                heroTag: 'Logout',
-                child: Icon(Icons.exit_to_app, size: 30.0),
-                foregroundColor: Colors.white,
-                backgroundColor: Colors.black,
-                onPressed: () => _signOut(context)),
-          ],
+        SafeArea(
+          child: Container(
+            alignment: Alignment(-1.0, 1.0),
+            child: Row(
+              children: <Widget>[
+                FloatingActionButton(
+                    heroTag: 'GoToPos',
+                    child: Icon(Icons.pin_drop, size: 30.0),
+                    foregroundColor: Colors.black,
+                    backgroundColor: themeLight().primaryColor,
+                    onPressed: () => _animateToUser()),
+                FloatingActionButton(
+                    heroTag: 'ChatRoomListPage',
+                    child: Icon(Icons.chat, size: 30.0),
+                    foregroundColor: Colors.black,
+                    backgroundColor: themeLight().primaryColor,
+                    onPressed: () {
+                      Navigator.push(
+                          context, RouteFromBottom(widget: ChatRoomListPage()));
+                    }),
+                FloatingActionButton(
+                    heroTag: 'MyUserProfile',
+                    child: Icon(Icons.account_circle, size: 30.0),
+                    foregroundColor: Colors.black,
+                    backgroundColor: Colors.red,
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          RouteFromBottom(
+                              widget: EditProfilePage(
+                            uid: loggedInUser.uid,
+                          )));
+                    }),
+                FloatingActionButton(
+                    heroTag: 'Settings',
+                    child: Icon(Icons.settings, size: 30.0),
+                    foregroundColor: Colors.black,
+                    backgroundColor: Colors.red,
+                    onPressed: () {
+                      Navigator.push(
+                          context, RouteFromBottom(widget: SettingsPage()));
+                    }),
+                FloatingActionButton(
+                    heroTag: 'Logout',
+                    child: Icon(Icons.exit_to_app, size: 30.0),
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.black,
+                    onPressed: () => _signOut(context)),
+              ],
+            ),
+          ),
         )
       ]),
     );
