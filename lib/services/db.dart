@@ -9,9 +9,15 @@ class DatabaseService {
   final Geoflutterfire _geo = Geoflutterfire();
 
   Future<User> getUser(String id) async {
-    var snapshot = await _db.collection('Users').document(id).get();
+    if (id == null) return null;
 
-    return User.fromFirestore(snapshot);
+    try {
+      var snapshot = await _db.collection('Users').document(id).get();
+      return User.fromFirestore(snapshot);
+    }
+    catch (e) {
+      return null;
+    }
   }
 
   Future<Interest> getInterest(String id) async {
