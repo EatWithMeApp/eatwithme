@@ -54,46 +54,107 @@ class _InterestPageState extends State<InterestPage> {
         Provider.value(value: loggedInInterests),
       ],
       child: Scaffold(
-          appBar: AppBar(
-            title: Text('Interests'),
-            backgroundColor: Colors.deepOrangeAccent,
+        appBar: AppBar(
+          title: Text(
+                  "Interests",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.w600
+
+                  ),
           ),
-          body: Container(
-            padding: EdgeInsets.only(top: 10.0),
-            width: sizeX,
-            height: sizeY,
-            color: Colors.white,
-            child: Column(
-              children: <Widget>[
-                TextField(
-                  controller: interest,
-                  decoration: InputDecoration(
-                      labelText: "Search",
-                      hintText: "Search",
-                      prefixIcon: Icon(Icons.search),
-                      border: OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius.all(Radius.circular(25.0)))),
+          backgroundColor: Color(0xFFFF7922),
+          elevation: 0,
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
+          body: Stack(
+            children: <Widget>[
+              Container(
+                padding: EdgeInsets.only(top: 10.0, bottom: 10),
+                width: sizeX,
+                height: sizeY,
+                color: Color(0xFFFF7922),
+                child: Column(
+                  children: <Widget>[
+
+                    Padding(
+                      child: Text(
+                        "Choose some things you would be interested in talking about.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400
+
+                        ),
+                      ),
+                      padding: EdgeInsets.only(left: 30, right: 30),  
+
+                    ),
+                    
+                    Padding(padding: EdgeInsets.all(15),
+                    child: TextField(
+                        controller: interest,
+                        decoration: InputDecoration(
+                          fillColor: Colors.white,
+                          filled: true,
+                          focusColor: Colors.white,
+                          labelText: "Search",
+                          hintText: "Search",
+                          prefixIcon: Icon(Icons.search),
+                          border: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(100.0)))),
+                      ),
+                    ),
+                    
+                    InterestList(
+                      addInterest: _addInterest,
+                      removeInterest: _removeInterest,
+                    ),
+                  ],
                 ),
-                InterestList(
-                  addInterest: _addInterest,
-                  removeInterest: _removeInterest,
+              ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  constraints: BoxConstraints(maxHeight: 80, maxWidth: 1000),
+                  alignment: Alignment.centerRight,
+                  padding: EdgeInsets.only(right: 30),
+                  decoration: BoxDecoration(
+                    color: Color(0xFFFF7922),
+                    boxShadow: [BoxShadow(blurRadius: 4, offset: Offset(0, -4), color: Color.fromRGBO(0, 0, 0, 0.3))], 
+                    borderRadius: BorderRadius.circular(1000),
+                  ),
+                  child: RaisedButton(
+                    child: Text('Save',
+                    style: TextStyle(
+                      color: Color(0xff333333),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+
+                      ),
+                    ),
+                    elevation: 2.0,
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(20.0),
+                      ),
+                    onPressed: () {
+                      setState(() {
+                        widget.updateParentInterests(loggedInInterests);
+                        db.updateUserInterests(widget.uid, loggedInInterests);
+                      });
+                      Navigator.pop(context);
+                    },
+                  ),
                 ),
-                RaisedButton(
-                  child: Text('Save My Interests'),
-                  elevation: 5.0,
-                  color: Colors.deepOrange,
-                  onPressed: () {
-                    setState(() {
-                      widget.updateParentInterests(loggedInInterests);
-                      db.updateUserInterests(widget.uid, loggedInInterests);
-                    });
-                    Navigator.pop(context);
-                  },
-                ),
-              ],
-            ),
-          )),
+              )     
+            ],
+          )
+      )         
     );
   }
 }

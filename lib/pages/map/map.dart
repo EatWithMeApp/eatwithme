@@ -18,6 +18,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:provider/provider.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
+import 'package:eatwithme/EatWithMeUI/RadialMenu.dart';
+import 'package:eatwithme/EatWithMeUI/MapPin.dart';
 
 class MapPage extends StatefulWidget {
   @override
@@ -45,6 +47,7 @@ class _MapPageState extends State<MapPage> {
   double _zoomValue = INITIAL_ZOOM_VALUE;
 
   bool isFilteringUsers = false;
+  Color overlay;
 
   @override
   void dispose() {
@@ -222,6 +225,10 @@ class _MapPageState extends State<MapPage> {
     loggedInUser = Provider.of<User>(context);
 
     return Scaffold(
+      appBar: PreferredSize(
+        child: AppBar(),
+        preferredSize: Size.fromHeight(0),
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: Stack(children: [
         GoogleMap(
@@ -269,58 +276,103 @@ class _MapPageState extends State<MapPage> {
         ),
 
         // TODO: Replace with radial menu (except for user position button)
-        SafeArea(
+        // SafeArea(
+        //   child: Container(
+        //     alignment: Alignment(-1.0, 1.0),
+        //     child: Row(
+        //       children: <Widget>[
+        //         FloatingActionButton(
+        //             heroTag: 'GoToPos',
+        //             child: Icon(Icons.pin_drop, size: 30.0),
+        //             foregroundColor: Colors.black,
+        //             backgroundColor: themeLight().primaryColor,
+        //             onPressed: () => _animateToUser()),
+        //         FloatingActionButton(
+        //             heroTag: 'ChatRoomListPage',
+        //             child: Icon(Icons.chat, size: 30.0),
+        //             foregroundColor: Colors.black,
+        //             backgroundColor: themeLight().primaryColor,
+        //             onPressed: () {
+        //               Navigator.push(
+        //                   context, RouteFromBottom(widget: ChatRoomListPage()));
+        //             }),
+        //         FloatingActionButton(
+        //             heroTag: 'MyUserProfile',
+        //             child: Icon(Icons.account_circle, size: 30.0),
+        //             foregroundColor: Colors.black,
+        //             backgroundColor: Colors.red,
+        //             onPressed: () {
+        //               Navigator.push(
+        //                   context,
+        //                   RouteFromBottom(
+        //                       widget: EditProfilePage(
+        //                     uid: loggedInUser.uid,
+        //                   )));
+        //             }),
+        //         FloatingActionButton(
+        //             heroTag: 'Settings',
+        //             child: Icon(Icons.settings, size: 30.0),
+        //             foregroundColor: Colors.black,
+        //             backgroundColor: Colors.red,
+        //             onPressed: () {
+        //               Navigator.push(
+        //                   context, RouteFromBottom(widget: SettingsPage()));
+        //             }),
+        //         FloatingActionButton(
+        //             heroTag: 'Logout',
+        //             child: Icon(Icons.exit_to_app, size: 30.0),
+        //             foregroundColor: Colors.white,
+        //             backgroundColor: Colors.black,
+        //             onPressed: () => _signOut(context)),
+        //       ],
+        //     ),
+        //   ),
+        // )
+        IgnorePointer(
           child: Container(
-            alignment: Alignment(-1.0, 1.0),
-            child: Row(
-              children: <Widget>[
-                FloatingActionButton(
-                    heroTag: 'GoToPos',
-                    child: Icon(Icons.pin_drop, size: 30.0),
-                    foregroundColor: Colors.black,
-                    backgroundColor: themeLight().primaryColor,
-                    onPressed: () => _animateToUser()),
-                FloatingActionButton(
-                    heroTag: 'ChatRoomListPage',
-                    child: Icon(Icons.chat, size: 30.0),
-                    foregroundColor: Colors.black,
-                    backgroundColor: themeLight().primaryColor,
-                    onPressed: () {
-                      Navigator.push(
-                          context, RouteFromBottom(widget: ChatRoomListPage()));
-                    }),
-                FloatingActionButton(
-                    heroTag: 'MyUserProfile',
-                    child: Icon(Icons.account_circle, size: 30.0),
-                    foregroundColor: Colors.black,
-                    backgroundColor: Colors.red,
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          RouteFromBottom(
-                              widget: EditProfilePage(
-                            uid: loggedInUser.uid,
-                          )));
-                    }),
-                FloatingActionButton(
-                    heroTag: 'Settings',
-                    child: Icon(Icons.settings, size: 30.0),
-                    foregroundColor: Colors.black,
-                    backgroundColor: Colors.red,
-                    onPressed: () {
-                      Navigator.push(
-                          context, RouteFromBottom(widget: SettingsPage()));
-                    }),
-                FloatingActionButton(
-                    heroTag: 'Logout',
-                    child: Icon(Icons.exit_to_app, size: 30.0),
-                    foregroundColor: Colors.white,
-                    backgroundColor: Colors.black,
-                    onPressed: () => _signOut(context)),
-              ],
+            decoration: BoxDecoration(
+              color: overlay,
             ),
           ),
-        )
+        ),
+        
+        Container(
+          alignment: Alignment.bottomRight,
+          padding: EdgeInsets.all(25),
+          child: RadialMenu(
+            onProfileTapped: () {
+              Navigator.push(
+                context, RouteFromBottom(widget: EditProfilePage(uid: loggedInUser.uid,)));
+            },    
+            onChatTapped: () {
+              Navigator.push(
+                context, RouteFromBottom(widget: ChatRoomListPage()));
+            },
+            onSettingsTapped: () {
+              Navigator.push(context, RouteFromBottom(widget: SettingsPage()));  
+            },  
+            onMenuTapped: () {
+              setState(() {
+                overlay = Color.fromARGB(50, 0, 0, 0);
+              });
+            },
+            onCrossTapped: () {
+              setState(() {
+                overlay = Colors.transparent;
+              });
+            },
+          ),
+        ),  
+        Container(
+          alignment: Alignment.bottomLeft,
+          padding: EdgeInsets.all(25),
+          child: FloatingActionButton(
+                heroTag: 'GoToPos',
+                child: Icon(Icons.pin_drop, size: 30.0),
+                foregroundColor: Colors.white,
+                backgroundColor: Color(0xff333333),
+                onPressed: () => _animateToUser()),
+        ),
       ]),
     );
   }

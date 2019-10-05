@@ -2,6 +2,7 @@ import 'package:eatwithme/models/models.dart';
 import 'package:eatwithme/widgets/loadingCircle.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:eatwithme/EatWithMeUI/InterestButton.dart';
 
 class InterestList extends StatefulWidget {
   final ValueChanged<Interest> addInterest;
@@ -26,77 +27,38 @@ class _InterestListState extends State<InterestList> {
     }
     
     return Expanded(
-        child: GridView.builder(
-            itemCount: dbInterests.length,
-            gridDelegate:
-                SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-            itemBuilder: (BuildContext context, int index) {
-              var interest = dbInterests.elementAt(index);
+        child: Padding(
+          padding: EdgeInsets.only(left: 15, right: 15),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(30), 
+                topRight: Radius.circular(30)
+                ),
+              color: Colors.white,
+              
+            ),
+            child: GridView.builder(
+              itemCount: dbInterests.length,
+              padding: EdgeInsets.all(5),
+              gridDelegate:SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+              itemBuilder: (BuildContext context, int index) {
+                var interest = dbInterests.elementAt(index);
 
-              if (interest == null) return LoadingCircle();
+                if (interest == null) return LoadingCircle();
 
-              return InterestButton(
-                interest: interest,
-                isInitiallyOn: userInterests.contains(interest),
-                addInterest: widget.addInterest,
-                removeInterest: widget.removeInterest,
-              );
-            }));
-  }
-}
-
-class InterestButton extends StatefulWidget {
-  final Interest interest;
-  final ValueChanged<Interest> addInterest;
-  final ValueChanged<Interest> removeInterest;
-  final bool isInitiallyOn;
-
-  const InterestButton(
-      {Key key,
-      @required this.interest,
-      @required this.isInitiallyOn,
-      @required this.addInterest,
-      @required this.removeInterest,})
-      : super(key: key);
-
-  @override
-  _InterestButtonState createState() => _InterestButtonState();
-}
-
-class _InterestButtonState extends State<InterestButton> {
-  bool _isPressed;
-
-  // TODO: Replace colours with animation to show state
-  Color _colour;
-
-  void _updateColour() {
-    setState(() {
-      _colour = (_isPressed) ? Colors.orange : Colors.white;
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    setState(() {
-      _isPressed = widget.isInitiallyOn;
-      _updateColour();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FlatButton(
-      child: Text(widget.interest.name),
-      color: _colour,
-      onPressed: () {
-        setState(() {
-          _isPressed = !_isPressed;
-          _updateColour();
-
-          _isPressed ? widget.addInterest(widget.interest) : widget.removeInterest(widget.interest);
-        });
-      },
-    );
+                return Padding(
+                  padding: EdgeInsets.all(8),
+                  child: InterestButton(
+                    interest: interest,
+                    initiallyOn: userInterests.contains(interest),
+                    addInterest: widget.addInterest,
+                    removeInterest: widget.removeInterest,
+                  )
+                );           
+              })
+            )
+          )
+        );       
   }
 }
