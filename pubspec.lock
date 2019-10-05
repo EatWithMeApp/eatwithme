@@ -126,21 +126,21 @@ packages:
       name: firebase_storage
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.5"
+    version: "3.0.6"
   flare_dart:
     dependency: transitive
     description:
       name: flare_dart
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.4.6"
+    version: "1.4.8"
   flare_flutter:
     dependency: "direct main"
     description:
       name: flare_flutter
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.5.8"
+    version: "1.5.12"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -206,7 +206,7 @@ packages:
       name: google_maps_flutter
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.21"
+    version: "0.5.21+7"
   google_sign_in:
     dependency: "direct main"
     description:
@@ -220,7 +220,7 @@ packages:
       name: html
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.14.0+2"
+    version: "0.14.0+3"
   http:
     dependency: transitive
     description:
@@ -409,7 +409,7 @@ packages:
       name: rxdart
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.22.2"
+    version: "0.22.3"
   shared_preferences:
     dependency: "direct main"
     description:
@@ -477,7 +477,7 @@ packages:
       name: sqflite
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.1.6+4"
+    version: "1.1.7"
   stack_trace:
     dependency: transitive
     description:
@@ -582,7 +582,7 @@ packages:
       name: yaml
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.16"
+    version: "2.2.0"
 sdks:
-  dart: ">=2.2.2 <3.0.0"
-  flutter: ">=1.7.8+hotfix.3 <2.0.0"
+  dart: ">=2.5.0 <3.0.0"
+  flutter: ">=1.9.1 <2.0.0"

@@ -8,5 +8,6 @@ class ChatNotification {
     _firebaseMessaging.requestNotificationPermissions();
 
     Map<String, dynamic> message = <String, dynamic>{};
+    
   }
 }
