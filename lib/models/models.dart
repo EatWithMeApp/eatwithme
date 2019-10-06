@@ -11,6 +11,7 @@ class User extends Equatable {
   final String photoURL;
   final Set<Interest> interests;
   final GeoFirePoint position;
+  final String token;
 
   User(
       {this.uid,
@@ -20,7 +21,8 @@ class User extends Equatable {
       this.lastSeen,
       this.photoURL,
       this.interests,
-      this.position});
+      this.position,
+      this.token});
 
   factory User.fromMap(Map data) {
     GeoPoint pos = data['position']['geopoint'];
@@ -43,6 +45,7 @@ class User extends Equatable {
           data['displayName'] ?? (userEmail.split('@')[0].trim() ?? '') ?? '',
       position: (pos != null) ? GeoFirePoint(pos.latitude, pos.longitude) : null,
       uid: data['uid'] ?? '',
+      token: data['token'] ?? '',
       photoURL: data['photoURL'] ?? '',
       lastSeen: DateTime.fromMillisecondsSinceEpoch(
               timestamp.millisecondsSinceEpoch) ??
@@ -71,6 +74,7 @@ class User extends Equatable {
       'photoURL': photoURL,
       'lastSeen': lastSeen,
       'interests': interests,
+      'token': token
     };
   }
 

@@ -101,6 +101,13 @@ class DatabaseService {
         .setData({'position': point.data}, merge: true);
   }
 
+  Future<void> updateToken(String uid, String token){
+    return _db
+        .collection('Users')
+        .document(uid)
+        .setData({'Token': token}, merge: true);
+  }
+
   Future<void> updateUserLastSeen(String uid) {
     return _db
         .collection('Users')
