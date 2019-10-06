@@ -98,6 +98,7 @@ class ChatScreenState extends State<ChatScreen> {
   bool isLoading;
   bool isShowSticker;
   String imageUrl;
+  DatabaseService db = DatabaseService();
 
   FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
 
@@ -215,7 +216,6 @@ class ChatScreenState extends State<ChatScreen> {
           'timestamp': Timestamp.fromMillisecondsSinceEpoch(
               DateTime.now().millisecondsSinceEpoch),
         }));
-
     chatMessageList.scrollToPosition(0.0, 300, Curves.easeOut);
 
     setState(() {
