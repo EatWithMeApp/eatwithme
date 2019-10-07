@@ -38,6 +38,8 @@ class UserProfile extends StatelessWidget {
   Widget build(BuildContext context) {
     User user = Provider.of<User>(context);
 
+    if (user == null) return Container();
+ 
     return Container(
       child: Stack(
         alignment: Alignment.topCenter,

@@ -274,60 +274,7 @@ class _MapPageState extends State<MapPage> {
             ),
           ),
         ),
-
-        // TODO: Replace with radial menu (except for user position button)
-        // SafeArea(
-        //   child: Container(
-        //     alignment: Alignment(-1.0, 1.0),
-        //     child: Row(
-        //       children: <Widget>[
-        //         FloatingActionButton(
-        //             heroTag: 'GoToPos',
-        //             child: Icon(Icons.pin_drop, size: 30.0),
-        //             foregroundColor: Colors.black,
-        //             backgroundColor: themeLight().primaryColor,
-        //             onPressed: () => _animateToUser()),
-        //         FloatingActionButton(
-        //             heroTag: 'ChatRoomListPage',
-        //             child: Icon(Icons.chat, size: 30.0),
-        //             foregroundColor: Colors.black,
-        //             backgroundColor: themeLight().primaryColor,
-        //             onPressed: () {
-        //               Navigator.push(
-        //                   context, RouteFromBottom(widget: ChatRoomListPage()));
-        //             }),
-        //         FloatingActionButton(
-        //             heroTag: 'MyUserProfile',
-        //             child: Icon(Icons.account_circle, size: 30.0),
-        //             foregroundColor: Colors.black,
-        //             backgroundColor: Colors.red,
-        //             onPressed: () {
-        //               Navigator.push(
-        //                   context,
-        //                   RouteFromBottom(
-        //                       widget: EditProfilePage(
-        //                     uid: loggedInUser.uid,
-        //                   )));
-        //             }),
-        //         FloatingActionButton(
-        //             heroTag: 'Settings',
-        //             child: Icon(Icons.settings, size: 30.0),
-        //             foregroundColor: Colors.black,
-        //             backgroundColor: Colors.red,
-        //             onPressed: () {
-        //               Navigator.push(
-        //                   context, RouteFromBottom(widget: SettingsPage()));
-        //             }),
-        //         FloatingActionButton(
-        //             heroTag: 'Logout',
-        //             child: Icon(Icons.exit_to_app, size: 30.0),
-        //             foregroundColor: Colors.white,
-        //             backgroundColor: Colors.black,
-        //             onPressed: () => _signOut(context)),
-        //       ],
-        //     ),
-        //   ),
-        // )
+        
         IgnorePointer(
           child: Container(
             decoration: BoxDecoration(
