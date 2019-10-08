@@ -42,12 +42,12 @@ exports.sendFollowerNotification = functions.database.ref('/followers/{followedU
         return console.log('There are no notification tokens to send to.');
       }
       console.log('There are', tokensSnapshot.numChildren(), 'tokens to send notifications to.');
-      console.log('Fetched follower profile', follower);
+      console.log('Fetched message profile', follower);
 
       // Notification details.
       const payload = {
         notification: {
-          title: 'You have a new follower!',
+          title: 'You have a new message!',
           body: `${follower.displayName} is now following you.`,
           icon: follower.photoURL
         }

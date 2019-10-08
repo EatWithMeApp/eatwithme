@@ -148,35 +148,35 @@ class DatabaseService {
     }, merge: true);
   }
 
-  Future<void> verifyChatRoom(List<String> userUids) async {
+  Future<void> verifyChatRoom(List<String> userUids, String token) async {
     String id = ChatRoom.generateID(userUids);
     var room = _db.collection('ChatRooms').document(id);
 
     return room.get().then((doc) {
       if (doc.exists == false) {
-        createChatRoom(id, userUids);
+        createChatRoom(id, userUids, token);
       }
     }).catchError((doc) {
       if (!doc.exists) {
-        createChatRoom(id, userUids);
+        createChatRoom(id, userUids, token);
       }
     });
   }
 
-  Future<void> createChatRoom(String roomId, List<String> userUids) {
+  Future<void> createChatRoom(String roomId, List<String> userUids, String token) {
     var room = _db.collection('ChatRooms').document(roomId);
 
     return room.setData({
       'id': roomId,
       'userUids': userUids,
-
+      'tokens': token,
       // Rooms with 2 users are user to user and shouldn't allow others
       'canAddUsers': (userUids.length != 2),
     }, merge: true);
   }
 
-  Future<void> writeMessageToChatRoom(List<String> userUids, Message message) {
-    verifyChatRoom(userUids);
+  Future<void> writeMessageToChatRoom(List<String> userUids, Message message, String token) {
+    verifyChatRoom(userUids, token);
 
     String id = ChatRoom.generateID(userUids);
     var room = _db.collection('ChatRooms').document(id);
@@ -189,6 +189,13 @@ class DatabaseService {
     return _db.runTransaction((transaction) async {
       await transaction.set(documentReference, message.toMap());
     });
+  }
+
+  Future<void> writeTokenToChatRoom(List<String> userUids, String token){
+    verifyChatRoom(userUids, token);
+    String id = ChatRoom.generateID(userUids);
+    var room = _db.collection('ChatRooms').document(id);
+
   }
 
   // Use this function if you need to repopulate or add to interests, modify list and attach function to button

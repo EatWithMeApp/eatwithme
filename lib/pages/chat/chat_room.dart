@@ -19,7 +19,7 @@ import 'chat_message_list.dart';
 
 class ChatRoomPage extends StatelessWidget {
   final String peerId;
-
+  String token = '';
   ChatRoomPage({
     Key key,
     @required this.peerId,
@@ -27,7 +27,7 @@ class ChatRoomPage extends StatelessWidget {
 
   void verifyChatRoom(List<String> userUids) async {
     var db = DatabaseService();
-    await db.verifyChatRoom(userUids);
+    await db.verifyChatRoom(userUids, token);
   }
 
   @override
@@ -106,7 +106,7 @@ class ChatScreenState extends State<ChatScreen> {
   final focusNode = FocusNode();
 
   final chatMessageList = ChatMessageList();
-  String message = "";
+  String token = '';
 
   @override
   void initState() {
@@ -136,11 +136,9 @@ class ChatScreenState extends State<ChatScreen> {
     });
   }
 
-  
-
   void update(String token){
     print("token is" + token);
-    message = token;
+    token = token;
     setState(() {
     });
   }
@@ -215,7 +213,8 @@ class ChatScreenState extends State<ChatScreen> {
           'uidFrom': loggedInUid,
           'timestamp': Timestamp.fromMillisecondsSinceEpoch(
               DateTime.now().millisecondsSinceEpoch),
-        }));
+        }),
+        token);
     chatMessageList.scrollToPosition(0.0, 300, Curves.easeOut);
 
     setState(() {
