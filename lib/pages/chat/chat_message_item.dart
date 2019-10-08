@@ -105,6 +105,14 @@ class ChatMessageItem extends StatelessWidget {
     return content;
   }
 
+  bool isTheSame(String loggedInUid){
+    if (message.isPeerMessage(loggedInUid) && (message.id == mostRecentMessage.id)){
+      return true;
+    }else {
+      return false;
+    }
+  }
+
   Widget profileImage(String loggedInUid) {
     var profile;
 
@@ -124,10 +132,11 @@ class ChatMessageItem extends StatelessWidget {
   }
 
   Widget timestamp(String loggedInUid) {
+    print("called timestamp");
     return message.isPeerMessage(loggedInUid) && (message.id == mostRecentMessage.id)
         ? Container(
             child: Text(
-              DateFormat('dd MMM kk:mm').format(message.timestamp),
+              DateFormat('dd MMM kk:mm').format(DateTime.fromMillisecondsSinceEpoch(int.parse(DateTime.now().millisecondsSinceEpoch.toString()))),
               style: TextStyle(
                   color: greyColor,
                   fontSize: 12.0,
@@ -159,7 +168,18 @@ class ChatMessageItem extends StatelessWidget {
                 chatBubble(loggedinUser.uid),
               ],
             ),
-            timestamp(loggedinUser.uid),
+            isTheSame(loggedinUser.uid)
+                ? Container(
+                  child: Text(
+                   DateFormat('dd MMM kk:mm').format(DateTime.fromMillisecondsSinceEpoch(int.parse(DateTime.now().millisecondsSinceEpoch.toString()))),
+                   style: TextStyle(
+                     color: greyColor,
+                     fontSize: 12.0,
+                     fontStyle: FontStyle.italic),
+                   ),
+                   margin: EdgeInsets.only(left: 50.0, top: 5.0, bottom: 5.0),
+                 )
+                : Container()
           ],
           crossAxisAlignment: CrossAxisAlignment.start,
         ),

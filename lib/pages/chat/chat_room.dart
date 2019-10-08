@@ -13,12 +13,13 @@ import 'package:eatwithme/pages/chat/constant.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'chat_message_list.dart';
 
 class ChatRoomPage extends StatelessWidget {
   final String peerId;
-
+  String token = '';
   ChatRoomPage({
     Key key,
     @required this.peerId,
@@ -26,7 +27,7 @@ class ChatRoomPage extends StatelessWidget {
 
   void verifyChatRoom(List<String> userUids) async {
     var db = DatabaseService();
-    await db.verifyChatRoom(userUids);
+    await db.verifyChatRoom(userUids, token);
   }
 
   @override
@@ -97,11 +98,15 @@ class ChatScreenState extends State<ChatScreen> {
   bool isLoading;
   bool isShowSticker;
   String imageUrl;
+  DatabaseService db = DatabaseService();
+
+  FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
 
   final textEditingController = TextEditingController();
   final focusNode = FocusNode();
 
   final chatMessageList = ChatMessageList();
+  String token = '';
 
   @override
   void initState() {
@@ -113,6 +118,29 @@ class ChatScreenState extends State<ChatScreen> {
     isLoading = false;
     isShowSticker = false;
     imageUrl = '';
+
+    // Add Initial start of notification 
+    _firebaseMessaging.configure(
+      onLaunch: (Map<String, dynamic> msg){
+        print("Launched");
+      },
+      onResume: (Map<String, dynamic> msg){
+        print("Resumed");
+      },
+      onMessage: (Map<String, dynamic> msg){
+        print("Messaged");
+      },
+    );
+    _firebaseMessaging.getToken().then((token){
+      update(token);
+    });
+  }
+
+  void update(String token){
+    print("token is" + token);
+    token = token;
+    setState(() {
+    });
   }
 
   void onFocusChange() {
@@ -185,8 +213,8 @@ class ChatScreenState extends State<ChatScreen> {
           'uidFrom': loggedInUid,
           'timestamp': Timestamp.fromMillisecondsSinceEpoch(
               DateTime.now().millisecondsSinceEpoch),
-        }));
-
+        }),
+        token);
     chatMessageList.scrollToPosition(0.0, 300, Curves.easeOut);
 
     setState(() {
