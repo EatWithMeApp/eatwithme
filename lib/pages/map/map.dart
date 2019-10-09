@@ -20,6 +20,7 @@ import 'package:provider/provider.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:eatwithme/EatWithMeUI/RadialMenu.dart';
 import 'package:eatwithme/EatWithMeUI/MapPin.dart';
+import 'package:test/test.dart';
 
 class MapPage extends StatefulWidget {
   @override
@@ -196,8 +197,23 @@ class _MapPageState extends State<MapPage> {
           mapToolbarEnabled: false,
         ),
 
+        // Stack(
+        //   children: <Widget>[
+        //     Align(
+        //       alignment: Alignment.center,
+        //       child: MapPin(name: "Benjamin"),
+        //     ),
+        //     Positioned(
+        //       child: MapPin(name: "Ben",),
+        //       left: 100,
+        //       top: 100,
+        //     )
+        //   ]
+        // ),
+
         IgnorePointer(
-          child: Container(
+          child: AnimatedContainer(
+            duration: Duration(milliseconds: 500),
             decoration: BoxDecoration(
               color: overlay,
             ),
@@ -220,7 +236,7 @@ class _MapPageState extends State<MapPage> {
             },  
             onMenuTapped: () {
               setState(() {
-                overlay = Color.fromARGB(50, 0, 0, 0);
+                overlay = Color.fromARGB(80, 0, 0, 0);
               });
             },
             onCrossTapped: () {
