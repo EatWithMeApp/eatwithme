@@ -1,12 +1,12 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'dart:async';
+// import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'dart:async';
 
-class ChatNotification {
-  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+// class ChatNotification {
+//   FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   
-  void registrationNotification(){
-    _firebaseMessaging.requestNotificationPermissions();
+//   void registrationNotification(){
+//     _firebaseMessaging.requestNotificationPermissions();
 
-    Map<String, dynamic> message = <String, dynamic>{};
-  }
-}
+//     Map<String, dynamic> message = <String, dynamic>{};
+//   }
+// }
