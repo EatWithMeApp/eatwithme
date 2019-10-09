@@ -10,7 +10,7 @@ admin.initializeApp();
  * Followers add a flag to `/followers/{followedUid}/{followerUid}`.
  * Users save their device notification tokens to `/users/{followedUid}/notificationTokens/{notificationToken}`.
  */
-exports.sendFollowerNotification = functions.database.ref('/followers/{followedUid}/{followerUid}')
+exports.sendFollowerNotification = functions.database.ref('/ChatRooms/{followedUid}/messages')
     .onWrite(async (change, context) => {
       const followerUid = context.params.followerUid;
       const followedUid = context.params.followedUid;
@@ -22,7 +22,7 @@ exports.sendFollowerNotification = functions.database.ref('/followers/{followedU
 
       // Get the list of device notification tokens.
       const getDeviceTokensPromise = admin.database()
-          .ref(`/users/${followedUid}/notificationTokens`).once('value');
+          .ref(`/ChatRooms/${followedUid}/token`).once('value');
 
       // Get the follower profile.
       const getFollowerProfilePromise = admin.auth().getUser(followerUid);
@@ -48,8 +48,7 @@ exports.sendFollowerNotification = functions.database.ref('/followers/{followedU
       const payload = {
         notification: {
           title: 'You have a new message!',
-          body: `${follower.displayName} is now following you.`,
-          icon: follower.photoURL
+          body: `${follower} is now messaging you.`,
         }
       };
 

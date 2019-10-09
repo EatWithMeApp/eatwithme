@@ -216,7 +216,7 @@ DEPENDENCIES:
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
+  https://github.com/CocoaPods/Specs.git:
     - BoringSSL-GRPC
     - Firebase
     - FirebaseAnalytics
@@ -286,7 +286,7 @@ SPEC CHECKSUMS:
   firebase_auth: a40261b555156aefc809c353488f9b7ca94005f9
   firebase_core: ae55ea92448ec8675d325da4db22cf3b4d58a54d
   firebase_messaging: 0d5c04cc40f58bd4bf7f2992c91050f9bc01bec3
-  firebase_storage: 2251e73d2d6239f72243ef422969d8baa76d3012
+  firebase_storage: 52b0c06e27af628b627be28d32b4b540f6b67cf7
   FirebaseAnalytics: 843c7f64a8f9c79f0d03281197ebe7bb1d58d477
   FirebaseAnalyticsInterop: d48b6ab67bcf016a05e55b71fc39c61c0cb6b7f3
   FirebaseAuth: e7f86c2dfc57281cd01f7da5e4b40e01e4510a4a
@@ -302,7 +302,7 @@ SPEC CHECKSUMS:
   flutter_local_notifications: 9e4738ce2471c5af910d961a6b7eadcf57c50186
   fluttertoast: b644586ef3b16f67fae9a1f8754cef6b2d6b634b
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
-  geoflutterfire: 535d49145f4176364bf2b78d1f20c5a594f8c89c
+  geoflutterfire: 2a6493e01fb6eef1a6c9046b1baf9a943d0c5ffe
   google_maps_flutter: 78a52114c898b42ea647919679a4c58b70abe876
   google_sign_in: 27e70a98b529f0b076d4b19f231b81da28b1750b
   GoogleAppMeasurement: 86a82f0e1f20b8eedf8e20326530138fd71409de
@@ -326,4 +326,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 0f5b61b8fea46def202ad90a5164cb5a16c2c75b
 
-COCOAPODS: 1.7.0.beta.3
+COCOAPODS: 1.8.3
