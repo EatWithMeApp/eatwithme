@@ -18,13 +18,14 @@ class ChatRoomListPage extends StatelessWidget {
         appBar: AppBar(
           title: Row(
             children: <Widget>[
-              Hero(
-                tag: 'ChatRoomListPage',
-                child: Icon(
+              // Hero(
+                // tag: 'ChatRoomListPage',
+                // child: 
+                Icon(
                   Icons.chat,
                   size: 35.0,
                 ),
-              ),
+              // ),
               Text(
                 '  Chats',
                 style: TextStyle(fontSize: 20.0),

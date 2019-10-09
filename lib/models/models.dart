@@ -25,8 +25,9 @@ class User extends Equatable {
   factory User.fromMap(Map data) {
     GeoPoint pos = data['position']['geopoint'];
     Set<Interest> userInterests = Set();
-    String userEmail = data['email'];
-    Timestamp timestamp = data['lastSeen'];
+    String userEmail = data['email'] ?? '';
+    Timestamp timestamp = data['lastSeen'] ?? Timestamp.now();
+    String url = data['photoURL'] ?? '';
 
     if (data['interests'] != null) {
       for (var interest in data['interests']) {
@@ -41,12 +42,12 @@ class User extends Equatable {
       email: userEmail ?? '(No email available)',
       displayName:
           data['displayName'] ?? (userEmail.split('@')[0].trim() ?? '') ?? '',
-      position: (pos != null) ? GeoFirePoint(pos.latitude, pos.longitude) : null,
+      position:
+          (pos != null) ? GeoFirePoint(pos.latitude, pos.longitude) : null,
       uid: data['uid'] ?? '',
-      photoURL: data['photoURL'] ?? '',
-      lastSeen: DateTime.fromMillisecondsSinceEpoch(
-              timestamp.millisecondsSinceEpoch) ??
-          DateTime.now(),
+      photoURL: url,
+      lastSeen:
+          DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch),
       interests: userInterests ?? [],
     );
   }
@@ -75,7 +76,8 @@ class User extends Equatable {
   }
 
   bool doesUserShareInterests(User otherUser) {
-    return interests.toSet().intersection(otherUser.interests.toSet()).length > 0;
+    return interests.toSet().intersection(otherUser.interests.toSet()).length >
+        0;
   }
 }
 
